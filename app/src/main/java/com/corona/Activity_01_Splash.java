@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Window;
 
 public class Activity_01_Splash extends ComActivity {
 
@@ -18,7 +19,10 @@ public class Activity_01_Splash extends ComActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+        getSupportActionBar().hide();
 
         this.hideActionBar();
 
@@ -34,7 +38,7 @@ public class Activity_01_Splash extends ComActivity {
         this.resumeCnt ++ ;
 
         if( 1 < resumeCnt ) {
-            //this.finish();
+            this.finish();
         }
     }
 
