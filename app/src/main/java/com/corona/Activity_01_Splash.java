@@ -8,6 +8,9 @@ import android.util.Log;
 
 public class Activity_01_Splash extends ComActivity {
 
+
+    private int resumeCnt = 0;
+
     @Override
     public final int getLayoutId() {
         return R.layout.activity_01_splash;
@@ -16,6 +19,10 @@ public class Activity_01_Splash extends ComActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.hideActionBar();
+
+        this.moveToNextActivity();
     }
 
     @Override
@@ -24,7 +31,11 @@ public class Activity_01_Splash extends ComActivity {
 
         Log.v(TAG, "onResume");
 
-        this.moveToNextActivity();
+        this.resumeCnt ++ ;
+
+        if( 1 < resumeCnt ) {
+            //this.finish();
+        }
     }
 
     private void moveToNextActivity() {
@@ -32,6 +43,6 @@ public class Activity_01_Splash extends ComActivity {
             public void run() {
                 startActivity(new android.content.Intent(Activity_01_Splash.this, Activity_02_Map.class));
             }
-        }, 1_200);
+        }, 600);
     }
 }

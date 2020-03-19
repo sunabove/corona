@@ -190,6 +190,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
+
     public void paintUI() {
         // do nothing.
     }
