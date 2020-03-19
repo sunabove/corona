@@ -63,24 +63,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private GpsLog gpsLog = new GpsLog();
     private LatLng lastGpsLatLng ;
 
-    private FloatingActionButton stop ;
-    private FloatingActionButton autopilot ;
     private EditText status ;
-    private EditText log ;
-
-    private EditText pitch ;
-    private EditText roll ;
-
-    private ImageView carAni ;
-    private Animation carAnimation = null ;
-
-    private String currMotion = "";
-    private long motionTime = System.currentTimeMillis();
-
-    private int moveCnt = 0 ;
-    private String motionCurr = "" ;
-
-    private boolean videoFullWidth = false ;
 
     // auto pilot
     private Marker pathStart ;
@@ -103,21 +86,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        this.stop = this.findViewById(R.id.stop );
         this.status = this.findViewById(R.id.status);
-        this.log = this.findViewById(R.id.log);
-
-        this.autopilot = this.findViewById(R.id.autopilot);
-
-        this.pitch = this.findViewById(R.id.pitch);
-        this.roll = this.findViewById(R.id.roll);
-
-        this.carAni = this.findViewById(R.id.carAni);
 
         this.motionEnabled = false ;
-
-        this.stop.setEnabled( false );
-        this.autopilot.setEnabled( false );
 
         this.status.setText( "" );
 
@@ -339,8 +310,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             text += String.format("\nHead : %3.6f °", prettyAngle60( heading ) ) ;
             text += String.format("   Alt    :  %3.6f m", altitude ) ;
 
-            log.setText( text );
-
             if( null != currCarMarker ) {
                 currCarMarker.remove();
             }
@@ -482,9 +451,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel() - 2 ));
 
                                     status.setText( "지도를 핸드폰 현재 위치로 이동하였습니다.");
-
-                                    stop.setEnabled( true );
-                                    autopilot.setEnabled( true );
 
                                     SharedPreferences.Editor editor = sharedPref.edit();
                                     editor.putFloat( "lastPhoneLat", (float) latLng.latitude );
