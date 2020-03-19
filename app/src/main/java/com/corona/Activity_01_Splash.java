@@ -47,6 +47,6 @@ public class Activity_01_Splash extends ComActivity {
             public void run() {
                 startActivity(new android.content.Intent(Activity_01_Splash.this, Activity_02_Map.class));
             }
-        }, 600);
+        }, 1_000);
     }
 }
