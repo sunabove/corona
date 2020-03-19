@@ -40,12 +40,6 @@ import io.socket.client.Socket;
 
 public abstract class ComActivity extends AppCompatActivity implements ComInterface {
 
-    protected static final int gray = Color.parseColor("#d3d3d3") ;
-    protected static final int yellow = Color.parseColor("#ffff00") ;
-    protected static final int green = Color.parseColor("#00FF00") ;
-    protected static final int black = Color.parseColor("#FFFFFF") ;
-    protected static final int red = Color.parseColor("#FF0000") ;
-
     protected static class Motion {
         public static final String FORWARD = "FORWARD" ;
         public static final String BACKWARD = "BACKWARD" ;
