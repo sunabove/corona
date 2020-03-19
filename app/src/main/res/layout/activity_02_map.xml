@@ -6,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activity_03_Map">
+    tools:context=".Activity_02_Map">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/goBack"

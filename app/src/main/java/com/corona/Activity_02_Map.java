@@ -13,27 +13,19 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
-import android.view.animation.TranslateAnimation;
 import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.coordinatorlayout.widget.CoordinatorLayout.LayoutParams;
 import androidx.lifecycle.Lifecycle;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -59,7 +51,7 @@ import org.json.JSONObject;
 import java.util.Arrays;
 import java.util.List;
 
-public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
+public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationClient;
@@ -71,7 +63,6 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
     private GpsLog gpsLog = new GpsLog();
     private LatLng lastGpsLatLng ;
 
-    private WebView videoView ;
     private FloatingActionButton stop ;
     private FloatingActionButton autopilot ;
     private EditText status ;
@@ -98,8 +89,9 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
     private boolean isAutopilot = false;
     // -- auto pilot
 
-    public int getLayoutId() {
-        return R.layout.activity_maps;
+    @Override
+    public final int getLayoutId() {
+        return R.layout.activity_02_map;
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -111,7 +103,6 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
 
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        this.videoView = this.findViewById(R.id.videoView);
         this.stop = this.findViewById(R.id.stop );
         this.status = this.findViewById(R.id.status);
         this.log = this.findViewById(R.id.log);
@@ -133,7 +124,7 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
         // hide keyboard always
         this.status.setInputType(InputType.TYPE_NULL);
 
-        //setContentView(R.layout.activity_maps);
+        //setContentView(R.layout.activity_02_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -160,6 +151,47 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+
+        final Activity_02_Map activity = this;
+
+        // Add a marker in Sydney and move the camera
+        if( false ) {
+            map.addMarker(new MarkerOptions().position(new LatLng(37.5866, 126.97)).title("청와대"));
+        }
+
+        Float lat = sharedPref.getFloat("lastPhoneLat", 37.5866f );
+        Float lng = sharedPref.getFloat("lastPhoneLng", 126.97f );
+
+        LatLng latlng = new LatLng(lat, lng);
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17));
+
+        status.setText( "지도가 로드되었습니다.");
+
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                status.setText( "현재 위치를 체크중입니다.");
+                getPhoneLastLocation();
+            }
+        }, 5_000);
+
+        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                activity.whenMapClick( latLng );
+            }
+        });
+
+    }
+
+    public void paintUI() {
+        // do nothing.
     }
 
 
@@ -249,7 +281,7 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
                     public void onResponse(JSONObject response) {
                         setCarLocationByJsonString( response );
 
-                        if( Activity_03_Map.this.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
+                        if( Activity_02_Map.this.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
                             getCarLocationByHttp( delay );
                         }
                     }
@@ -317,7 +349,7 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
 
             if( true ) {
                 LatLng latLng = new LatLng(latitude, longitude);
-                GpsLog gpsLog = Activity_03_Map.this.gpsLog ;
+                GpsLog gpsLog = Activity_02_Map.this.gpsLog ;
 
                 if( null == lastGpsLatLng ) {
                     lastGpsLatLng = latLng;
@@ -475,47 +507,6 @@ public class Activity_03_Map extends ComActivity implements OnMapReadyCallback {
                 // Granted. Start getting the location information
             }
         }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-
-        final Activity_03_Map activity = this;
-
-        // Add a marker in Sydney and move the camera
-        if( false ) {
-            map.addMarker(new MarkerOptions().position(new LatLng(37.5866, 126.97)).title("청와대"));
-        }
-
-        Float lat = sharedPref.getFloat("lastPhoneLat", 37.5866f );
-        Float lng = sharedPref.getFloat("lastPhoneLng", 126.97f );
-
-        LatLng latlng = new LatLng(lat, lng);
-
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17));
-
-        status.setText( "지도가 로드되었습니다.");
-
-        new android.os.Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                status.setText( "현재 위치를 체크중입니다.");
-                getPhoneLastLocation();
-            }
-        }, 5_000);
-
-        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                activity.whenMapClick( latLng );
-            }
-        });
-
-    }
-
-    public void paintUI() {
-        // do nothing.
     }
 
 }

@@ -26,6 +26,7 @@ import android.widget.Toast;
 import androidx.annotation.IdRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.lifecycle.Lifecycle;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -262,6 +263,10 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
                 startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
             }
         }, 2_000);
+    }
+
+    public boolean isActivityAlive() {
+        return getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED);
     }
 
 }
