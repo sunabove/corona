@@ -15,7 +15,8 @@ public class GpsLog extends ArrayList<LatLng> {
         return results ;
     }
 
-    public double getHeading( double def ) {
+    // 최신 방향 각도
+    public double getLatestHeading( double def ) {
         double heading = 0.0;
 
         int size = this.size();
