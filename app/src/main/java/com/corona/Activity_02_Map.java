@@ -386,7 +386,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 if( 1 > gpsLog.size() ) {
                     currCarMarker.setRotation( (float) heading );
                 } else {
-                    double gpsHeading = gpsLog.getHeading( heading );
+                    double gpsHeading = gpsLog.getLatestHeading( heading );
 
                     currCarMarker.setRotation( (float) gpsHeading );
 

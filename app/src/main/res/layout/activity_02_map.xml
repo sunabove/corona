@@ -30,8 +30,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="20dp"
+        android:layout_marginRight="80dp"
         android:orientation="vertical">
 
         <LinearLayout
@@ -62,15 +62,14 @@
         android:layout_marginTop="4dp"
         android:layout_marginRight="10dp"
         >
+
         <ImageView
-            android:id="@+id/carAni"
-            android:layout_width="60dp"
-            android:layout_height="100dp"
+            android:id="@+id/locationAni"
+            android:layout_width="40dp"
+            android:layout_height="50dp"
             android:layout_weight="1"
-            android:background="#66CDDC39"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/car_top_03_stop"
-            />
+            app:srcCompat="@drawable/gps_recording_00" />
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
