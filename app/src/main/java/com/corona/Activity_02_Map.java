@@ -69,7 +69,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private Marker pathStart ;
     private Marker pathEnd ;
     private Polyline autoPilotPath ;
-    private boolean isAutopilot = false;
     // -- auto pilot
 
     @Override
@@ -114,14 +113,17 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         this.hideActionBar();
 
-        this.getCarLocationByHttp( 500 );
-
-        this.isAutopilot = false ;
+        this.recordGpsData( 500 );
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    public void onBackPressed() {
+        finish();
     }
 
     @Override
@@ -161,121 +163,72 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     }
 
-    @Override
-    public void onBackPressed() {
-        finish();
-    }
-
-    public void paintUI() {
-        // do nothing.
-    }
-
-
     private void whenMapClick(LatLng latLng) {
         final String tag = "google map";
 
         Log.d( tag, "onMapClick");
 
-        if( ! isAutopilot ) {
-            Log.d( tag, "Autopilot is not enabled." );
-        } else if( isAutopilot ) {
-
-            if (null != pathEnd) {
-                pathEnd.remove();
-            }
-
-            if (null != autoPilotPath) {
-                autoPilotPath.remove();
-            }
-
-            // clear gps log
-            this.gpsLog = new GpsLog();
-
-            if (null != gpsPath) {
-                gpsPath.remove();
-            }
-
-            // 도착 지점 추가
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title("목적지");
-
-            pathEnd = map.addMarker(markerOptions);
-            pathEnd.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.path_end));
-
-            if (null != pathEnd) {
-                pathEnd.hideInfoWindow();
-            }
-
-            pathEnd.showInfoWindow();
-            // -- 도착 지점 추가
-
-            // 출발지 -> 도착지 경로 표시
-
-            if (null != pathStart) {
-                List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
-                //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(20), new Dash(30), new Gap(20));
-
-                PolylineOptions polyOptions = new PolylineOptions().width(20).color(Color.GREEN).geodesic(true);
-                polyOptions.add(pathStart.getPosition());
-                polyOptions.add(pathEnd.getPosition());
-                polyOptions.pattern(pattern);
-
-                autoPilotPath = map.addPolyline(polyOptions);
-            }
-
-            Toast.makeText(getApplicationContext(), "목적지가 설정되었습니다.", Toast.LENGTH_SHORT).show();
-
-            // -- 출발지 -> 도착지 경로 표시
+        if (null != pathEnd) {
+            pathEnd.remove();
         }
 
+        if (null != autoPilotPath) {
+            autoPilotPath.remove();
+        }
+
+        // clear gps log
+        this.gpsLog = new GpsLog();
+
+        if (null != gpsPath) {
+            gpsPath.remove();
+        }
+
+        // 도착 지점 추가
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("목적지");
+
+        pathEnd = map.addMarker(markerOptions);
+        pathEnd.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.path_end));
+
+        if (null != pathEnd) {
+            pathEnd.hideInfoWindow();
+        }
+
+        pathEnd.showInfoWindow();
+        // -- 도착 지점 추가
+
+        // 출발지 -> 도착지 경로 표시
+
+        if (null != pathStart) {
+            List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
+            //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(20), new Dash(30), new Gap(20));
+
+            PolylineOptions polyOptions = new PolylineOptions().width(20).color(Color.GREEN).geodesic(true);
+            polyOptions.add(pathStart.getPosition());
+            polyOptions.add(pathEnd.getPosition());
+            polyOptions.pattern(pattern);
+
+            autoPilotPath = map.addPolyline(polyOptions);
+        }
+
+        Toast.makeText(getApplicationContext(), "목적지가 설정되었습니다.", Toast.LENGTH_SHORT).show();
+
+        // -- 출발지 -> 도착지 경로 표시
     }
 
     // 차량의 최근 위치를 반환한다.
-    private void getCarLocationByHttp( final long delay ) {
+    private void recordGpsData( final long delay ) {
         final Handler handler = new Handler() ;
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                getCarLocationByHttpImpl( delay );
+                showGpsData( delay );
             }
         }, delay );
     }
 
-    private int carLocCnt = 0 ;
-    private void getCarLocationByHttpImpl( final long delay ) {
-        String url = "http://10.3.141.1/send_me_curr_pos.json";
-        final String tag = "car location" ;
-
-        carLocCnt += 1;
-        Log.d( tag, String.format("[%04d] Getting car location by http ...", carLocCnt ) );
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        setCarLocationByJsonString( response );
-
-                        if( Activity_02_Map.this.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED)) {
-                            getCarLocationByHttp( delay );
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
-
-                        Log.d( tag, "Error has occured" );
-
-                        getCarLocationByHttp( 3*delay );
-                    }
-                });
-
-        this.requestQueue.add( jsonObjectRequest );
-    }
-
-    private void setCarLocationByJsonString( Object obj ) {
+    private void showGpsData( Object obj ) {
         try {
             JSONObject response = null ;
 
@@ -295,8 +248,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Log.d( "sunabove", "There is no gps data.");
                 return ;
             }
-
-            boolean isAutopilot = this.isAutopilot;
 
             double latitude = Double.parseDouble(response.get("latitude").toString().trim());
             double longitude = Double.parseDouble(response.get("longitude").toString().trim());
@@ -319,7 +270,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             }
 
-            final String tag = "car location" ;
+            final String tag = "gps path" ;
 
             if( true ) {
                 LatLng latLng = new LatLng(latitude, longitude);
@@ -353,6 +304,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                         gpsLog.remove( 0 );
                     }
                 }
+
+                boolean isAutopilot = true;
 
                 int color = isAutopilot ? Color.RED : Color.BLUE ;
                 int width = isAutopilot ? 12 : 10 ;
