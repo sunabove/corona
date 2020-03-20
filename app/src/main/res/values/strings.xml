@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">Corona Zero</string>
+    <string name="app_name">Corona Alarm</string>
+
+    <string name="app_version">V1.0</string>
 
     <string name="title_activity_maps">Corona Map</string>
 
