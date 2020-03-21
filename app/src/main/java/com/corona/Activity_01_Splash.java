@@ -2,6 +2,8 @@ package com.corona;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -25,6 +27,11 @@ public class Activity_01_Splash extends ComActivity {
         getSupportActionBar().hide();
 
         this.hideActionBar();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startForegroundService(new Intent(this, LocationService.class));
+        else
+            startService(new Intent(this, LocationService.class));
 
         this.moveToNextActivity();
     }
