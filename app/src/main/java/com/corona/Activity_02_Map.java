@@ -94,7 +94,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         // hide keyboard always
         this.status.setInputType(InputType.TYPE_NULL);
 
-        //setContentView(R.layout.activity_02_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -108,11 +107,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     protected void onResume()
     {
         super.onResume();
-
         Log.v( TAG, "onResume");
-
         this.hideActionBar();
-
         this.recordGpsData( 500 );
     }
 
@@ -379,48 +375,57 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     // 핸드폰의 최근 위치를 반환한다.
     @SuppressLint("MissingPermission")
     private void getPhoneLastLocation(){
-        if (checkPermissions()) {
-            if (isLocationEnabled()) {
-                fusedLocationClient.getLastLocation().addOnCompleteListener(
-                        new OnCompleteListener<Location>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Location> task) {
-                                Location location = task.getResult();
-                                if (location != null) {
-                                    if( null != myPhoneMarker ) {
-                                        myPhoneMarker.remove();
-                                    }
+        boolean valid = checkPermissions();
 
-                                    LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        if( ! valid ) {
+            requestPermissions();
+        } else {
+            valid = valid && isLocationEnabled();
 
-                                    MarkerOptions options = new MarkerOptions();
-                                    options.position(latLng).title("현재 나의 위치") ;
-
-                                    myPhoneMarker = map.addMarker(options);
-                                    myPhoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01));
-
-                                    myPhoneMarker.showInfoWindow();
-
-                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel() - 2 ));
-
-                                    status.setText( "지도를 핸드폰 현재 위치로 이동하였습니다.");
-
-                                    SharedPreferences.Editor editor = sharedPref.edit();
-                                    editor.putFloat( "lastPhoneLat", (float) latLng.latitude );
-                                    editor.putFloat( "lastPhoneLng", (float) latLng.longitude);
-                                    editor.commit();
-                                }
-                            }
-                        }
-                );
-            } else {
+            if( ! valid ) {
                 Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
             }
-        } else {
-            requestPermissions();
         }
+
+        if( ! valid ) {
+            return ;
+        }
+
+
+        fusedLocationClient.getLastLocation().addOnCompleteListener(
+            new OnCompleteListener<Location>() {
+                @Override
+                public void onComplete(@NonNull Task<Location> task) {
+                    Location location = task.getResult();
+                    if (location != null) {
+                        if (null != myPhoneMarker) {
+                            myPhoneMarker.remove();
+                        }
+
+                        LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
+
+                        MarkerOptions options = new MarkerOptions();
+                        options.position(latLng).title("현재 나의 위치");
+
+                        myPhoneMarker = map.addMarker(options);
+                        myPhoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01));
+
+                        myPhoneMarker.showInfoWindow();
+
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel() - 2));
+
+                        status.setText("지도를 핸드폰 현재 위치로 이동하였습니다.");
+
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putFloat("lastPhoneLat", (float) latLng.latitude);
+                        editor.putFloat("lastPhoneLng", (float) latLng.longitude);
+                        editor.commit();
+                    }
+                }
+            }
+        );
     }
 
     @Override
