@@ -393,9 +393,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             return ;
         }
 
-
         fusedLocationClient.getLastLocation().addOnCompleteListener(
             new OnCompleteListener<Location>() {
+                int upCnt = 0 ;
                 @Override
                 public void onComplete(@NonNull Task<Location> task) {
                     Location location = task.getResult();
@@ -404,10 +404,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                             myPhoneMarker.remove();
                         }
 
+                        upCnt ++ ;
+
                         LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
 
                         MarkerOptions options = new MarkerOptions();
-                        options.position(latLng).title("현재 나의 위치");
+                        options.position(latLng).title(String.format("현재 나의 위치 (%d)", upCnt));
 
                         myPhoneMarker = map.addMarker(options);
                         myPhoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01));
@@ -418,10 +420,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
                         status.setText("지도를 핸드폰 현재 위치로 이동하였습니다.");
 
+                        // 최신 위치 저장
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putFloat("lastPhoneLat", (float) latLng.latitude);
                         editor.putFloat("lastPhoneLng", (float) latLng.longitude);
                         editor.commit();
+                        // -- 최신 위치 저장
                     }
                 }
             }
