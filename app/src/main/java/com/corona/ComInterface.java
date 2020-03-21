@@ -23,5 +23,7 @@ public interface ComInterface {
     public static final int black = Color.parseColor("#FFFFFF") ;
     public static final int red = Color.parseColor("#FF0000") ;
 
+    public static final long LOCATION_REQUEST_INTERVAL = 10000;
+    public static final float LOCATION_REQUEST_DISPLACEMENT = 5.0f;
 
 }

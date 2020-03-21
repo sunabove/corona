@@ -1,7 +1,10 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -10,6 +13,7 @@ import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
@@ -27,6 +31,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -53,6 +60,8 @@ import java.util.List;
 
 public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
+    private static String TAG = "sunabove map" ;
+
     private GoogleMap map;
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -70,6 +79,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private Marker pathEnd ;
     private Polyline autoPilotPath ;
     // -- auto pilot
+
+    private GpsDataReceiver gpsDataReceiver;
 
     @Override
     public final int getLayoutId() {
@@ -99,7 +110,35 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        this.fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
+        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
+
+        LocationCallback locationCallback = new LocationCallback() {
+            int updCnt = 0 ;
+
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+
+                updCnt ++ ;
+
+                Log.d(TAG, String.format("locationResult update[%d]: %s", updCnt, locationResult) );
+
+                Intent intent = new Intent( getApplicationContext(), Activity_02_Map.GpsDataReceiver.class ) ;
+                intent.setAction( "locationResult" );
+                intent.putExtra( "locationResult", locationResult );
+                sendBroadcast(intent);
+            }
+        };
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+
+        gpsDataReceiver = new GpsDataReceiver();
+        registerReceiver( gpsDataReceiver, new IntentFilter("GET_GPS_DATA"));
 
     }
 
@@ -115,6 +154,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     @Override
     protected void onPause() {
         super.onPause();
+
+        unregisterReceiver( gpsDataReceiver );
     }
 
     @Override
@@ -156,6 +197,23 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 activity.whenMapClick( latLng );
             }
         });
+
+    }
+
+    public static class GpsDataReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String action = intent.getAction();
+            Log.d( TAG, "action = " + action );
+
+            if(intent.getAction().equals( "locationResult" ) ) {
+                LocationResult locationResult = (LocationResult) intent.getParcelableExtra("locationResult" );
+
+                Log.d(TAG, "locationResult received: " + locationResult);
+            }
+        }
 
     }
 

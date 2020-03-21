@@ -1,9 +1,9 @@
 package com.corona;
 
 import android.Manifest;
+import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,21 +28,29 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class LocationService extends Service implements GoogleApiClient.ConnectionCallbacks,
+public class LocationService extends IntentService implements ComInterface, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    public static final String TAG = LocationService.class.getSimpleName();
-    private static final long LOCATION_REQUEST_INTERVAL = 10000;
-    private static final float LOCATION_REQUEST_DISPLACEMENT = 5.0f;
+    public static final String TAG = ComInterface.TAG + " " + LocationService.class.getSimpleName();
+
     private GoogleApiClient googleApiClient;
-    private FusedLocationProviderClient fusedLocationProviderClient;
+    private FusedLocationProviderClient fusedLocationClient;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
+
+    public LocationService() {
+        super( LocationService.class.getSimpleName() );
+    }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+
     }
 
     @Override
@@ -53,20 +61,29 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         showNotificationAndStartForegroundService();
 
         locationCallback = new LocationCallback() {
+            int sendCnt = 0 ;
+
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 //here you get the continues location updated based on the interval defined in
                 //location request
 
-                Log.d(TAG, "onLocationResult: " + locationResult);
+                sendCnt ++ ;
+
+                Log.d(TAG, String.format("locationResult sent[%d]: %s", sendCnt, locationResult) );
+
+                Intent intent = new Intent( getApplicationContext(), Activity_02_Map.GpsDataReceiver.class ) ;
+                intent.setAction( "locationResult" );
+                intent.putExtra( "locationResult", locationResult );
+                sendBroadcast(intent);
             }
         };
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         return START_STICKY;
     }
 
@@ -114,18 +131,18 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
                 //get the last location of the device
             }
         });
 
-        fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
     }
 
     private void removeLocationUpdate() {
-        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+        fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 
     /**
