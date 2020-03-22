@@ -32,6 +32,7 @@ import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Dash;
+import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
@@ -282,7 +283,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
             polyOptions.jointType(JointType.ROUND);
 
-            List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
+            //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
+            List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(10));
             polyOptions.pattern( pattern );
 
             for( LatLng log : gpsLog ) {
