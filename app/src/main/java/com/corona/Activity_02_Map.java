@@ -74,14 +74,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private EditText status ;
 
-    // auto pilot
-    private Marker pathStart ;
-    private Marker pathEnd ;
-    private Polyline autoPilotPath ;
-    // -- auto pilot
-
-    private GpsDataReceiver gpsDataReceiver;
-
     @Override
     public final int getLayoutId() {
         return R.layout.activity_02_map;
@@ -111,35 +103,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
-        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
-
-        LocationCallback locationCallback = new LocationCallback() {
-            int updCnt = 0 ;
-
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-
-                updCnt ++ ;
-
-                Log.d(TAG, String.format("locationResult update[%d]: %s", updCnt, locationResult) );
-
-                Intent intent = new Intent( getApplicationContext(), Activity_02_Map.GpsDataReceiver.class ) ;
-                intent.setAction( "locationResult" );
-                intent.putExtra( "locationResult", locationResult );
-                sendBroadcast(intent);
-            }
-        };
-
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
-
-        gpsDataReceiver = new GpsDataReceiver();
-        registerReceiver( gpsDataReceiver, new IntentFilter("GET_GPS_DATA"));
-
     }
 
     @Override
@@ -147,15 +110,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     {
         super.onResume();
         Log.v( TAG, "onResume");
+
         this.hideActionBar();
-        this.recordGpsData( 500 );
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        unregisterReceiver( gpsDataReceiver );
     }
 
     @Override
@@ -166,8 +127,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-
-        final Activity_02_Map activity = this;
 
         // Add a marker in Sydney and move the camera
         if( false ) {
@@ -189,31 +148,34 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 status.setText( "현재 위치를 체크중입니다.");
                 getPhoneLastLocation();
             }
-        }, 5_000);
+        }, 1_000);
+
+        if( true ) { // location updater
+            LocationRequest locationRequest = LocationRequest.create();
+            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
+            locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
+
+            LocationCallback locationCallback = new LocationCallback() {
+                int updCnt = 0;
+
+                @Override
+                public void onLocationResult(LocationResult locationResult) {
+                    super.onLocationResult(locationResult);
+                    updCnt++;
+                    Log.d(TAG, String.format("locationResult update[%d]: %s", updCnt, locationResult));
+                }
+            };
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+        }
 
         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                activity.whenMapClick( latLng );
+               whenMapClick( latLng );
             }
         });
-
-    }
-
-    public static class GpsDataReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            String action = intent.getAction();
-            Log.d( TAG, "action = " + action );
-
-            if(intent.getAction().equals( "locationResult" ) ) {
-                LocationResult locationResult = (LocationResult) intent.getParcelableExtra("locationResult" );
-
-                Log.d(TAG, "locationResult received: " + locationResult);
-            }
-        }
 
     }
 
@@ -221,65 +183,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         final String tag = "google map";
 
         Log.d( tag, "onMapClick");
-
-        if (null != pathEnd) {
-            pathEnd.remove();
-        }
-
-        if (null != autoPilotPath) {
-            autoPilotPath.remove();
-        }
-
-        // clear gps log
-        this.gpsLog = new GpsLog();
-
-        if (null != gpsPath) {
-            gpsPath.remove();
-        }
-
-        // 도착 지점 추가
-        MarkerOptions markerOptions = new MarkerOptions();
-        markerOptions.position(latLng);
-        markerOptions.title("목적지");
-
-        pathEnd = map.addMarker(markerOptions);
-        pathEnd.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.path_end));
-
-        if (null != pathEnd) {
-            pathEnd.hideInfoWindow();
-        }
-
-        pathEnd.showInfoWindow();
-        // -- 도착 지점 추가
-
-        // 출발지 -> 도착지 경로 표시
-
-        if (null != pathStart) {
-            List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
-            //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(20), new Dash(30), new Gap(20));
-
-            PolylineOptions polyOptions = new PolylineOptions().width(20).color(Color.GREEN).geodesic(true);
-            polyOptions.add(pathStart.getPosition());
-            polyOptions.add(pathEnd.getPosition());
-            polyOptions.pattern(pattern);
-
-            autoPilotPath = map.addPolyline(polyOptions);
-        }
-
-        Toast.makeText(getApplicationContext(), "목적지가 설정되었습니다.", Toast.LENGTH_SHORT).show();
-
-        // -- 출발지 -> 도착지 경로 표시
-    }
-
-    // 차량의 최근 위치를 반환한다.
-    private void recordGpsData( final long delay ) {
-        final Handler handler = new Handler() ;
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                showGpsData( delay );
-            }
-        }, delay );
     }
 
     private void showGpsData( Object obj ) {
@@ -359,17 +262,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                     }
                 }
 
-                boolean isAutopilot = true;
-
-                int color = isAutopilot ? Color.RED : Color.BLUE ;
-                int width = isAutopilot ? 12 : 10 ;
+                int color = Color.BLUE ;
+                int width = 10 ;
 
                 PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
 
-                if( isAutopilot ) {
-                    List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
-                    polyOptions.pattern( pattern );
-                }
+                List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
+                polyOptions.pattern( pattern );
 
                 for( LatLng log : gpsLog ) {
                     polyOptions.add( log );
