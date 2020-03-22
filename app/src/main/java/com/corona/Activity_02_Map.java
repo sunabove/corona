@@ -33,6 +33,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Gap;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -231,8 +232,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Log.d( tag, "onMapClick");
     }
 
+    private boolean isMapDetail() {
+        float zoom = this.getZoom();
+        return ( zoom > googleMap.getMaxZoomLevel() - 2.5 );
+    }
 
     private void showGpsData( LocationResult locationResult ) {
+
+        float zoom = this.getZoom();
+        boolean isMapDetail = this.isMapDetail();
 
         if( true ) {
             Location location = locationResult.getLastLocation();
@@ -269,9 +277,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
 
             int color = Color.BLUE ;
-            int width = 10 ;
+            int width = isMapDetail ? 30: 15 ;
 
             PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
+            polyOptions.jointType(JointType.ROUND);
 
             List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
             polyOptions.pattern( pattern );
@@ -301,9 +310,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             currCarMarker = googleMap.addMarker(markerOptions);
 
-            float zoom = this.getZoom();
-
-            if( zoom > googleMap.getMaxZoomLevel() - 2.5 ) {
+            if( isMapDetail ) {
                 currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
             } else {
                 currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
