@@ -16,7 +16,7 @@ public class GpsLog extends ArrayList<LatLng> {
     }
 
     // 최신 방향 각도
-    public double getLatestHeading( double def ) {
+    public double getGpsHeading( double def ) {
         double heading = 0.0;
 
         int size = this.size();
@@ -36,6 +36,8 @@ public class GpsLog extends ArrayList<LatLng> {
             this.getDistance( latLng, lastLatLng, results );
 
             if( 2.0f < results[0] ) {
+                return results[1];
+            } else {
                 return results[1];
             }
         }

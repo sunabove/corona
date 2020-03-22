@@ -63,6 +63,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private TextView mapInfo ;
     private ImageView locationEnabled ;
 
+    private LocationResult lastLocationResult ;
+    private float lastZoom ;
+
     @Override
     public final int getLayoutId() {
         return R.layout.activity_02_map;
@@ -160,6 +163,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                     super.onLocationResult(locationResult);
                     Log.d(TAG, String.format("locationResult update[%d]: %s", updCnt, locationResult));
 
+                    lastLocationResult = locationResult ;
+
                     showGpsData( locationResult );
 
                     updCnt ++;
@@ -188,6 +193,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     }
 
+
     private void whenCameraIdle() {
         if( this.isLocationEnabled() ) {
             this.locationEnabled.setImageResource(R.drawable.gps_recording_02);
@@ -196,12 +202,27 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         TextView mapInfo = this.mapInfo;
-        float zoom = googleMap.getCameraPosition().zoom ;
+        float zoom = this.getZoom();
 
         String info = "Zoom: %.1f";
         info = String.format(info, zoom);
 
         mapInfo.setText( info );
+
+        if( zoom != this.lastZoom ) {
+            whenCameraZoomChanged();
+        }
+        this.lastZoom = zoom ;
+    }
+
+    private float getZoom() {
+        float zoom = googleMap.getCameraPosition().zoom ;
+
+        return zoom;
+    }
+
+    private void whenCameraZoomChanged() {
+        this.showGpsData( this.lastLocationResult );
     }
 
     private void whenMapClick(LatLng latLng) {
@@ -210,11 +231,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Log.d( tag, "onMapClick");
     }
 
-    private void showGpsData( LocationResult locationResult ) {
 
-        if( null != currCarMarker ) {
-            currCarMarker.remove();
-        }
+    private void showGpsData( LocationResult locationResult ) {
 
         if( true ) {
             Location location = locationResult.getLastLocation();
@@ -270,6 +288,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         if( true ){
+            if( null != currCarMarker ) {
+                currCarMarker.remove();
+            }
             currMarkerUpdCnt += 1 ;
 
             Location location = locationResult.getLastLocation();
@@ -280,19 +301,19 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             currCarMarker = googleMap.addMarker(markerOptions);
 
-            currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
+            float zoom = this.getZoom();
 
-            double heading = 0 ;
-
-            if( 1 > gpsLog.size() ) {
-                currCarMarker.setRotation( (float) heading );
+            if( zoom > googleMap.getMaxZoomLevel() - 2.5 ) {
+                currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
             } else {
-                double gpsHeading = gpsLog.getLatestHeading( heading );
-
-                currCarMarker.setRotation( (float) gpsHeading );
-
-                Log.d( "heading" , "heading = " + gpsHeading );
+                currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
             }
+
+            double gpsHeading = gpsLog.getGpsHeading( 0 );
+
+            currCarMarker.setRotation( (float) gpsHeading );
+
+            Log.d( "heading" , "heading = " + gpsHeading );
 
             //currCarMarker.showInfoWindow();
 
@@ -314,7 +335,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Log.d("screen range", "yr = " + yr);
             }
 
-            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
+            if( firstMove ) {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
+                firstMove = false ;
+            } else {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            }
 
             if( 0.35 < xr || 0.4 < yr ) {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -323,6 +349,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         }
     }
+
+    private boolean firstMove = true ;
 
     // 핸드폰의 최근 위치를 반환한다.
     @SuppressLint("MissingPermission")
