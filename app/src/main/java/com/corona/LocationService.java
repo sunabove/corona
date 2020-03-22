@@ -71,12 +71,7 @@ public class LocationService extends IntentService implements ComInterface, Goog
 
                 sendCnt ++ ;
 
-                Log.d(TAG, String.format("locationResult sent[%d]: %s", sendCnt, locationResult) );
-
-                Intent intent = new Intent( getApplicationContext(), Activity_02_Map.GpsDataReceiver.class ) ;
-                intent.setAction( "locationResult" );
-                intent.putExtra( "locationResult", locationResult );
-                sendBroadcast(intent);
+                Log.d(TAG, String.format("locationResult gps data saved[%d]: %s", sendCnt, locationResult) );
             }
         };
     }
