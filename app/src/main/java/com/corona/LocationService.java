@@ -4,7 +4,9 @@ import android.Manifest;
 import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -69,6 +72,30 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 Log.d(TAG, String.format("locationResult gps data saved[%d]: %s", sendCnt, locationResult) );
             }
         };
+
+        this.showCoronaAlarm();
+    }
+
+    private void showCoronaAlarm() {
+        int NOTIFICATION_ID = 888;
+        String CHANNEL_ID = "999";
+
+        // Create an Intent for the activity you want to start
+        Intent resultIntent = new Intent(this, Activity_02_Map.class);
+        // Create the TaskStackBuilder and add the intent, which inflates the back stack
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(resultIntent);
+        // Get the PendingIntent containing the entire back stack
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setContentIntent(resultPendingIntent);
+        builder.setSmallIcon(R.drawable.corona_alarm);
+        builder.setContentTitle( "aaaa");
+        builder.setContentText( "bbbb" );
+        builder.setContentInfo( "cccc" );
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 
     @Override
