@@ -108,26 +108,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        // Create an Intent for the activity you want to start
-        Intent resultIntent = new Intent(this, Activity_02_Map.class);
-        // Create the TaskStackBuilder and add the intent, which inflates the back stack
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntentWithParentStack(resultIntent);
-        // Get the PendingIntent containing the entire back stack
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-        builder.setContentIntent(resultPendingIntent);
-        builder.setSmallIcon(R.drawable.ic_launcher_foreground );
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
-
     }
-
-    public static final int NOTIFICATION_ID = 888;
-    public static final String CHANNEL_ID = "999";
-
 
     @Override
     protected void onResume()
