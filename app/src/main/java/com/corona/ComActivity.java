@@ -58,7 +58,6 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
     protected SharedPreferences sharedPref = null;
 
     protected RequestQueue requestQueue ;
-    protected boolean motionEnabled = false ;
 
     protected Socket socket = null;
 

@@ -14,6 +14,8 @@ import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -47,7 +49,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private static String TAG = "sunabove map" ;
 
-    private GoogleMap map;
+    private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationClient;
 
     private Marker myPhoneMarker;
@@ -58,6 +60,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private LatLng lastGpsLatLng ;
 
     private EditText status ;
+    private TextView mapInfo ;
+    private ImageView locationEnabled ;
 
     @Override
     public final int getLayoutId() {
@@ -74,8 +78,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         this.status = this.findViewById(R.id.status);
-
-        this.motionEnabled = false;
+        this.mapInfo = this.findViewById(R.id.mapInfo);
+        this.locationEnabled = this.findViewById(R.id.locationEnabled);
 
         this.status.setText("");
 
@@ -111,11 +115,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
+        this.googleMap = googleMap;
 
         // Add a marker in Sydney and move the camera
         if( false ) {
-            map.addMarker(new MarkerOptions().position(new LatLng(37.5866, 126.97)).title("청와대"));
+            this.googleMap.addMarker(new MarkerOptions().position(new LatLng(37.5866, 126.97)).title("청와대"));
         }
 
         Float lat = sharedPref.getFloat("lastPhoneLat", 37.5866f );
@@ -123,7 +127,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         LatLng latlng = new LatLng(lat, lng);
 
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17));
+        this.googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng, 17));
 
         status.setText( "지도가 로드되었습니다.");
 
@@ -174,6 +178,30 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         });
 
+        googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+
+            @Override
+            public void onCameraIdle() {
+                whenCameraIdle();
+            }
+        });
+
+    }
+
+    private void whenCameraIdle() {
+        if( this.isLocationEnabled() ) {
+            this.locationEnabled.setImageResource(R.drawable.gps_recording_02);
+        } else {
+            this.locationEnabled.setImageResource(R.drawable.gps_recording_00);
+        }
+
+        TextView mapInfo = this.mapInfo;
+        float zoom = googleMap.getCameraPosition().zoom ;
+
+        String info = "Zoom: %.1f";
+        info = String.format(info, zoom);
+
+        mapInfo.setText( info );
     }
 
     private void whenMapClick(LatLng latLng) {
@@ -238,7 +266,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 gpsPathPoly.remove();
             }
 
-            gpsPathPoly = map.addPolyline( polyOptions );
+            gpsPathPoly = googleMap.addPolyline( polyOptions );
         }
 
         if( true ){
@@ -250,7 +278,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             markerOptions.position(latLng);
             markerOptions.title(String.format("현재 위치 [%04d]", currMarkerUpdCnt ));
 
-            currCarMarker = map.addMarker(markerOptions);
+            currCarMarker = googleMap.addMarker(markerOptions);
 
             currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
 
@@ -268,7 +296,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             //currCarMarker.showInfoWindow();
 
-            Projection projection = map.getProjection();
+            Projection projection = googleMap.getProjection();
             Point scrPos = projection.toScreenLocation(currCarMarker.getPosition());
 
             // animate camera when current marker is out of screen
@@ -286,10 +314,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Log.d("screen range", "yr = " + yr);
             }
 
-            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel() - 2));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
 
             if( 0.35 < xr || 0.4 < yr ) {
-                map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             }
             // --animate camera when current marker is out of screen
 
@@ -335,12 +363,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                         MarkerOptions options = new MarkerOptions();
                         options.position(latLng).title(String.format("현재 나의 위치 (%d)", upCnt));
 
-                        myPhoneMarker = map.addMarker(options);
+                        myPhoneMarker = googleMap.addMarker(options);
                         myPhoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
 
                         myPhoneMarker.showInfoWindow();
 
-                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel() - 2));
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
 
                         status.setText("지도를 핸드폰 현재 위치로 이동하였습니다.");
 
