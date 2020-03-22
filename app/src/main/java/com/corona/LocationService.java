@@ -59,7 +59,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         showNotificationAndStartForegroundService();
 
         locationCallback = new LocationCallback() {
-            int sendCnt = 0 ;
+            int saveCnt = 0 ;
 
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -67,9 +67,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 //here you get the continues location updated based on the interval defined in
                 //location request
 
-                sendCnt ++ ;
+               Log.d(TAG, String.format("locationResult gps data saved[%d]: %s", saveCnt, locationResult) );
 
-                Log.d(TAG, String.format("locationResult gps data saved[%d]: %s", sendCnt, locationResult) );
+                saveCnt ++ ;
             }
         };
 
@@ -124,8 +124,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
      */
     private void createLocationRequest() {
         locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setPriority(LOCATION_REQUEST_PRIORITY);
         locationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
+        locationRequest.setFastestInterval(LOCATION_REQUEST_INTERVAL);
         locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
 
         requestLocationUpdate();

@@ -2,6 +2,8 @@ package com.corona;
 
 import android.graphics.Color;
 
+import com.google.android.gms.location.LocationRequest;
+
 /**
  * Created by sunabove on 2016-02-19.
  */
@@ -23,7 +25,14 @@ public interface ComInterface {
     public static final int black = Color.parseColor("#FFFFFF") ;
     public static final int red = Color.parseColor("#FF0000") ;
 
-    public static final long LOCATION_REQUEST_INTERVAL = 10000;
+    /*
+    public static final long LOCATION_REQUEST_INTERVAL = 0 ;
+    public static final float LOCATION_REQUEST_DISPLACEMENT = 1.0f;
+    public static final int LOCATION_REQUEST_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY ;
+    */
+
+    public static final long LOCATION_REQUEST_INTERVAL = 10_000;
     public static final float LOCATION_REQUEST_DISPLACEMENT = 5.0f;
+    public static final int LOCATION_REQUEST_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY ;
 
 }

@@ -1,13 +1,7 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
-import android.app.PendingIntent;
-import android.app.TaskStackBuilder;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -15,26 +9,15 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
-import android.view.animation.Animation;
-import android.webkit.WebView;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.lifecycle.Lifecycle;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -56,9 +39,6 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import org.json.JSONObject;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,7 +53,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private Marker myPhoneMarker;
     private Marker currCarMarker;
     private int currMarkerUpdCnt = 0 ;
-    private Polyline gpsPath = null ;
+    private Polyline gpsPathPoly = null ;
     private GpsLog gpsLog = new GpsLog();
     private LatLng lastGpsLatLng ;
 
@@ -147,18 +127,25 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         status.setText( "지도가 로드되었습니다.");
 
-        new android.os.Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                status.setText( "현재 위치를 체크중입니다.");
-                getPhoneLastLocation();
-            }
-        }, 1_000);
+        boolean valid = checkPermissions();
 
-        if( true ) { // location updater
+        if( ! valid ) {
+            requestPermissions();
+        } else {
+            valid = valid && isLocationEnabled();
+
+            if( ! valid ) {
+                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        }
+
+        if( valid ) { // location updater
             LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            locationRequest.setPriority(LOCATION_REQUEST_PRIORITY);
             locationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
+            locationRequest.setFastestInterval(LOCATION_REQUEST_INTERVAL);
             locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
 
             LocationCallback locationCallback = new LocationCallback() {
@@ -167,10 +154,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
-                    updCnt++;
                     Log.d(TAG, String.format("locationResult update[%d]: %s", updCnt, locationResult));
 
                     showGpsData( locationResult );
+
+                    updCnt ++;
+
+                    status.setText(String.format("GPS update[%d]", updCnt ));
                 }
             };
 
@@ -196,11 +186,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( null != currCarMarker ) {
             currCarMarker.remove();
-        }
-
-        if( null !=gpsPath ) {
-            gpsPath.remove();
-
         }
 
         if( true ) {
@@ -249,7 +234,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 polyOptions.add( log );
             }
 
-            gpsPath = map.addPolyline( polyOptions );
+            if( null != gpsPathPoly ) {
+                gpsPathPoly.remove();
+            }
+
+            gpsPathPoly = map.addPolyline( polyOptions );
         }
 
         if( true ){
@@ -263,7 +252,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             currCarMarker = map.addMarker(markerOptions);
 
-            currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.car_map_icon_02));
+            currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
 
             double heading = 0 ;
 
@@ -282,6 +271,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             Projection projection = map.getProjection();
             Point scrPos = projection.toScreenLocation(currCarMarker.getPosition());
 
+            // animate camera when current marker is out of screen
             double x = scrPos.x;
             double y = scrPos.y;
 
@@ -296,9 +286,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Log.d("screen range", "yr = " + yr);
             }
 
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, map.getMaxZoomLevel() - 2));
+
             if( 0.35 < xr || 0.4 < yr ) {
                 map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             }
+            // --animate camera when current marker is out of screen
 
         }
     }
@@ -343,7 +336,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                         options.position(latLng).title(String.format("현재 나의 위치 (%d)", upCnt));
 
                         myPhoneMarker = map.addMarker(options);
-                        myPhoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01));
+                        myPhoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
 
                         myPhoneMarker.showInfoWindow();
 
