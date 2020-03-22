@@ -29,8 +29,6 @@ public class Activity_01_Splash extends ComActivity {
 
         this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        getSupportActionBar().hide();
-
         this.hideActionBar();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)

@@ -1,6 +1,9 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +27,8 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.lifecycle.Lifecycle;
 
 import com.android.volley.Request;
@@ -103,7 +108,26 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Create an Intent for the activity you want to start
+        Intent resultIntent = new Intent(this, Activity_02_Map.class);
+        // Create the TaskStackBuilder and add the intent, which inflates the back stack
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(resultIntent);
+        // Get the PendingIntent containing the entire back stack
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setContentIntent(resultPendingIntent);
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground );
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
+
     }
+
+    public static final int NOTIFICATION_ID = 888;
+    public static final String CHANNEL_ID = "999";
+
 
     @Override
     protected void onResume()
@@ -259,6 +283,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             currCarMarker = map.addMarker(markerOptions);
 
             currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.car_map_icon_02));
+
+            double heading = 0 ;
 
             if( 1 > gpsLog.size() ) {
                 currCarMarker.setRotation( (float) heading );
