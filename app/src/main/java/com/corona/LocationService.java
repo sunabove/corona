@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.IntentService;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,7 +29,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class LocationService extends IntentService implements ComInterface, GoogleApiClient.ConnectionCallbacks,
+public class LocationService extends Service implements ComInterface, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
     public static final String TAG = ComInterface.TAG + " " + LocationService.class.getSimpleName();
@@ -39,18 +40,12 @@ public class LocationService extends IntentService implements ComInterface, Goog
     private LocationCallback locationCallback;
 
     public LocationService() {
-        super( LocationService.class.getSimpleName() );
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-
     }
 
     @Override
