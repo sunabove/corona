@@ -5,11 +5,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
+import android.provider.BaseColumns;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
@@ -44,6 +47,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -192,7 +196,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 whenCameraIdle();
             }
         });
-
     }
 
 
@@ -214,7 +217,19 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         if( zoom != this.lastZoom ) {
             whenCameraZoomChanged();
         }
+
+        if( ! paintGpsDb ) {
+            this.showGpsDb();
+
+            paintGpsDb = true ;
+        }
         this.lastZoom = zoom ;
+    }
+
+    private boolean paintGpsDb = false ;
+
+    private void showGpsDb() {
+        FeedReaderDbHelper.readGpsDb(this.getApplicationContext() );
     }
 
     private float getZoom() {
@@ -228,9 +243,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenMapClick(LatLng latLng) {
-        final String tag = "google map";
 
-        Log.d( tag, "onMapClick");
+        Log.d( TAG, "onMapClick");
     }
 
     private boolean isMapDetail() {
@@ -346,7 +360,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             if( firstMove ) {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
-                firstMove = false ;
             } else {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
             }
@@ -355,7 +368,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             }
             // --animate camera when current marker is out of screen
+        }
 
+        if( firstMove ) {
+            firstMove = false ;
         }
     }
 

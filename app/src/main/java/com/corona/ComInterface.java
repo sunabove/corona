@@ -9,7 +9,7 @@ import com.google.android.gms.location.LocationRequest;
  */
 public interface ComInterface {
 
-    public static final String TAG = "sunabove";
+    public static final String TAG = "sun_above";
 
     public static final long HANDLER_DELAY_SPINNER_ITEM = 200;
 

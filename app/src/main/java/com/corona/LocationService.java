@@ -7,9 +7,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -55,7 +57,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     public void onCreate() {
         super.onCreate();
 
+        FeedReaderDbHelper.createGpsDb( this.getApplicationContext() );
+
         buildGoogleApiClient();
+
         showNotificationAndStartForegroundService();
 
         locationCallback = new LocationCallback() {
