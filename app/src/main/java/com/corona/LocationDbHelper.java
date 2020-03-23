@@ -12,7 +12,7 @@ import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 13;
+    public static final int DATABASE_VERSION = 14;
     public static final String DATABASE_NAME = "Location.db";
 
     private static LocationDbHelper dbHelper = null;
@@ -39,7 +39,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         sql = "CREATE TABLE gps( " +
                 " id INTEGER PRIMARY KEY AUTOINCREMENT , "
                 + " yyyy INTEGER, mm INTEGER, dd INTEGER, hh INTEGER, mi INTEGER, ss INTEGER, zz INTEGER, "
-                + " longitude REAL, latitude REAL " +
+                + " latitude REAL, longitude REAL" +
                 " )"
         ;
         db.execSQL(sql);
@@ -63,8 +63,8 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
-        values.put("longitude", location.getLatitude());
-        values.put("latitude", location.getLongitude());
+        values.put("latitude", location.getLatitude());
+        values.put("longitude", location.getLongitude());
 
         Calendar now = Calendar.getInstance();
 

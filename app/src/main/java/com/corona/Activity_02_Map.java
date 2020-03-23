@@ -51,7 +51,7 @@ import java.util.List;
 
 public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
-    private static String TAG = "sunabove map" ;
+    private static String TAG = "sun_above map" ;
 
     private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -252,7 +252,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         SQLiteDatabase db = dbHelper.rdb;
 
-        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, longitude, latitude FROM gps ";
+        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, latitude, longitude FROM gps ";
         sql += " ORDER BY yyyy, mm, dd, hh, mi, ss, zz ";
 
         String[] args = {};
