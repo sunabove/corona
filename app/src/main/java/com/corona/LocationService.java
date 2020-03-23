@@ -75,10 +75,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             }
         };
 
-        this.showCoronaAlarm();
+        this.showColonaAlarmNotification();
     }
 
-    private void showCoronaAlarm() {
+    private void showColonaAlarmNotification() {
         int NOTIFICATION_ID = 888;
         String CHANNEL_ID = "999";
 

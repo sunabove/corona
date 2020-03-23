@@ -20,6 +20,7 @@ import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.CalendarView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -81,6 +82,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     protected FloatingActionButton showCalendar ;
     private CalendarView calendar ;
     private LinearLayout togglePane;
+    private ImageButton hidePaneBtn ;
 
     @Override
     public final int getLayoutId() {
@@ -102,6 +104,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.showCalendar = this.findViewById(R.id.showCalendar);
         this.calendar = this.findViewById(R.id.calendar);
         this.togglePane = this.findViewById(R.id.togglePane) ;
+        this.hidePaneBtn = this.findViewById(R.id.hidePaneBtn);
+
+        this.hidePaneBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                whenShowCalendarClicked();
+            }
+        });
 
         this.togglePane.setVisibility(View.INVISIBLE);
 
@@ -271,7 +281,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private boolean isMapDetail() {
         float zoom = this.getZoom();
-        return ( zoom > googleMap.getMaxZoomLevel() - 2.5 );
+        return ( zoom > 17.0 );
     }
 
     private void showGpsDb() {
