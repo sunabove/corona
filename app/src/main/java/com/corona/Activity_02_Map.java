@@ -21,6 +21,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +80,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     protected FloatingActionButton showCalendar ;
     private CalendarView calendar ;
+    private LinearLayout togglePane;
 
     @Override
     public final int getLayoutId() {
@@ -99,8 +101,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogo = this.findViewById(R.id.gpsLogo);
         this.showCalendar = this.findViewById(R.id.showCalendar);
         this.calendar = this.findViewById(R.id.calendar);
+        this.togglePane = this.findViewById(R.id.togglePane) ;
 
-        this.calendar.setVisibility(View.INVISIBLE);
+        this.togglePane.setVisibility(View.INVISIBLE);
 
         this.status.setText("");
 
@@ -216,13 +219,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenShowCalendarClicked() {
-        CalendarView calendar = this.calendar ;
-
-        if( View.INVISIBLE == calendar.getVisibility() ) {
+        if( View.INVISIBLE == togglePane.getVisibility() ) {
             this.setHighlightedDays();
         }
 
-        calendar.setVisibility( calendar.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
+        togglePane.setVisibility( togglePane.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
     }
 
     int gpsUpdCnt = 0;
