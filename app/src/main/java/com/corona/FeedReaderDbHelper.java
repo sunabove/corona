@@ -89,7 +89,9 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper implements ComInterface
         FeedReaderDbHelper dbHelper = new FeedReaderDbHelper( context );
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, longitude, latitude FROM gps ORDER BY yyyy ";
+        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, longitude, latitude FROM gps ";
+        sql += " ORDER BY yyyy, mm, dd, hh, mi, ss, zz ";
+
         String [] args = { };
         Cursor cursor = db.rawQuery( sql, args );
 
@@ -101,12 +103,14 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper implements ComInterface
             long yyyy = cursor.getLong( cursor.getColumnIndex( "yyyy") );
             long mm = cursor.getLong( cursor.getColumnIndex( "mm") );
             long dd = cursor.getLong( cursor.getColumnIndex( "dd") );
+
             long hh = cursor.getLong( cursor.getColumnIndex( "hh") );
             long mi = cursor.getLong( cursor.getColumnIndex( "mi") );
             long ss = cursor.getLong( cursor.getColumnIndex( "ss") );
+
             long zz = cursor.getLong( cursor.getColumnIndex( "zz") );
 
-            String dateTime = "%04d-%02d-%02d %02d:%02d:%02d:%02d %d";
+            String dateTime = "%04d-%02d-%02d %02d:%02d:%02d %d";
             dateTime = String.format( dateTime, yyyy, mm, dd, hh, mi, ss, zz );
 
             String info = "id = %d, lon = %f, lat = %f, upd = %s ";
