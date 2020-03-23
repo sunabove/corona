@@ -5,14 +5,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Looper;
-import android.provider.BaseColumns;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
@@ -34,7 +31,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Dash;
 import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.JointType;
@@ -47,7 +43,6 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -229,7 +224,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private boolean paintGpsDb = false ;
 
     private void showGpsDb() {
-        FeedReaderDbHelper.readGpsDb(this.getApplicationContext() );
+        LocationDbHelper.readGpsDb(this.getApplicationContext() );
     }
 
     private float getZoom() {
