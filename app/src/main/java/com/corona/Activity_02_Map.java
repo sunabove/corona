@@ -1,7 +1,6 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -47,6 +46,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
@@ -161,20 +161,17 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
 
             LocationCallback locationCallback = new LocationCallback() {
-                int updCnt = 0;
 
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
-                    Log.d(TAG, String.format("locationResult update[%d]: %s", updCnt, locationResult));
+                    Log.d(TAG, String.format("locationResult update[%d]: %s", gpsUpdCnt, locationResult));
 
                     lastLocationResult = locationResult ;
 
-                    showGpsData( locationResult );
+                    showLastGpsData( locationResult );
 
-                    updCnt ++;
-
-                    status.setText(String.format("GPS update[%d]", updCnt ));
+                    gpsUpdCnt ++;
                 }
             };
 
@@ -197,6 +194,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         });
     }
 
+    int gpsUpdCnt = 0;
 
     private void whenCameraIdle() {
         if( this.isLocationEnabled() ) {
@@ -208,8 +206,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         TextView mapInfo = this.mapInfo;
         float zoom = this.getZoom();
 
-        String info = "Zoom: %.1f";
-        info = String.format(info, zoom);
+        String info = "Zoom: %02.1f, GPS: %d ";
+        info = String.format(info, zoom, gpsUpdCnt );
 
         mapInfo.setText( info );
 
@@ -217,11 +215,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             whenCameraZoomChanged();
         }
 
-        if( ! paintGpsDb ) {
-            this.showGpsDb();
-
-            paintGpsDb = true ;
-        }
         this.lastZoom = zoom ;
     }
 
@@ -232,7 +225,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenCameraZoomChanged() {
-        this.showGpsData( this.lastLocationResult );
+
+        this.showGpsDb();
+
+        this.showLastGpsData( this.lastLocationResult );
+
     }
 
     private void whenMapClick(LatLng latLng) {
@@ -245,17 +242,21 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         return ( zoom > googleMap.getMaxZoomLevel() - 2.5 );
     }
 
-    private boolean paintGpsDb = false ;
-
     private void showGpsDb() {
         LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(this.getApplicationContext() );
 
         SQLiteDatabase db = dbHelper.rdb;
+        Calendar now = Calendar.getInstance();
+
+        long yyyy = now.get(Calendar.YEAR);
+        long mm = now.get(Calendar.MONTH) + 1; // Note: zero based!
+        long dd = now.get(Calendar.DAY_OF_MONTH);
 
         String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, latitude, longitude FROM gps ";
-        sql += " ORDER BY yyyy, mm, dd, hh, mi, ss, zz ";
+        sql += " WHERE yyyy = ? AND mm = ? AND dd = ? " ;
+        sql += " ORDER BY yyyy ASC, mm ASC, dd ASC, hh ASC, mi ASC, ss ASC, zz ASC ";
 
-        String[] args = {};
+        String[] args = { "" + yyyy, "" + mm, "" + dd };
         Cursor cursor = db.rawQuery(sql, args);
 
         boolean  isMapDetail = this.isMapDetail() ;
@@ -276,9 +277,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             double latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
             double longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-            long yyyy = cursor.getLong(cursor.getColumnIndex("yyyy"));
-            long mm = cursor.getLong(cursor.getColumnIndex("mm"));
-            long dd = cursor.getLong(cursor.getColumnIndex("dd"));
+            yyyy = cursor.getLong(cursor.getColumnIndex("yyyy"));
+            mm = cursor.getLong(cursor.getColumnIndex("mm"));
+            dd = cursor.getLong(cursor.getColumnIndex("dd"));
 
             long hh = cursor.getLong(cursor.getColumnIndex("hh"));
             long mi = cursor.getLong(cursor.getColumnIndex("mi"));
@@ -309,7 +310,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
     }
 
-    private void showGpsData( LocationResult locationResult ) {
+    private void showLastGpsData(LocationResult locationResult ) {
 
         float zoom = this.getZoom();
         boolean isMapDetail = this.isMapDetail();
