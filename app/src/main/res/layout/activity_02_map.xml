@@ -95,6 +95,25 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <ImageButton
+                    android:id="@+id/imageButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:scaleType="centerInside"
+                    app:srcCompat="@drawable/close_btn_02" />
+            </LinearLayout>
+
             <CalendarView
                 android:id="@+id/calendar"
                 android:layout_width="wrap_content"
@@ -109,13 +128,29 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
                 <TextView
                     android:id="@+id/textView9"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:clickable="false"
+                    android:contextClickable="false"
                     android:gravity="center"
-                    android:text="2020-12-31 24:60:60" />
+                    android:inputType="none"
+                    android:linksClickable="false"
+                    android:longClickable="false"
+                    android:text="2020-12-31 24:60:60"
+                    android:textSize="18sp" />
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
 
             </LinearLayout>
 
