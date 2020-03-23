@@ -15,8 +15,10 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,6 +48,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -73,6 +76,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private LocationResult lastLocationResult ;
     private float lastZoom ;
 
+    protected FloatingActionButton showCalendar ;
+    private CalendarView calendar ;
+
     @Override
     public final int getLayoutId() {
         return R.layout.activity_02_map;
@@ -90,11 +96,21 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.status = this.findViewById(R.id.status);
         this.mapInfo = this.findViewById(R.id.mapInfo);
         this.gpsLogo = this.findViewById(R.id.gpsLogo);
+        this.showCalendar = this.findViewById(R.id.showCalendar);
+        this.calendar = this.findViewById(R.id.calendar);
+
+        this.calendar.setVisibility(View.INVISIBLE);
 
         this.status.setText("");
 
         // hide keyboard always
         this.status.setInputType(InputType.TYPE_NULL);
+
+        this.showCalendar.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                whenShowCalendarClicked();
+            }
+        });
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -196,6 +212,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 whenCameraIdle();
             }
         });
+    }
+
+    private void whenShowCalendarClicked() {
+        CalendarView calendar = this.calendar ;
+        calendar.setVisibility( calendar.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
     }
 
     int gpsUpdCnt = 0;
