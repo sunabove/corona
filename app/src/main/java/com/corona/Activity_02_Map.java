@@ -1,10 +1,13 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
@@ -57,6 +60,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private Marker currCarMarker;
     private int currMarkerUpdCnt = 0 ;
     private Polyline gpsPathPoly = null ;
+    private Polyline gpsLogPathPoly = null ;
     private GpsLog gpsLog = new GpsLog();
     private LatLng lastGpsLatLng ;
 
@@ -221,12 +225,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.lastZoom = zoom ;
     }
 
-    private boolean paintGpsDb = false ;
-
-    private void showGpsDb() {
-        LocationDbHelper.readGpsDb(this.getApplicationContext() );
-    }
-
     private float getZoom() {
         float zoom = googleMap.getCameraPosition().zoom ;
 
@@ -245,6 +243,70 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private boolean isMapDetail() {
         float zoom = this.getZoom();
         return ( zoom > googleMap.getMaxZoomLevel() - 2.5 );
+    }
+
+    private boolean paintGpsDb = false ;
+
+    private void showGpsDb() {
+        LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(this.getApplicationContext() );
+
+        SQLiteDatabase db = dbHelper.rdb;
+
+        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, longitude, latitude FROM gps ";
+        sql += " ORDER BY yyyy, mm, dd, hh, mi, ss, zz ";
+
+        String[] args = {};
+        Cursor cursor = db.rawQuery(sql, args);
+
+        boolean  isMapDetail = this.isMapDetail() ;
+        int color = Color.GRAY ;
+        int width = isMapDetail ? 30: 15 ;
+
+        PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
+        polyOptions.jointType(JointType.ROUND);
+
+        //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
+        List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(10));
+        polyOptions.pattern( pattern );
+
+        int cnt = 0 ;
+
+        while (cursor.moveToNext()) {
+            long id = cursor.getLong(cursor.getColumnIndex("id"));
+            double latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
+            double longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
+
+            long yyyy = cursor.getLong(cursor.getColumnIndex("yyyy"));
+            long mm = cursor.getLong(cursor.getColumnIndex("mm"));
+            long dd = cursor.getLong(cursor.getColumnIndex("dd"));
+
+            long hh = cursor.getLong(cursor.getColumnIndex("hh"));
+            long mi = cursor.getLong(cursor.getColumnIndex("mi"));
+            long ss = cursor.getLong(cursor.getColumnIndex("ss"));
+
+            long zz = cursor.getLong(cursor.getColumnIndex("zz"));
+
+            String dateTime = "%04d-%02d-%02d %02d:%02d:%02d %d";
+            dateTime = String.format(dateTime, yyyy, mm, dd, hh, mi, ss, zz);
+
+            String info = "id = %d, lon = %f, lat = %f, upd = %s ";
+            info = String.format(info, id, longitude, latitude, dateTime);
+            Log.d(TAG, info);
+
+            LatLng latLng = new LatLng( latitude, longitude );
+            polyOptions.add( latLng );
+
+            cnt ++ ;
+        }
+        cursor.close();
+
+        if( cnt > 2 ) {
+            if (null != gpsLogPathPoly) {
+                gpsLogPathPoly.remove();
+            }
+
+            gpsLogPathPoly = googleMap.addPolyline(polyOptions);
+        }
     }
 
     private void showGpsData( LocationResult locationResult ) {

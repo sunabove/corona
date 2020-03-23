@@ -17,10 +17,17 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
     private static LocationDbHelper dbHelper = null;
     // Gets the data repository in write mode
-    private SQLiteDatabase wdb;
-    private SQLiteDatabase rdb;
+    public SQLiteDatabase wdb;
+    public SQLiteDatabase rdb;
 
-    public LocationDbHelper(Context context) {
+    public static LocationDbHelper getLocationDbHelper( Context context ) {
+        if (null == dbHelper) {
+            dbHelper = new LocationDbHelper(context);
+        }
+        return dbHelper;
+    }
+
+    private LocationDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
         wdb = this.getWritableDatabase();
@@ -52,9 +59,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     }
 
     public static void insertGpsLog(Context context, Location location) {
-        if (null == dbHelper) {
-            dbHelper = new LocationDbHelper(context);
-        }
+        LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
 
         // Create a new map of values, where column names are the keys
         ContentValues values = new ContentValues();
@@ -83,45 +88,5 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         SQLiteDatabase db = dbHelper.wdb;
 
         long newRowId = db.insert("gps", null, values);
-    }
-
-    public static void readGpsDb(Context context) {
-        if (null == dbHelper) {
-            dbHelper = new LocationDbHelper(context);
-        }
-
-        SQLiteDatabase db = dbHelper.rdb;
-
-        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, longitude, latitude FROM gps ";
-        sql += " ORDER BY yyyy, mm, dd, hh, mi, ss, zz ";
-
-        String[] args = {};
-        Cursor cursor = db.rawQuery(sql, args);
-
-        while (cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndex("id"));
-            double longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
-            double latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
-
-            long yyyy = cursor.getLong(cursor.getColumnIndex("yyyy"));
-            long mm = cursor.getLong(cursor.getColumnIndex("mm"));
-            long dd = cursor.getLong(cursor.getColumnIndex("dd"));
-
-            long hh = cursor.getLong(cursor.getColumnIndex("hh"));
-            long mi = cursor.getLong(cursor.getColumnIndex("mi"));
-            long ss = cursor.getLong(cursor.getColumnIndex("ss"));
-
-            long zz = cursor.getLong(cursor.getColumnIndex("zz"));
-
-            String dateTime = "%04d-%02d-%02d %02d:%02d:%02d %d";
-            dateTime = String.format(dateTime, yyyy, mm, dd, hh, mi, ss, zz);
-
-            String info = "id = %d, lon = %f, lat = %f, upd = %s ";
-            info = String.format(info, id, longitude, latitude, dateTime);
-            Log.d(TAG, info);
-        }
-        cursor.close();
-
-        db.close();
     }
 }
