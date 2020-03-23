@@ -15,6 +15,8 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -66,7 +68,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private EditText status ;
     private TextView mapInfo ;
-    private ImageView locationEnabled ;
+    private ImageView gpsLogo;
 
     private LocationResult lastLocationResult ;
     private float lastZoom ;
@@ -87,7 +89,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         this.status = this.findViewById(R.id.status);
         this.mapInfo = this.findViewById(R.id.mapInfo);
-        this.locationEnabled = this.findViewById(R.id.locationEnabled);
+        this.gpsLogo = this.findViewById(R.id.gpsLogo);
 
         this.status.setText("");
 
@@ -169,6 +171,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
                     lastLocationResult = locationResult ;
 
+                    animateGpsLogoRotate();
+
                     showLastGpsData( locationResult );
 
                     gpsUpdCnt ++;
@@ -198,15 +202,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void whenCameraIdle() {
         if( this.isLocationEnabled() ) {
-            this.locationEnabled.setImageResource(R.drawable.gps_recording_02);
+            this.gpsLogo.setImageResource(R.drawable.gps_recording_02);
         } else {
-            this.locationEnabled.setImageResource(R.drawable.gps_recording_00);
+            this.gpsLogo.setImageResource(R.drawable.gps_recording_00);
         }
 
         TextView mapInfo = this.mapInfo;
         float zoom = this.getZoom();
 
-        String info = "Zoom: %02.1f, GPS: %d ";
+        String info = "Zoom: %02.1f,  GPS: %d ";
         info = String.format(info, zoom, gpsUpdCnt );
 
         mapInfo.setText( info );
@@ -431,6 +435,47 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         if( firstMove ) {
             firstMove = false ;
         }
+    }
+
+    private Animation gpsAnimation = null ;
+
+    private void animateGpsLogoRotate() {
+        if( null != this.gpsAnimation) {
+            this.gpsLogo.clearAnimation();
+        }
+
+        this.gpsLogo.setImageResource(R.drawable.gps_recording_02 );
+
+        int relative = Animation.RELATIVE_TO_SELF ;
+
+        Animation animation = new RotateAnimation(
+                30, -30,
+                relative, 0.5f,
+                relative,  0.5f);
+
+        animation.setDuration( 2_500 );
+        animation.setRepeatCount( 2 );
+
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                gpsLogo.clearAnimation();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        this.gpsAnimation = animation ;
+
+        this.gpsLogo.startAnimation( animation );
     }
 
     private boolean firstMove = true ;

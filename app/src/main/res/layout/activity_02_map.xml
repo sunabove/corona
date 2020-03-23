@@ -13,12 +13,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_marginTop="4dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="10dp"
         app:backgroundTint="#8BC34A"
-        app:maxImageSize="35dp"
+        app:maxImageSize="40dp"
         app:srcCompat="@drawable/go_back_act" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/calendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="70dp"
+        android:layout_marginBottom="10dp"
+        app:backgroundTint="#8BC34A"
+        app:maxImageSize="40dp"
+        app:srcCompat="@drawable/calendar_01" />
 
     <fragment
         android:id="@+id/map"
@@ -44,7 +54,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="4dp"
-                android:background="#4DCFCACA"
                 android:clickable="false"
                 android:ems="10"
                 android:inputType="textPersonName"
@@ -64,7 +73,7 @@
         >
 
         <ImageView
-            android:id="@+id/locationEnabled"
+            android:id="@+id/gpsLogo"
             android:layout_width="40dp"
             android:layout_height="50dp"
             android:layout_weight="1"
