@@ -292,13 +292,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         long yyyy = now.get(Calendar.YEAR);
         long mm = now.get(Calendar.MONTH) + 1; // Note: zero based!
-        long dd = now.get(Calendar.DAY_OF_MONTH);
+        long dd = now.get(Calendar.DAY_OF_MONTH) - 2 ; // condition for yesterday
+        long upd = now.getTimeInMillis() - 24*60*60*1_000; // condition for yesterday
 
-        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, latitude, longitude FROM gps ";
-        sql += " WHERE yyyy = ? AND mm = ? AND dd = ? " ;
-        sql += " ORDER BY yyyy ASC, mm ASC, dd ASC, hh ASC, mi ASC, ss ASC, zz ASC ";
+        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, latitude, longitude, upd FROM gps ";
+        sql += " WHERE yyyy = ? AND mm = ? AND dd > ? AND upd > ? " ;
+        sql += " ORDER BY upd ASC ";
 
-        String[] args = { "" + yyyy, "" + mm, "" + dd };
+        String[] args = { "" + yyyy, "" + mm, "" + dd, "" + upd };
         Cursor cursor = db.rawQuery(sql, args);
 
         boolean  isMapDetail = this.isMapDetail() ;
