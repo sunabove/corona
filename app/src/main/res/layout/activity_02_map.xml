@@ -94,7 +94,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:background="#59D8D2D2"
 
             android:dateTextAppearance="@android:style/TextAppearance.Large"
             android:weekDayTextAppearance="@android:style/TextAppearance.Large" />

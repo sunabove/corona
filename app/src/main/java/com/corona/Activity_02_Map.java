@@ -50,6 +50,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -216,6 +217,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void whenShowCalendarClicked() {
         CalendarView calendar = this.calendar ;
+
+        if( View.INVISIBLE == calendar.getVisibility() ) {
+            this.setHighlightedDays();
+        }
+
         calendar.setVisibility( calendar.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
     }
 
@@ -333,6 +339,16 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             gpsLogPathPoly = googleMap.addPolyline(polyOptions);
         }
+
+    }
+
+    private void setHighlightedDays() {
+        List<Calendar> dates = new ArrayList<>();
+        Calendar cal = Calendar.getInstance();
+        cal.set( Calendar.DAY_OF_MONTH, 22 );
+
+        dates.add( cal );
+        CalendarView calendar = this.calendar;
     }
 
     private void showLastGpsData(LocationResult locationResult ) {
