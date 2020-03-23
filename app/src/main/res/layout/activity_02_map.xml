@@ -106,12 +106,12 @@
                     android:layout_weight="1" />
 
                 <ImageButton
-                    android:id="@+id/imageButton"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/hidePaneBtn"
+                    android:layout_width="35dp"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
                     android:scaleType="centerInside"
-                    app:srcCompat="@drawable/close_btn_02" />
+                    app:srcCompat="@drawable/close_btn_04" />
             </LinearLayout>
 
             <CalendarView
