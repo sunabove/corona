@@ -64,9 +64,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationClient;
 
-    private Marker myPhoneMarker;
-    private Marker currCarMarker;
-    private int currMarkerUpdCnt = 0 ;
+    private Marker phoneMarker;
+    private int phoneMarkerUpdCnt = 0 ;
     private Polyline gpsPathPoly = null ;
     private Polyline gpsLogPathPoly = null ;
     private GpsLog gpsLog = new GpsLog();
@@ -365,100 +364,87 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void showLastGpsData(LocationResult locationResult ) {
 
-        this.showCurrentPositionMarker( locationResult );
-
-        float zoom = this.getZoom();
         boolean isMapDetail = this.isMapDetail();
 
-        if( true ) {
-            Location location = locationResult.getLastLocation();
-            LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
-            GpsLog gpsLog = this.gpsLog ;
+        Location location = locationResult.getLastLocation();
+        LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
+        GpsLog gpsLog = this.gpsLog ;
 
-            if( null == lastGpsLatLng ) {
-                lastGpsLatLng = latLng;
-
-                gpsLog.add( latLng );
-            } else if( null != lastGpsLatLng ){
-                float dists [] = getDistance( lastGpsLatLng, latLng );
-                float dist = dists[ 0 ];
-
-                Log.d( TAG , String.format("dist = %f", dist ) );
-
-                if( 0.1f > dist ) {
-                    Log.d( TAG , String.format("dist is small = %f", dist ) );
-                    if( 0 < gpsLog.size() ) {
-                        gpsLog.remove(gpsLog.size() - 1);
-                    }
-                    gpsLog.add( latLng );
-                } else {
-                    gpsLog.add( latLng );
-                }
-
-                lastGpsLatLng = latLng;
+        if( 100_000 < gpsLog.size() ) {
+            while( 100_000 < gpsLog.size() ) {
+                gpsLog.remove( 0 );
             }
-
-            if( 1_000 < gpsLog.size() ) {
-                while( 1_000 < gpsLog.size() ) {
-                    gpsLog.remove( 0 );
-                }
-            }
-
-            int color = Color.BLUE ;
-            int width = isMapDetail ? 30: 15 ;
-
-            PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
-            polyOptions.jointType(JointType.ROUND);
-
-            //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
-            List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(10));
-            polyOptions.pattern( pattern );
-
-            for( LatLng log : gpsLog ) {
-                polyOptions.add( log );
-            }
-
-            if( null != gpsPathPoly ) {
-                gpsPathPoly.remove();
-            }
-
-            gpsPathPoly = googleMap.addPolyline( polyOptions );
         }
+
+        gpsLog.add( latLng );
+
+        lastGpsLatLng = latLng;
+
+        int color = Color.BLUE ;
+        int width = isMapDetail ? 30: 15 ;
+
+        PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
+        polyOptions.jointType(JointType.ROUND);
+
+        //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
+        List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(10));
+        polyOptions.pattern( pattern );
+
+        int insCnt = 0 ;
+        for( LatLng log : gpsLog ) {
+            polyOptions.add( log );
+            insCnt += 1;
+        }
+
+        while( 3 > insCnt ) {
+            polyOptions.add( latLng );
+            insCnt += 1;
+        }
+
+        if( null != gpsPathPoly ) {
+            gpsPathPoly.remove();
+        }
+
+        gpsPathPoly = googleMap.addPolyline( polyOptions );
+        gpsPathPoly.setZIndex( 4 );
+
+        this.showCurrentPositionMarker( locationResult );
     }
 
     private void showCurrentPositionMarker(LocationResult locationResult ) {
         float zoom = this.getZoom();
         boolean isMapDetail = this.isMapDetail();
 
-        if( null != currCarMarker ) {
-            currCarMarker.remove();
+        if( null != phoneMarker) {
+            phoneMarker.remove();
         }
-        currMarkerUpdCnt += 1 ;
+        phoneMarkerUpdCnt += 1 ;
 
         Location location = locationResult.getLastLocation();
         LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        markerOptions.title(String.format("현재 위치 [%04d]", currMarkerUpdCnt ));
+        markerOptions.title(String.format("현재 위치 [%04d]", phoneMarkerUpdCnt));
+        markerOptions.flat(true);
 
-        currCarMarker = googleMap.addMarker(markerOptions);
+        phoneMarker = googleMap.addMarker(markerOptions);
 
         if( isMapDetail ) {
-            currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
+            phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
         } else {
-            currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
+            phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
         }
 
         double gpsHeading = gpsLog.getGpsHeading( 0 );
 
-        currCarMarker.setRotation( (float) gpsHeading );
+        phoneMarker.setRotation( (float) gpsHeading );
 
         Log.d( "heading" , "heading = " + gpsHeading );
 
         //currCarMarker.showInfoWindow();
 
         Projection projection = googleMap.getProjection();
-        Point scrPos = projection.toScreenLocation(currCarMarker.getPosition());
+        Point scrPos = projection.toScreenLocation(phoneMarker.getPosition());
 
         // animate camera when current marker is out of screen
         double x = scrPos.x;
@@ -562,8 +548,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 public void onComplete(@NonNull Task<Location> task) {
                     Location location = task.getResult();
                     if (location != null) {
-                        if (null != myPhoneMarker) {
-                            myPhoneMarker.remove();
+                        if (null != phoneMarker) {
+                            phoneMarker.remove();
                         }
 
                         upCnt ++ ;
@@ -573,10 +559,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                         MarkerOptions options = new MarkerOptions();
                         options.position(latLng).title(String.format("현재 나의 위치 (%d)", upCnt));
 
-                        myPhoneMarker = googleMap.addMarker(options);
-                        myPhoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
+                        phoneMarker = googleMap.addMarker(options);
+                        phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
 
-                        myPhoneMarker.showInfoWindow();
+                        phoneMarker.showInfoWindow();
 
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
 
