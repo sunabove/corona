@@ -37,8 +37,6 @@ public class GpsLog extends ArrayList<LatLng> {
 
             if( 2.0f < results[0] ) {
                 return results[1];
-            } else {
-                return results[1];
             }
         }
 
