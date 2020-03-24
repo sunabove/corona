@@ -183,7 +183,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         String serviceName = getString(R.string.location_service_name);
-        String contentText = "핸드폰 위치와 호가진자의 동선을 스캔중입니다.";
+        String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_NONE;
