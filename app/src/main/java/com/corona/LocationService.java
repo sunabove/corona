@@ -94,8 +94,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
         builder.setSmallIcon(R.drawable.corona_alarm);
-        builder.setContentTitle( "확진자 A");
-        builder.setContentText( "동선 겹침" );
+        builder.setContentTitle( "강남역 사거리 / 확진자 A");
+        builder.setContentText( "동선 겹침 / 2020년 3월 24일  오후 2시 22분경 " );
         builder.setContentInfo( "자가 격리 요망" );
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
@@ -205,7 +205,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             builder.setContentText( contentText );
             startForeground(NOTIFICATION_ID, builder.build());
         }
-    } 
+    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
