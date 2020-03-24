@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Corona Alarm</string>
 
+    <string name="location_service_name">코로나 스캔</string>
+
     <string name="app_version">V1.0</string>
 
     <string name="title_activity_maps">Corona Map</string>

@@ -1,6 +1,7 @@
 package com.corona;
 
 import android.Manifest;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -93,9 +94,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
         builder.setSmallIcon(R.drawable.corona_alarm);
-        builder.setContentTitle( "aaaa");
-        builder.setContentText( "bbbb" );
-        builder.setContentInfo( "cccc" );
+        builder.setContentTitle( "확진자 A");
+        builder.setContentText( "동선 겹침" );
+        builder.setContentInfo( "자가 격리 요망" );
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
@@ -169,15 +170,20 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
      * This Method shows notification for ForegroundService
      * Start Foreground Service and Show Notification to user for android all version
      */
+    final int NOTIFICATION_ID = 100;
+
     private void showNotificationAndStartForegroundService() {
 
         final String CHANNEL_ID = BuildConfig.APPLICATION_ID.concat("_notification_id");
         final String CHANNEL_NAME = BuildConfig.APPLICATION_ID.concat("_notification_name");
-        final int NOTIFICATION_ID = 100;
+
 
         NotificationCompat.Builder builder;
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        String serviceName = getString(R.string.location_service_name);
+        String contentText = "핸드폰 위치와 호가진자의 동선을 스캔중입니다.";
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_NONE;
@@ -188,16 +194,18 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 notificationManager.createNotificationChannel(mChannel);
             }
             builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-            builder.setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(getString(R.string.app_name));
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+            builder.setContentTitle( serviceName );
+            builder.setContentText( contentText );
             startForeground(NOTIFICATION_ID, builder.build());
         } else {
             builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-            builder.setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(getString(R.string.app_name));
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+            builder.setContentTitle( serviceName );
+            builder.setContentText( contentText );
             startForeground(NOTIFICATION_ID, builder.build());
         }
-    }
+    } 
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {

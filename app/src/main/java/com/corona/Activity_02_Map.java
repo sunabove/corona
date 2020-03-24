@@ -365,6 +365,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void showLastGpsData(LocationResult locationResult ) {
 
+        this.showCurrentPositionMarker( locationResult );
+
         float zoom = this.getZoom();
         boolean isMapDetail = this.isMapDetail();
 
@@ -422,64 +424,67 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             gpsPathPoly = googleMap.addPolyline( polyOptions );
         }
+    }
 
-        if( true ){
-            if( null != currCarMarker ) {
-                currCarMarker.remove();
-            }
-            currMarkerUpdCnt += 1 ;
+    private void showCurrentPositionMarker(LocationResult locationResult ) {
+        float zoom = this.getZoom();
+        boolean isMapDetail = this.isMapDetail();
 
-            Location location = locationResult.getLastLocation();
-            LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title(String.format("현재 위치 [%04d]", currMarkerUpdCnt ));
-
-            currCarMarker = googleMap.addMarker(markerOptions);
-
-            if( isMapDetail ) {
-                currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
-            } else {
-                currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
-            }
-
-            double gpsHeading = gpsLog.getGpsHeading( 0 );
-
-            currCarMarker.setRotation( (float) gpsHeading );
-
-            Log.d( "heading" , "heading = " + gpsHeading );
-
-            //currCarMarker.showInfoWindow();
-
-            Projection projection = googleMap.getProjection();
-            Point scrPos = projection.toScreenLocation(currCarMarker.getPosition());
-
-            // animate camera when current marker is out of screen
-            double x = scrPos.x;
-            double y = scrPos.y;
-
-            int sw = getScreenWidth();
-            int sh = getScreenHeight();
-
-            double xr = Math.abs( sw/2.0 - x )/sw ;
-            double yr = Math.abs( sh/2.0 - y )/sh ;
-
-            if( false ) {
-                Log.d("screen range", "xr = " + xr);
-                Log.d("screen range", "yr = " + yr);
-            }
-
-            if( firstMove ) {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
-            } else {
-                googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-            }
-
-            if( 0.35 < xr || 0.4 < yr ) {
-                googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            }
-            // --animate camera when current marker is out of screen
+        if( null != currCarMarker ) {
+            currCarMarker.remove();
         }
+        currMarkerUpdCnt += 1 ;
+
+        Location location = locationResult.getLastLocation();
+        LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title(String.format("현재 위치 [%04d]", currMarkerUpdCnt ));
+
+        currCarMarker = googleMap.addMarker(markerOptions);
+
+        if( isMapDetail ) {
+            currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
+        } else {
+            currCarMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
+        }
+
+        double gpsHeading = gpsLog.getGpsHeading( 0 );
+
+        currCarMarker.setRotation( (float) gpsHeading );
+
+        Log.d( "heading" , "heading = " + gpsHeading );
+
+        //currCarMarker.showInfoWindow();
+
+        Projection projection = googleMap.getProjection();
+        Point scrPos = projection.toScreenLocation(currCarMarker.getPosition());
+
+        // animate camera when current marker is out of screen
+        double x = scrPos.x;
+        double y = scrPos.y;
+
+        int sw = getScreenWidth();
+        int sh = getScreenHeight();
+
+        double xr = Math.abs( sw/2.0 - x )/sw ;
+        double yr = Math.abs( sh/2.0 - y )/sh ;
+
+        if( false ) {
+            Log.d("screen range", "xr = " + xr);
+            Log.d("screen range", "yr = " + yr);
+        }
+
+        if( firstMove ) {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
+        } else {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        }
+
+        if( 0.35 < xr || 0.4 < yr ) {
+            googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        }
+        // --animate camera when current marker is out of screen
 
         if( firstMove ) {
             firstMove = false ;
