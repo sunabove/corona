@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">Corona Alarm</string>
 
-    <string name="location_service_name">코로나 스캔</string>
+    <string name="location_service_name">코로나 동선 스캔중입니다.</string>
 
     <string name="app_version">V1.0</string>
 

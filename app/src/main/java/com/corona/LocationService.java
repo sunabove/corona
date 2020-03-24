@@ -94,8 +94,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
         builder.setSmallIcon(R.drawable.corona_alarm);
-        builder.setContentTitle( "강남역 사거리 / 확진자 A");
-        builder.setContentText( "동선 겹침 / 2020년 3월 24일  오후 2시 22분경 " );
+        builder.setContentTitle( "강남역 사거리 / 확진자 A / 동선 겹침");
+        builder.setContentText( "2020년 3월 24일  오후 2시 22분경 / 자가 격리 요망" );
         builder.setContentInfo( "자가 격리 요망" );
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
