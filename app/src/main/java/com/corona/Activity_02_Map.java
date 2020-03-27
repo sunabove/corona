@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.text.InputType;
@@ -52,9 +53,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
@@ -140,7 +143,106 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Log.v( TAG, "onResume");
 
         this.hideActionBar();
+
+        this.startCoronaDbShowHandler();
     }
+
+    private Handler coronaDbShowHandler ;
+    private void startCoronaDbShowHandler() {
+        if( null == this.googleMap ) {
+            return ;
+        }
+
+        if( null != this.coronaDbShowHandler ) {
+            return ;
+        }
+
+        this.coronaDbShowHandler = new Handler();
+
+        this.coronaDbShowHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if( ! isActivityAlive() ) {
+                    Log.d(TAG, "Running startCoronaDbShowHandler activity is not alive.");
+
+                    return ;
+                }
+
+                Log.d(TAG, "Running startCoronaDbShowHandler");
+
+                startCoronaDbShowImpl();
+
+                if( isActivityAlive() ) {
+                    coronaDbShowHandler.postDelayed(this, ComInterface.CORONA_DB_GET_INTERVAL);
+                }
+            }
+        }, 1_000);
+
+    }
+
+    private long coronaMaxUpDt = -1 ;
+    private int coronaMarkerZIndex = 1;
+
+    private void startCoronaDbShowImpl() {
+        LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
+
+        SQLiteDatabase db = dbHelper.rdb;
+
+        long coronaMaxUpDt = this.coronaMaxUpDt;
+
+        String sql = "" ;
+        sql += " SELECT id, deleted, up_dt, place, patient, visit_fr, visit_to " ;
+        sql += " , latitude, longitude " ;
+        sql += " FROM corona " ;
+        sql += " WHERE up_dt > ? " ;
+        sql += " ORDER BY up_dt ASC" ;
+        ;
+
+        String[] args = { "" + coronaMaxUpDt };
+        Cursor cursor = db.rawQuery(sql, args);
+
+        while ( this.isActivityAlive() && cursor.moveToNext()) {
+            long id = cursor.getLong(cursor.getColumnIndex("id"));
+            long deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
+            long up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
+            String place = cursor.getString(cursor.getColumnIndex("place"));
+            String patient = cursor.getString(cursor.getColumnIndex("patient"));
+            long visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
+            long visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
+            double latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
+            double longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
+
+            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
+
+            String title = String.format("[%d] %s / %s", id, place, patient );
+            String snippet = String.format( "%s ~ %s", df.format( new Date( visit_fr) ) , df.format( new Date( visit_to ) ) );
+
+            String info = String.format("corona marker title = %s, latitude = %f, longitude = %f", title, latitude, longitude ) ;
+            Log.d( TAG, info );
+
+            LatLng latLng = new LatLng( latitude, longitude );
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title( title );
+            markerOptions.snippet( snippet );
+            markerOptions.flat(true);
+            markerOptions.zIndex( coronaMarkerZIndex );
+
+            if( ! this.isActivityAlive()) {
+                return ;
+            }
+
+            phoneMarker = googleMap.addMarker(markerOptions);
+
+            if( up_dt > this.coronaMaxUpDt ) {
+                this.coronaMaxUpDt = up_dt ;
+            }
+            coronaMarkerZIndex ++ ;
+        }
+
+        cursor.close();
+    }
+    // -- startCoronaDbShowImpl
 
     @Override
     protected void onPause() {
@@ -225,6 +327,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 whenCameraIdle();
             }
         });
+
+        this.startCoronaDbShowHandler();
     }
 
     private void whenShowCalendarClicked() {
@@ -334,7 +438,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             String info = "Gps Log on DB: id = %d, lon = %f, lat = %f, upd = %s ";
             info = String.format(info, id, longitude, latitude, dateTime);
-            Log.d(TAG, info);
+            //Log.d(TAG, info);
 
             LatLng latLng = new LatLng( latitude, longitude );
             polyOptions.add( latLng );
@@ -430,6 +534,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         markerOptions.position(latLng);
         markerOptions.title(String.format("현재 위치 [%04d]", phoneMarkerUpdCnt));
         markerOptions.flat(true);
+        markerOptions.zIndex(1_000_000);
 
         phoneMarker = googleMap.addMarker(markerOptions);
 

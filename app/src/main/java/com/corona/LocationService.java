@@ -240,8 +240,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     }
 
     private void getCoronaDataFromServer() {
-        //final long delay = 5*60*1_000;
-        final long delay = 10 * 1_000;
+        final long delay = CORONA_DB_GET_INTERVAL;
 
         final Handler handler = new Handler();
         final Runnable runnable = new Runnable() {
