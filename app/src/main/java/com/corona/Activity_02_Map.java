@@ -237,7 +237,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             markerOptions.snippet( snippet );
             markerOptions.flat(true);
             markerOptions.zIndex( coronaMarkerZIndex );
-            markerOptions.icon(BitmapDescriptorFactory.fromResource( R.drawable.map_dot_yellow ));
+            //markerOptions.icon(BitmapDescriptorFactory.fromResource( R.drawable.map_dot_yellow ));
+            //markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 
             if( 1 == deleted ) {
                 deletedIds.add( id );
