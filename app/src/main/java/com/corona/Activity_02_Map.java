@@ -364,6 +364,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void showLastGpsData(LocationResult locationResult ) {
 
+        if( null == locationResult ) {
+            return;
+        }
+
         boolean isMapDetail = this.isMapDetail();
 
         Location location = locationResult.getLastLocation();

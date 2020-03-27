@@ -8,6 +8,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
@@ -129,5 +133,31 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         cursor.close();
 
         return 0;
+    }
+
+    public void whenCoronaDbReceived(JSONArray response) {
+        JSONObject obj ;
+        for( int i = 0 ; i < response.length() ; i ++ ) {
+            try {
+                obj = response.getJSONObject( i );
+                Long upDt = obj.getLong( "upDt" );
+                String place = obj.getString( "place" );
+                String patient = obj.getString( "patient" );
+                Object deleted = obj.get( "deleted" );
+                JSONObject geom = obj.getJSONObject( "geom" );
+                Long latitude = geom.getLong( "lat" );
+                Long longitude = geom.getLong( "lon" );
+                Long visitFr = obj.getLong( "visitFr" );
+                Long visitTo = obj.getLong( "visitTo" );
+
+                String info = "[%d] upDt: %s, place = %s, patient, %s, deleted = %s, latitude = %s, longitude = %s, visitFr = %s, visitTo = %s" ;
+                info = String.format( info, i, "" + upDt, place, patient, "" + deleted, latitude, longitude, "" + visitFr, "" + visitTo );
+
+                Log.d(TAG, info );
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -39,6 +39,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.gson.JsonArray;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -280,6 +281,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                     public void onResponse(JSONArray response) {
                         Log.d(TAG, "Response: Success " + response.toString());
 
+                        whenCoronaDbReceived( response );
+
                         handler.postDelayed(runnable, delay);
                     }
                 },
@@ -298,6 +301,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         // Access the RequestQueue through your singleton class.
         coronaDbHandlerCnt ++ ;
         this.requestQueue.add( jsonObjectRequest );
+    }
+
+    private void whenCoronaDbReceived(JSONArray response) {
+        LocationDbHelper.getLocationDbHelper(this).whenCoronaDbReceived( response );
     }
 
     private void showColonaDetectionAlarmNotification() {
