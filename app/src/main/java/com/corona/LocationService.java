@@ -228,6 +228,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     }
 
     private void whenLocationUpdated(LocationResult locationResult) {
+        if( null == locationResult || null == locationResult.getLastLocation() ) {
+            return;
+        }
+
         LocationDbHelper.insertGpsLog(getApplicationContext(), locationResult.getLastLocation());
 
         Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult));
@@ -264,11 +268,11 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         if( coronaMaxUpDt < 1 ) {
             up_dt = "" ;
         } else {
-            up_dt = ComInterface.yyyMMdd_HHmmSS.format( new Date( coronaMaxUpDt ) ) ;
+            up_dt = "" + ( coronaMaxUpDt + 1 );
         }
 
         try {
-            url += "?up_dt=" + URLEncoder.encode(up_dt, "UTF-8");
+            url += "?up_dt=" + URLEncoder.encode( up_dt, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -304,7 +308,11 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     }
 
     private void whenCoronaDbReceived(JSONArray response) {
-        LocationDbHelper.getLocationDbHelper(this).whenCoronaDbReceived( response );
+        try {
+            LocationDbHelper.getLocationDbHelper(this).whenCoronaDbReceived( response );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void showColonaDetectionAlarmNotification() {

@@ -52,7 +52,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         db.execSQL("CREATE INDEX gps_idx_02 ON gps( up_dt DESC ) ");
 
         sql = "CREATE TABLE corona( ";
-        sql += " id INTEGER PRIMARY KEY ";
+        sql += "   id INTEGER PRIMARY KEY ";
         sql += " , deleted INT2 ";
         sql += " , up_dt INTEGER ";
         sql += " , place VARCHAR(500), patient VARCHAR(500) ";
@@ -136,23 +136,40 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         return 0;
     }
 
-    public void whenCoronaDbReceived(JSONArray response) {
+    public void whenCoronaDbReceived(JSONArray response) throws Exception {
+        SQLiteDatabase db = this.wdb;
+
         JSONObject obj ;
         for( int i = 0 ; i < response.length() ; i ++ ) {
             try {
                 obj = response.getJSONObject( i );
-                Long upDt = obj.getLong( "upDt" );
+                long id = obj.getLong( "id" );
+                Object deleted = obj.get( "deleted" );
+                long upDt = obj.getLong( "upDt" );
                 String place = obj.getString( "place" );
                 String patient = obj.getString( "patient" );
-                Object deleted = obj.get( "deleted" );
                 JSONObject geom = obj.getJSONObject( "geom" );
-                Long latitude = geom.getLong( "lat" );
-                Long longitude = geom.getLong( "lon" );
-                Long visitFr = obj.getLong( "visitFr" );
-                Long visitTo = obj.getLong( "visitTo" );
+                long visitFr = obj.getLong( "visitFr" );
+                long visitTo = obj.getLong( "visitTo" );
+                double latitude = geom.getDouble( "lat" );
+                double longitude = geom.getDouble( "lon" );
 
-                String info = "[%d] upDt: %s, place = %s, patient, %s, deleted = %s, latitude = %s, longitude = %s, visitFr = %s, visitTo = %s" ;
-                info = String.format( info, i, "" + upDt, place, patient, "" + deleted, latitude, longitude, "" + visitFr, "" + visitTo );
+                String info = "[%d] upDt: %s, id=%s, place = %s, patient, %s, deleted = %s, latitude = %s, longitude = %s, visitFr = %s, visitTo = %s" ;
+                info = String.format( info, i, "" + id, "" + upDt, place, patient, "" + deleted, latitude, longitude, "" + visitFr, "" + visitTo );
+
+                // Create a new map of values, where column names are the keys
+                ContentValues values = new ContentValues();
+                values.put("id", id );
+                values.put("deleted", "1".equals("" + deleted) ? 1 : 0 );
+                values.put("up_dt", upDt );
+                values.put("place", place );
+                values.put("patient", patient );
+                values.put("visit_fr", visitFr );
+                values.put("visit_to", visitTo );
+                values.put("latitude", latitude );
+                values.put("longitude", longitude );
+
+                long newRowId = db.replace("corona", null, values);
 
                 Log.d(TAG, info );
 
