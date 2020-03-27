@@ -217,7 +217,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private void getCoronaDataFromServer() {
         final Handler handler = new Handler();
-        final long delay = 5*60*1_000;
+        //final long delay = 5*60*1_000;
+        final long delay = 10*1_000;
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {

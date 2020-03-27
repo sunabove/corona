@@ -332,7 +332,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             String dateTime = "%04d-%02d-%02d %02d:%02d:%02d %d";
             dateTime = String.format(dateTime, yyyy, mm, dd, hh, mi, ss, zz);
 
-            String info = "id = %d, lon = %f, lat = %f, upd = %s ";
+            String info = "Gps Log on DB: id = %d, lon = %f, lat = %f, upd = %s ";
             info = String.format(info, id, longitude, latitude, dateTime);
             Log.d(TAG, info);
 
