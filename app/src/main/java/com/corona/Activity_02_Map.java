@@ -317,11 +317,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         if( valid ) { // location updater
-            LocationRequest locationRequest = LocationRequest.create();
-            locationRequest.setPriority(LOCATION_REQUEST_PRIORITY);
-            locationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
-            locationRequest.setFastestInterval(LOCATION_REQUEST_INTERVAL);
-            locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
+            LocationRequest locationRequest = LocationService.createLocationRequest();
 
             LocationCallback locationCallback = new LocationCallback() {
 

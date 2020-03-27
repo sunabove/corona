@@ -29,7 +29,6 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,17 +38,11 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.gson.JsonArray;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class LocationService extends Service implements ComInterface, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -76,9 +69,11 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     public void onCreate() {
         super.onCreate();
 
-        buildGoogleApiClient();
+        this.requestQueue = Volley.newRequestQueue(this);
 
-        showNotificationAndStartForegroundService();
+        this.buildGoogleApiClient();
+
+        this.showNotificationAndStartForegroundService();
 
         locationCallback = new LocationCallback() {
             @Override
@@ -92,14 +87,13 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         this.showColonaDetectionAlarmNotification();
 
-        this.requestQueue = Volley.newRequestQueue(this);
-
         this.getCoronaDataFromServer();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         return START_STICKY;
     }
 
@@ -121,14 +115,14 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
      * After successfully connection of the GoogleClient ,
      * This method used for to request continues location
      */
-    private void createLocationRequest() {
-        locationRequest = LocationRequest.create();
+    public static LocationRequest createLocationRequest() {
+        LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LOCATION_REQUEST_PRIORITY);
         locationRequest.setInterval(LOCATION_REQUEST_INTERVAL);
         locationRequest.setFastestInterval(LOCATION_REQUEST_INTERVAL);
-        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT);
+        locationRequest.setSmallestDisplacement(LOCATION_REQUEST_DISPLACEMENT_METERS);
 
-        requestLocationUpdate();
+        return locationRequest;
     }
 
     /**
@@ -165,7 +159,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "GoogleApi Client Connected");
-        createLocationRequest();
+
+        this.locationRequest = createLocationRequest();
+
+        this.requestLocationUpdate();
     }
 
     @Override

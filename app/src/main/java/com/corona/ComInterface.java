@@ -29,12 +29,12 @@ public interface ComInterface {
 
     /*
     public static final long LOCATION_REQUEST_INTERVAL = 0 ;
-    public static final float LOCATION_REQUEST_DISPLACEMENT = 1.0f;
+    public static final float LOCATION_REQUEST_DISPLACEMENT_METERS = 1.0f;
     public static final int LOCATION_REQUEST_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY ;
     */
 
     public static final long LOCATION_REQUEST_INTERVAL = 10_000;
-    public static final float LOCATION_REQUEST_DISPLACEMENT = 5.0f;
+    public static final float LOCATION_REQUEST_DISPLACEMENT_METERS = 5.0f;
     public static final int LOCATION_REQUEST_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY ;
 
     public static final SimpleDateFormat yyyMMdd_HHmmSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
