@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
@@ -181,7 +182,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private void startCoronaMarkerDbShowImpl() {
         LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
 
-        SQLiteDatabase db = dbHelper.rdb;
+        SQLiteDatabase db = dbHelper.wdb;
 
         long coronaMaxUpDt = this.coronaMaxUpDt;
 
@@ -205,6 +206,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long visit_to;
         float latitude = 0;
         float longitude = 0 ;
+
+        HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
+        GoogleMap googleMap = this.googleMap;
+        ArrayList<Long> deletedIds = new ArrayList<>();
 
         while ( this.isActivityAlive() && cursor.moveToNext()) {
             id = cursor.getLong(cursor.getColumnIndex("id"));
@@ -233,12 +238,21 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             markerOptions.flat(true);
             markerOptions.zIndex( coronaMarkerZIndex );
 
-            if( ! this.isActivityAlive()) {
-                Log.d( TAG, "activity is not alive skipped to add corona marker.");
-                return ;
-            }
+            if( 1 == deleted ) {
+                deletedIds.add( id );
+                Marker marker = coronaMarkers.get( id );
+                marker.remove();
+                coronaMarkers.remove( id );
+            } else {
 
-            googleMap.addMarker(markerOptions);
+                if (!this.isActivityAlive()) {
+                    Log.d(TAG, "Activity is not alive skipped to add corona marker.");
+                    break;
+                }
+
+                Marker marker = googleMap.addMarker(markerOptions);
+                coronaMarkers.put(id, marker);
+            }
 
             if( up_dt > this.coronaMaxUpDt ) {
                 this.coronaMaxUpDt = up_dt ;
@@ -246,13 +260,16 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             coronaMarkerZIndex ++ ;
         }
 
-        if( latitude > 0 && longitude > 0 ) {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude)));
+        cursor.close();
+
+        for( Long delId : deletedIds ) {
+            db.delete("corona", " WHERE ID = ?", new String[]{ "" + delId });
         }
 
-        cursor.close();
     }
     // -- startCoronaDbShowImpl
+
+    private HashMap<Long, Marker> coronaMarkers = new HashMap<>();
 
     @Override
     protected void onPause() {
@@ -561,15 +578,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         markerOptions.title(String.format("현재 위치 [%04d]", phoneMarkerUpdCnt));
         markerOptions.flat(true);
 
-        if( isMapDetail ) {
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_64));
+        int mapIconRscId = R.drawable.smart_phone_icon_01_64;
+        if( zoom > 18.4 ) {
+            mapIconRscId = R.drawable.smart_phone_icon_01_64;
+        } else if( zoom > 16.1 ) {
+            mapIconRscId = R.drawable.smart_phone_icon_02_32;
         } else {
-            if( zoom > 16.1 ) {
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_32));
-            } else {
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_03_16));
-            }
+            mapIconRscId = R.drawable.smart_phone_icon_03_16;
         }
+        markerOptions.icon(BitmapDescriptorFactory.fromResource( mapIconRscId ));
 
         markerOptions.zIndex(1_000_000);
 
