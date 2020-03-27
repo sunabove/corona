@@ -247,26 +247,24 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private int coronaDbHandlerCnt = 0;
     protected RequestQueue requestQueue ;
-    private long lastCoronaDbUpDt = 0;
 
     private void getCoronaDataFromServerImpl(final Handler handler, final Runnable runnable, final long delay) {
         Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt));
 
-        coronaDbHandlerCnt++;
-
         String url = "http://sunabove.iptime.org:8080/corona_web/corona/data.json";
 
-        final long now = System.currentTimeMillis();
+        String up_dt = "";
+        long coronaMaxUpDt = LocationDbHelper.getLocationDbHelper( this ).getCoronaMaxUpDt();
 
-        if( lastCoronaDbUpDt < 1 ) {
-            lastCoronaDbUpDt = now;
+        if( coronaMaxUpDt < 1 ) {
+            up_dt = "" ;
+        } else {
+            up_dt = ComInterface.yyyMMdd_HHmmSS.format( new Date( coronaMaxUpDt ) ) ;
         }
-
-        Date upDt = new Date( lastCoronaDbUpDt );
 
         JSONObject params = new JSONObject();
         try {
-            params.put("up_dt", ComInterface.yyyMMdd_HHmmSS.format(upDt));
+            params.put("up_dt", up_dt );
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -278,8 +276,6 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                     @Override
                     public void onResponse(JSONObject response) {
                         Log.d(TAG, "Response: Success " + response.toString());
-
-                        lastCoronaDbUpDt = now;
 
                         handler.postDelayed(runnable, delay);
                     }

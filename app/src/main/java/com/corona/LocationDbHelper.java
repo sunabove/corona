@@ -104,13 +104,30 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         values.put("ss", ss);
         values.put("zz", zz);
 
-        long upd = now.getTimeInMillis() ;
+        long up_dt = now.getTimeInMillis() ;
 
-        values.put("upd", upd );
+        values.put( "up_dt", up_dt );
 
         // Insert the new row, returning the primary key value of the new row
         SQLiteDatabase db = dbHelper.wdb;
 
         long newRowId = db.insert("gps", null, values);
+    }
+
+    public long getCoronaMaxUpDt() {
+        String sql = " SELECT MAX( up_dt ) AS max_up_dt FROM corona " ;
+
+        String[] args = { };
+        SQLiteDatabase db = this.rdb;
+        Cursor cursor = db.rawQuery(sql, args);
+
+        while (cursor.moveToNext()) {
+            long max_up_dt = cursor.getLong( 0 );
+            return max_up_dt ;
+        }
+
+        cursor.close();
+
+        return 0;
     }
 }
