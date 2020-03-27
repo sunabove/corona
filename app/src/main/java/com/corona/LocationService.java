@@ -24,6 +24,12 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.android.volley.BuildConfig;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -32,6 +38,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LocationService extends Service implements ComInterface, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -43,7 +56,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
 
-    int gpsInsCnt = 0 ;
+    int gpsInsCnt = 0;
 
     public LocationService() {
     }
@@ -73,6 +86,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         };
 
         this.showColonaDetectionAlarmNotification();
+
+        this.requestQueue = Volley.newRequestQueue(this);
 
         this.getCoronaDataFromServer();
     }
@@ -195,45 +210,93 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             }
             builder = new NotificationCompat.Builder(this, CHANNEL_ID);
             builder.setSmallIcon(R.mipmap.ic_launcher);
-            builder.setContentTitle( serviceName );
-            builder.setContentText( contentText );
+            builder.setContentTitle(serviceName);
+            builder.setContentText(contentText);
             startForeground(NOTIFICATION_ID, builder.build());
         } else {
             builder = new NotificationCompat.Builder(this, CHANNEL_ID);
             builder.setSmallIcon(R.mipmap.ic_launcher);
-            builder.setContentTitle( serviceName );
-            builder.setContentText( contentText );
+            builder.setContentTitle(serviceName);
+            builder.setContentText(contentText);
             startForeground(NOTIFICATION_ID, builder.build());
         }
     }
 
     private void whenLocationUpdated(LocationResult locationResult) {
-        LocationDbHelper.insertGpsLog( getApplicationContext(), locationResult.getLastLocation() );
+        LocationDbHelper.insertGpsLog(getApplicationContext(), locationResult.getLastLocation());
 
-        Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult) );
+        Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult));
 
-        gpsInsCnt++ ;
+        gpsInsCnt++;
     }
 
     private void getCoronaDataFromServer() {
-        final Handler handler = new Handler();
         //final long delay = 5*60*1_000;
-        final long delay = 10*1_000;
-        handler.postDelayed(new Runnable() {
+        final long delay = 10 * 1_000;
+
+        final Handler handler = new Handler();
+        final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                getCoronaDataFromServerImpl();
-
-                handler.postDelayed( this, delay );
+                getCoronaDataFromServerImpl( handler, this , delay);
             }
-        }, 2_000 );
+        };
+
+        handler.postDelayed( runnable, 2_000);
     }
 
-    private int coronaDbHandlerCnt = 0 ;
-    private void getCoronaDataFromServerImpl() {
-        Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt) );
+    private int coronaDbHandlerCnt = 0;
+    protected RequestQueue requestQueue ;
+    private long lastCoronaDbUpDt = 0;
 
-        coronaDbHandlerCnt++ ;
+    private void getCoronaDataFromServerImpl(final Handler handler, final Runnable runnable, final long delay) {
+        Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt));
+
+        coronaDbHandlerCnt++;
+
+        String url = "http://sunabove.iptime.org:8080/corona_web/corona/data.json";
+
+        final long now = System.currentTimeMillis();
+
+        if( lastCoronaDbUpDt < 1 ) {
+            lastCoronaDbUpDt = now;
+        }
+
+        Date upDt = new Date( lastCoronaDbUpDt );
+
+        JSONObject params = new JSONObject();
+        try {
+            params.put("up_dt", ComInterface.yyyMMdd_HHmmSS.format(upDt));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, params,
+
+                new Response.Listener<JSONObject>() {
+
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d(TAG, "Response: Success " + response.toString());
+
+                        lastCoronaDbUpDt = now;
+
+                        handler.postDelayed(runnable, delay);
+                    }
+                },
+
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "Response: Error " + error.toString());
+
+                        handler.postDelayed(runnable, delay);
+                    }
+                }
+        );
+
+        // Access the RequestQueue through your singleton class.
+       this.requestQueue.add( jsonObjectRequest );
     }
 
     private void showColonaDetectionAlarmNotification() {
@@ -251,9 +314,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
         builder.setSmallIcon(R.drawable.corona_alarm);
-        builder.setContentTitle( "강남역 사거리 / 확진자 A / 동선 겹침");
-        builder.setContentText( "2020년 3월 24일  오후 2시 22분경 / 자가 격리 요망" );
-        builder.setContentInfo( "자가 격리 요망" );
+        builder.setContentTitle("강남역 사거리 / 확진자 A / 동선 겹침");
+        builder.setContentText("2020년 3월 24일  오후 2시 22분경 / 자가 격리 요망");
+        builder.setContentInfo("자가 격리 요망");
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }

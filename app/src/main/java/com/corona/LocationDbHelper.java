@@ -12,7 +12,7 @@ import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 15;
+    public static final int DATABASE_VERSION = 16;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static LocationDbHelper dbHelper = null;
@@ -36,24 +36,40 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
     public void onCreate(SQLiteDatabase db) {
         String sql = "";
-        sql = "CREATE TABLE gps( " +
-                " id INTEGER PRIMARY KEY AUTOINCREMENT , "
-                + " yyyy INTEGER, mm INTEGER, dd INTEGER, hh INTEGER, mi INTEGER, ss INTEGER, zz INTEGER, "
-                + " upd INTEGR, "
-                + " latitude REAL, longitude REAL" +
-                " )"
-        ;
+        sql = "CREATE TABLE gps( ";
+        sql += " id INTEGER PRIMARY KEY AUTOINCREMENT ";
+        sql += " , yyyy INTEGER, mm INTEGER, dd INTEGER, hh INTEGER, mi INTEGER, ss INTEGER, zz INTEGER ";
+        sql += " , up_dt INTEGR ";
+        sql += " , latitude REAL, longitude REAL" ;
+        sql += " )" ;
+
         db.execSQL(sql);
-        db.execSQL("CREATE INDEX gps_idx_01_yyyy ON gps( yyyy DESC, mm DESC, dd DESC, hh DESC, mi DESC, ss DESC, zz DESC ) ");
-        db.execSQL("CREATE INDEX gps_idx_02_upd ON gps( upd DESC ) ");
+        db.execSQL("CREATE INDEX gps_idx_01 ON gps( yyyy DESC, mm DESC, dd DESC, hh DESC, mi DESC, ss DESC, zz DESC ) ");
+        db.execSQL("CREATE INDEX gps_idx_02 ON gps( up_dt DESC ) ");
+
+        sql = "CREATE TABLE corona( ";
+        sql += " id INTEGER PRIMARY KEY ";
+        sql += " , up_dt INTEGER ";
+        sql += " , place VARCHAR(500), patient VARCHAR(500) ";
+        sql += " , visit_fr INTEGER, visit_to INTEGER ";
+        sql += " , latitude REAL, longitude REAL" ;
+        sql += ")";
+
+        db.execSQL( sql );
+        db.execSQL("CREATE INDEX corona_idx_01 ON corona( up_dt ) ");
+        db.execSQL("CREATE INDEX corona_idx_02 ON corona( visit_fr, visit_to ) ");
     }
 
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
-        db.execSQL("DROP INDEX IF EXISTS gps_idx_01_yyyy");
-        db.execSQL("DROP INDEX IF EXISTS gps_idx_02_upd");
-        db.execSQL("DROP TABLE IF EXISTS GPS ");
+        db.execSQL("DROP INDEX IF EXISTS gps_idx_01");
+        db.execSQL("DROP INDEX IF EXISTS gps_idx_02");
+        db.execSQL("DROP TABLE IF EXISTS gps ");
+
+        db.execSQL("DROP INDEX IF EXISTS corona_idx_01");
+        db.execSQL("DROP INDEX IF EXISTS corona_idx_02");
+        db.execSQL("DROP TABLE IF EXISTS corona ");
 
         onCreate(db);
     }
