@@ -294,7 +294,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long dd = now.get(Calendar.DAY_OF_MONTH) - 2 ; // condition for yesterday
         long up_dt = now.getTimeInMillis() - 24*60*60*1_000; // condition for yesterday
 
-        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, latitude, longitude, upd FROM gps ";
+        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, latitude, longitude, up_dt FROM gps ";
         sql += " WHERE yyyy = ? AND mm = ? AND dd > ? AND up_dt > ? " ;
         sql += " ORDER BY up_dt ASC ";
 

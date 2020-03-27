@@ -28,6 +28,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
@@ -39,9 +40,12 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -262,19 +266,18 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             up_dt = ComInterface.yyyMMdd_HHmmSS.format( new Date( coronaMaxUpDt ) ) ;
         }
 
-        JSONObject params = new JSONObject();
         try {
-            params.put("up_dt", up_dt );
-        } catch (JSONException e) {
+            url += "?up_dt=" + URLEncoder.encode(up_dt, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, params,
+        Log.d(TAG, "Response: url = " + url );
 
-                new Response.Listener<JSONObject>() {
-
+        JsonArrayRequest jsonObjectRequest = new JsonArrayRequest(Request.Method.GET, url, null,
+                new Response.Listener<JSONArray>() {
                     @Override
-                    public void onResponse(JSONObject response) {
+                    public void onResponse(JSONArray response) {
                         Log.d(TAG, "Response: Success " + response.toString());
 
                         handler.postDelayed(runnable, delay);
@@ -284,6 +287,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, "Response: Error Message " + error.getMessage());
                         Log.d(TAG, "Response: Error " + error.toString());
 
                         handler.postDelayed(runnable, delay);
@@ -292,7 +296,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         );
 
         // Access the RequestQueue through your singleton class.
-       this.requestQueue.add( jsonObjectRequest );
+        coronaDbHandlerCnt ++ ;
+        this.requestQueue.add( jsonObjectRequest );
     }
 
     private void showColonaDetectionAlarmNotification() {
