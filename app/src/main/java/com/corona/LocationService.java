@@ -1,7 +1,6 @@
 package com.corona;
 
 import android.Manifest;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.android.volley.BuildConfig;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -42,6 +43,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
 
+    int gpsInsCnt = 0 ;
+
     public LocationService() {
     }
 
@@ -60,45 +63,18 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         showNotificationAndStartForegroundService();
 
         locationCallback = new LocationCallback() {
-            int saveCnt = 0 ;
-
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 //here you get the continues location updated based on the interval defined in
                 //location request
-
-                LocationDbHelper.insertGpsLog( getApplicationContext(), locationResult.getLastLocation() );
-
-                Log.d(TAG, String.format("locationResult gps data saved[%d]: %s", saveCnt, locationResult) );
-
-                saveCnt ++ ;
+                whenLocationUpdated(locationResult);
             }
         };
 
-        this.showColonaAlarmNotification();
-    }
+        this.showColonaDetectionAlarmNotification();
 
-    private void showColonaAlarmNotification() {
-        int NOTIFICATION_ID = 888;
-        String CHANNEL_ID = "999";
-
-        // Create an Intent for the activity you want to start
-        Intent resultIntent = new Intent(this, Activity_02_Map.class);
-        // Create the TaskStackBuilder and add the intent, which inflates the back stack
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntentWithParentStack(resultIntent);
-        // Get the PendingIntent containing the entire back stack
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-        builder.setContentIntent(resultPendingIntent);
-        builder.setSmallIcon(R.drawable.corona_alarm);
-        builder.setContentTitle( "강남역 사거리 / 확진자 A / 동선 겹침");
-        builder.setContentText( "2020년 3월 24일  오후 2시 22분경 / 자가 격리 요망" );
-        builder.setContentInfo( "자가 격리 요망" );
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
+        this.getCoronaDataFromServer();
     }
 
     @Override
@@ -166,6 +142,31 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         fusedLocationClient.removeLocationUpdates(locationCallback);
     }
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d(TAG, "GoogleApi Client Connected");
+        createLocationRequest();
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d(TAG, "GoogleApi Client Suspended");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d(TAG, "GoogleApi Client Failed");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        removeLocationUpdate();
+        if (googleApiClient != null && googleApiClient.isConnected()) {
+            googleApiClient.disconnect();
+        }
+    }
+
     /**
      * This Method shows notification for ForegroundService
      * Start Foreground Service and Show Notification to user for android all version
@@ -176,7 +177,6 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         final String CHANNEL_ID = BuildConfig.APPLICATION_ID.concat("_notification_id");
         final String CHANNEL_NAME = BuildConfig.APPLICATION_ID.concat("_notification_name");
-
 
         NotificationCompat.Builder builder;
         NotificationManager notificationManager =
@@ -207,28 +207,54 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
     }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.d(TAG, "GoogleApi Client Connected");
-        createLocationRequest();
+    private void whenLocationUpdated(LocationResult locationResult) {
+        LocationDbHelper.insertGpsLog( getApplicationContext(), locationResult.getLastLocation() );
+
+        Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult) );
+
+        gpsInsCnt++ ;
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d(TAG, "GoogleApi Client Suspended");
+    private void getCoronaDataFromServer() {
+        final Handler handler = new Handler();
+        final long delay = 5*60*1_000;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                getCoronaDataFromServerImpl();
+
+                handler.postDelayed( this, delay );
+            }
+        }, 2_000 );
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(TAG, "GoogleApi Client Failed");
+    private int coronaDbHandlerCnt = 0 ;
+    private void getCoronaDataFromServerImpl() {
+        Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt) );
+
+        coronaDbHandlerCnt++ ;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        removeLocationUpdate();
-        if (googleApiClient != null && googleApiClient.isConnected()) {
-            googleApiClient.disconnect();
-        }
+    private void showColonaDetectionAlarmNotification() {
+        int NOTIFICATION_ID = 888;
+        String CHANNEL_ID = "999";
+
+        // Create an Intent for the activity you want to start
+        Intent resultIntent = new Intent(this, Activity_02_Map.class);
+        // Create the TaskStackBuilder and add the intent, which inflates the back stack
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addNextIntentWithParentStack(resultIntent);
+        // Get the PendingIntent containing the entire back stack
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setContentIntent(resultPendingIntent);
+        builder.setSmallIcon(R.drawable.corona_alarm);
+        builder.setContentTitle( "강남역 사거리 / 확진자 A / 동선 겹침");
+        builder.setContentText( "2020년 3월 24일  오후 2시 22분경 / 자가 격리 요망" );
+        builder.setContentInfo( "자가 격리 요망" );
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
+
 }
