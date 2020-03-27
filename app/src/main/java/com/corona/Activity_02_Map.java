@@ -2,7 +2,6 @@ package com.corona;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -27,8 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -49,8 +46,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
@@ -201,16 +196,26 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         String[] args = { "" + coronaMaxUpDt };
         Cursor cursor = db.rawQuery(sql, args);
 
+        long id;
+        long deleted;
+        long up_dt;
+        String place;
+        String patient;
+        long visit_fr;
+        long visit_to;
+        float latitude = 0;
+        float longitude = 0 ;
+
         while ( this.isActivityAlive() && cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndex("id"));
-            long deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
-            long up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
-            String place = cursor.getString(cursor.getColumnIndex("place"));
-            String patient = cursor.getString(cursor.getColumnIndex("patient"));
-            long visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
-            long visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
-            double latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
-            double longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
+            id = cursor.getLong(cursor.getColumnIndex("id"));
+            deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
+            up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
+            place = cursor.getString(cursor.getColumnIndex("place"));
+            patient = cursor.getString(cursor.getColumnIndex("patient"));
+            visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
+            visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
+            latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
+            longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
             SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
 
@@ -229,15 +234,20 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             markerOptions.zIndex( coronaMarkerZIndex );
 
             if( ! this.isActivityAlive()) {
+                Log.d( TAG, "activity is not alive skipped to add corona marker.");
                 return ;
             }
 
-            phoneMarker = googleMap.addMarker(markerOptions);
+            googleMap.addMarker(markerOptions);
 
             if( up_dt > this.coronaMaxUpDt ) {
                 this.coronaMaxUpDt = up_dt ;
             }
             coronaMarkerZIndex ++ ;
+        }
+
+        if( latitude > 0 && longitude > 0 ) {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(latitude, longitude)));
         }
 
         cursor.close();
@@ -328,8 +338,25 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         });
 
+        googleMap.setOnCameraMoveStartedListener( new GoogleMap.OnCameraMoveStartedListener() {
+
+            @Override
+            public void onCameraMoveStarted(int reasonCode) {
+                if (reasonCode == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+                    // I will no longer keep updating the camera location because
+                    // the user interacted with it. This is my field I check before
+                    // snapping the camera location to the latest value.
+                    lastMapMoveTime = System.currentTimeMillis();
+
+                    Log.d( TAG, "onCameraMoveStarted. lastMapMoveTime = " + lastMapMoveTime);
+                }
+            }
+        });
+
         this.startCoronaMarkerDbShowHandler();
     }
+
+    private long lastMapMoveTime = 0 ;
 
     private void whenShowCalendarClicked() {
         if( View.INVISIBLE == togglePane.getVisibility() ) {
@@ -370,7 +397,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenCameraZoomChanged() {
-
         this.showGpsDb();
 
         this.showLastGpsData( this.lastLocationResult );
@@ -378,8 +404,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenMapClick(LatLng latLng) {
-
-        Log.d( TAG, "onMapClick");
+        Log.d( TAG, "onMapClick. " );
     }
 
     private boolean isMapDetail() {
@@ -525,6 +550,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( null != phoneMarker) {
             phoneMarker.remove();
+            this.phoneMarker = null;
         }
         phoneMarkerUpdCnt += 1 ;
 
@@ -577,14 +603,22 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( firstMove ) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
+            if( 0.35 < xr || 0.4 < yr ) {
+                // animate camera when current marker is out of screen
+                googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+            }
         } else {
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            long now = System.currentTimeMillis();
+            if( now - lastMapMoveTime < 6*1000 ) {
+                Log.d( TAG, "Last click time is less than 6 seconds. Skipped moving map." );
+            } else {
+                googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                if( 0.35 < xr || 0.4 < yr ) {
+                    // animate camera when current marker is out of screen
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+                }
+            }
         }
-
-        if( 0.35 < xr || 0.4 < yr ) {
-            googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        }
-        // --animate camera when current marker is out of screen
 
         if( firstMove ) {
             firstMove = false ;
@@ -634,6 +668,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private boolean firstMove = true ;
 
+    /*
     // 핸드폰의 최근 위치를 반환한다.
     @SuppressLint("MissingPermission")
     private void getPhoneLastLocation(){
@@ -693,6 +728,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         );
     }
+     */
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
