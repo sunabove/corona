@@ -144,11 +144,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         this.hideActionBar();
 
-        this.startCoronaDbShowHandler();
+        this.startCoronaMarkerDbShowHandler();
     }
 
     private Handler coronaDbShowHandler ;
-    private void startCoronaDbShowHandler() {
+    private void startCoronaMarkerDbShowHandler() {
         if( null == this.googleMap ) {
             return ;
         }
@@ -170,7 +170,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
                 Log.d(TAG, "Running startCoronaDbShowHandler");
 
-                startCoronaDbShowImpl();
+                startCoronaMarkerDbShowImpl();
 
                 if( isActivityAlive() ) {
                     coronaDbShowHandler.postDelayed(this, ComInterface.CORONA_DB_GET_INTERVAL);
@@ -183,7 +183,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private long coronaMaxUpDt = -1 ;
     private int coronaMarkerZIndex = 1;
 
-    private void startCoronaDbShowImpl() {
+    private void startCoronaMarkerDbShowImpl() {
         LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
 
         SQLiteDatabase db = dbHelper.rdb;
@@ -328,7 +328,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         });
 
-        this.startCoronaDbShowHandler();
+        this.startCoronaMarkerDbShowHandler();
     }
 
     private void whenShowCalendarClicked() {
@@ -534,15 +534,20 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         markerOptions.position(latLng);
         markerOptions.title(String.format("현재 위치 [%04d]", phoneMarkerUpdCnt));
         markerOptions.flat(true);
+
+        if( isMapDetail ) {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_64));
+        } else {
+            if( zoom > 16.1 ) {
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_32));
+            } else {
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_03_16));
+            }
+        }
+
         markerOptions.zIndex(1_000_000);
 
         phoneMarker = googleMap.addMarker(markerOptions);
-
-        if( isMapDetail ) {
-            phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_64));
-        } else {
-            phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
-        }
 
         double gpsHeading = gpsLog.getGpsHeading( 0 );
 
@@ -669,7 +674,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                         options.position(latLng).title(String.format("현재 나의 위치 (%d)", upCnt));
 
                         phoneMarker = googleMap.addMarker(options);
-                        phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_01_32));
+                        phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_32));
 
                         phoneMarker.showInfoWindow();
 
