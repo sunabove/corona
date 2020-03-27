@@ -237,6 +237,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             markerOptions.snippet( snippet );
             markerOptions.flat(true);
             markerOptions.zIndex( coronaMarkerZIndex );
+            markerOptions.icon(BitmapDescriptorFactory.fromResource( R.drawable.map_dot_yellow ));
 
             if( 1 == deleted ) {
                 deletedIds.add( id );
@@ -257,6 +258,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             if( up_dt > this.coronaMaxUpDt ) {
                 this.coronaMaxUpDt = up_dt ;
             }
+
             coronaMarkerZIndex ++ ;
         }
 
@@ -581,7 +583,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         int mapIconRscId = R.drawable.smart_phone_icon_01_64;
         if( zoom > 18.4 ) {
             mapIconRscId = R.drawable.smart_phone_icon_01_64;
-        } else if( zoom > 16.1 ) {
+        } else if( zoom > 13 ) {
             mapIconRscId = R.drawable.smart_phone_icon_02_32;
         } else {
             mapIconRscId = R.drawable.smart_phone_icon_03_16;
