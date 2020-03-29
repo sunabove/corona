@@ -16,7 +16,7 @@ import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 19;
+    public static final int DATABASE_VERSION = 22 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static LocationDbHelper dbHelper = null;
@@ -43,7 +43,9 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
         sql = "CREATE TABLE corona( ";
         sql += "   id INTEGER PRIMARY KEY ";
-        sql += " , deleted INT2 ";
+        sql += " , deleted INT2 NOT NULL DEFAUTL 0 ";
+        sql += " , checked INT2 NOT NULL DEFAULT 0 ";
+        sql += " , notification INT2 NOT NULL DEFAULT 0";
         sql += " , up_dt INTEGER ";
         sql += " , place VARCHAR(500), patient VARCHAR(500) ";
         sql += " , visit_fr INTEGER, visit_to INTEGER ";
@@ -51,13 +53,13 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         sql += ")";
 
         db.execSQL( sql );
-        db.execSQL("CREATE INDEX corona_idx_01 ON corona( deleted, up_dt ) ");
-        db.execSQL("CREATE INDEX corona_idx_02 ON corona( deleted, visit_fr, visit_to, y, x ) ");
+        db.execSQL( "CREATE INDEX corona_idx_01 ON corona( deleted, checked, notification, up_dt ) ");
+        db.execSQL( "CREATE INDEX corona_idx_02 ON corona( deleted, checked, visit_fr, visit_to, y, x ) ");
 
         sql = "CREATE TABLE gps( ";
         sql += " id INTEGER PRIMARY KEY AUTOINCREMENT ";
         sql += " , yyyy INTEGER, mm INTEGER, dd INTEGER, hh INTEGER, mi INTEGER, ss INTEGER, zz INTEGER ";
-        sql += " , up_dt INTEGR ";
+        sql += " , visit_tm INTEGR ";
         sql += " , latitude REAL, longitude REAL, y REAL, x REAL" ;
         sql += " , corona_id INTEGER ";
         sql += " , FOREIGN KEY( corona_id ) REFERENCES corona( id ) ";
@@ -65,7 +67,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
         db.execSQL(sql);
         db.execSQL("CREATE INDEX gps_idx_01 ON gps( yyyy DESC, mm DESC, dd DESC, hh DESC, mi DESC, ss DESC, zz DESC ) ");
-        db.execSQL("CREATE INDEX gps_idx_02 ON gps( up_dt, y, x ) ");
+        db.execSQL("CREATE INDEX gps_idx_02 ON gps( visit_tm, y, x ) ");
 
     }
 
@@ -114,9 +116,9 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         values.put("ss", ss);
         values.put("zz", zz);
 
-        long up_dt = now.getTimeInMillis() ;
+        long visit_tm = location.getTime() ;
 
-        values.put( "up_dt", up_dt );
+        values.put( "visit_tm", visit_tm );
 
         // Insert the new row, returning the primary key value of the new row
         SQLiteDatabase db = dbHelper.wdb;

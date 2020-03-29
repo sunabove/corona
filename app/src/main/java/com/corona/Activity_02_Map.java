@@ -437,13 +437,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long yyyy = now.get(Calendar.YEAR);
         long mm = now.get(Calendar.MONTH) + 1; // Note: zero based!
         long dd = now.get(Calendar.DAY_OF_MONTH) - 2 ; // condition for yesterday
-        long up_dt = now.getTimeInMillis() - 24*60*60*1_000; // condition for yesterday
+        long visit_tm = now.getTimeInMillis() - 24*60*60*1_000; // condition for yesterday
 
-        String sql = "SELECT id, yyyy, mm, dd, hh, mi, ss, zz, latitude, longitude, up_dt FROM gps ";
-        sql += " WHERE yyyy = ? AND mm = ? AND dd > ? AND up_dt > ? " ;
-        sql += " ORDER BY up_dt ASC ";
+        String sql = "SELECT id, latitude, longitude, visit_tm FROM gps ";
+        sql += " WHERE yyyy = ? AND mm = ? AND dd > ? AND visit_tm > ? " ;
+        sql += " ORDER BY visit_tm ASC ";
 
-        String[] args = { "" + yyyy, "" + mm, "" + dd, "" + up_dt };
+        String[] args = { "" + yyyy, "" + mm, "" + dd, "" + visit_tm };
         Cursor cursor = db.rawQuery(sql, args);
 
         boolean  isMapDetail = this.isMapDetail() ;
@@ -458,26 +458,21 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         polyOptions.pattern( pattern );
 
         int cnt = 0 ;
+        long id;
+        double latitude, longitude;
+        String dateTime;
+        SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS;
 
         while (cursor.moveToNext()) {
-            long id = cursor.getLong(cursor.getColumnIndex("id"));
-            double latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
-            double longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
+            id = cursor.getLong(cursor.getColumnIndex("id"));
+            latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
+            longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-            yyyy = cursor.getLong(cursor.getColumnIndex("yyyy"));
-            mm = cursor.getLong(cursor.getColumnIndex("mm"));
-            dd = cursor.getLong(cursor.getColumnIndex("dd"));
+            visit_tm = cursor.getLong(cursor.getColumnIndex("visit_tm"));
 
-            long hh = cursor.getLong(cursor.getColumnIndex("hh"));
-            long mi = cursor.getLong(cursor.getColumnIndex("mi"));
-            long ss = cursor.getLong(cursor.getColumnIndex("ss"));
+            dateTime = df.format( new Date( visit_tm ) ) ;
 
-            long zz = cursor.getLong(cursor.getColumnIndex("zz"));
-
-            String dateTime = "%04d-%02d-%02d %02d:%02d:%02d %d";
-            dateTime = String.format(dateTime, yyyy, mm, dd, hh, mi, ss, zz);
-
-            String info = "Gps Log on DB: id = %d, lon = %f, lat = %f, upd = %s ";
+            String info = "Gps Log on DB: id = %d, lon = %f, lat = %f, visit_tm = %s ";
             info = String.format(info, id, longitude, latitude, dateTime);
             //Log.d(TAG, info);
 
