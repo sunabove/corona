@@ -214,6 +214,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
         GoogleMap googleMap = this.googleMap;
         ArrayList<Long> deletedIds = new ArrayList<>();
+        final long now = System.currentTimeMillis();
 
         while ( this.isActivityAlive() && cursor.moveToNext()) {
             id = cursor.getLong(cursor.getColumnIndex("id"));
@@ -233,6 +234,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             String info = String.format("corona marker title = %s, latitude = %f, longitude = %f", title, latitude, longitude ) ;
             Log.d( TAG, info );
+            int rscId = R.drawable.map_dot_yellow_64 ;
+            if( now - up_dt < ComInterface.CORONA_DB_GET_INTERVAL ) {
+                rscId = R.drawable.map_dot_pink_64 ;
+            }
 
             LatLng latLng = new LatLng( latitude, longitude );
             MarkerOptions markerOptions = new MarkerOptions();
@@ -240,7 +245,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             markerOptions.title( title );
             markerOptions.snippet( snippet );
             markerOptions.flat(true);
-            markerOptions.icon(BitmapDescriptorFactory.fromResource( R.drawable.map_dot_yellow_64 ));
+            markerOptions.icon(BitmapDescriptorFactory.fromResource( rscId ));
             markerOptions.zIndex( coronaMarkerZIndex );
 
             if( 1 == deleted ) {
