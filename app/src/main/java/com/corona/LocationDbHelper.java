@@ -46,9 +46,9 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
         sql = "CREATE TABLE corona( ";
         sql += "   id INTEGER PRIMARY KEY ";
-        sql += " , deleted INT2 NOT NULL DEFAUTL 0 ";
+        sql += " , deleted INT2 NOT NULL DEFAULT 0 ";
         sql += " , checked INT2 NOT NULL DEFAULT 0 ";
-        sql += " , notification INT2 NOT NULL DEFAULT 0";
+        sql += " , notification INT2 NOT NULL DEFAULT 0 ";
         sql += " , up_dt INTEGER ";
         sql += " , place VARCHAR(500), patient VARCHAR(500) ";
         sql += " , visit_fr INTEGER, visit_to INTEGER ";
