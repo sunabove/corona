@@ -93,7 +93,68 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public void insertGpsLog(Context context, Location location) {
+    public void checkCoronaInfection() {
+        // Insert the new row, returning the primary key value of the new row
+
+        long prevCheckedCnt = 0 ;
+        if( true ) {
+            String sql = " SELECT COUNT( id ) FROM corona ";
+            sql += " WHERE checked = 1 ";
+            String [] args = {};
+
+            SQLiteDatabase db = this.wdb;
+
+            Cursor cursor = db.rawQuery( sql, args );
+            while( cursor.moveToNext() ) {
+                prevCheckedCnt = cursor.getLong( 0 );
+            }
+            cursor.close();
+        }
+
+        if( true ) {
+            long visit_gap = 30 * 60 * 1_000;
+            long dist_gap = 31;
+            long distum_gap = dist_gap * dist_gap;
+
+            String sql = "UPDATE corona SET ";
+            sql += " checked = 1 ";
+            sql += " WHERE checked = 0 ";
+            sql += " AND id IN ( ";
+            sql += "    SELECT DISTINCT c.id FROM corona c , gps g ";
+            sql += "    WHERE c.deleted = 1 AND c.checked = 0 ";
+            sql += "    AND g.visit_tm IN ( c.visit_fr - ? , c.visit_to + ? ) ";
+            sql += "    AND g.y - c.y < ? AND g.x - c.x < ? ";
+            sql += "    AND (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) < ? ";
+            sql += " ) ";
+
+            SQLiteDatabase db = this.wdb;
+            String[] args = {"" + visit_gap, "" + visit_gap, "" + dist_gap, "" + dist_gap, "" + distum_gap, "" + distum_gap};
+            db.execSQL(sql, args);
+
+            Log.d( TAG, "checked corona infection." );
+        }
+
+        long currCheckedCnt = 0 ;
+
+        if( true ) {
+            String sql = " SELECT COUNT( id ) FROM corona ";
+            sql += " WHERE checked = 1 ";
+            String [] args = {};
+
+            SQLiteDatabase db = this.wdb;
+
+            Cursor cursor = db.rawQuery( sql, args );
+            while( cursor.moveToNext() ) {
+                currCheckedCnt = cursor.getLong( 0 );
+            }
+            cursor.close();
+        }
+
+        Log.d( TAG, "prevCheckCnt = " + prevCheckedCnt + ", currCheckCnt = " + currCheckedCnt );
+
+    }
+
+    public void insertGpsLog( Location location) {
         ContentValues values = new ContentValues();
         double latitude = location.getLatitude();;
         double longitude = location.getLongitude();;

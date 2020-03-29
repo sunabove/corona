@@ -233,11 +233,13 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             return;
         }
 
-        locationDbHelper.insertGpsLog(getApplicationContext(), locationResult.getLastLocation());
+        locationDbHelper.insertGpsLog( locationResult.getLastLocation());
 
         Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult));
 
         gpsInsCnt++;
+
+        locationDbHelper.checkCoronaInfection();
     }
 
     private void getCoronaDataFromServer() {
