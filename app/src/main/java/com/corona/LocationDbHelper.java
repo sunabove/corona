@@ -17,7 +17,7 @@ import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 22 ;
+    public static final int DATABASE_VERSION = 23 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static LocationDbHelper dbHelper = null;
@@ -48,6 +48,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         sql += "   id INTEGER PRIMARY KEY ";
         sql += " , deleted INT2 NOT NULL DEFAULT 0 ";
         sql += " , checked INT2 NOT NULL DEFAULT 0 ";
+        sql += " , checked_tm INTEGER ";
         sql += " , notification INT2 NOT NULL DEFAULT 0 ";
         sql += " , up_dt INTEGER ";
         sql += " , place VARCHAR(500), patient VARCHAR(500) ";
@@ -112,12 +113,14 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         }
 
         if( true ) {
-            long visit_gap = 30 * 60 * 1_000;
-            long dist_gap = 31;
-            long distum_gap = dist_gap * dist_gap;
+            String checked_tm   = "" + System.currentTimeMillis();
+            String visit_gap    = "" + ( 30 * 60 * 1_000 );
+            String dist_gap     = "" + 31;
+            String distum_gap   = "" + (31*31);
 
             String sql = "UPDATE corona SET ";
             sql += " checked = 1 ";
+            sql += " , checked_tm = ? ";
             sql += " WHERE checked = 0 ";
             sql += " AND id IN ( ";
             sql += "    SELECT DISTINCT c.id FROM corona c , gps g ";
@@ -128,7 +131,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
             sql += " ) ";
 
             SQLiteDatabase db = this.wdb;
-            String[] args = {"" + visit_gap, "" + visit_gap, "" + dist_gap, "" + dist_gap, "" + distum_gap, "" + distum_gap};
+            String[] args = { checked_tm, visit_gap, visit_gap,  dist_gap, dist_gap, distum_gap };
             db.execSQL(sql, args);
 
             Log.d( TAG, "checked corona infection." );
