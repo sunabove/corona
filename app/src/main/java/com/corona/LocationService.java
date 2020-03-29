@@ -54,6 +54,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
 
+    private Proj projection = Proj.projection();
+    private LocationDbHelper locationDbHelper;
+
     int gpsInsCnt = 0;
 
     public LocationService() {
@@ -70,6 +73,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         super.onCreate();
 
         this.requestQueue = Volley.newRequestQueue(this);
+        this.locationDbHelper = LocationDbHelper.getLocationDbHelper( this );
 
         this.buildGoogleApiClient();
 
@@ -229,7 +233,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             return;
         }
 
-        LocationDbHelper.insertGpsLog(getApplicationContext(), locationResult.getLastLocation());
+        locationDbHelper.insertGpsLog(getApplicationContext(), locationResult.getLastLocation());
 
         Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult));
 

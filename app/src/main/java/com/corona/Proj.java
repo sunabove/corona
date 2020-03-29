@@ -9,7 +9,7 @@ import org.locationtech.proj4j.CRSFactory;
 import org.locationtech.proj4j.CoordinateReferenceSystem;
 import org.locationtech.proj4j.ProjCoordinate;
 
-public class Projection implements ComInterface {
+public class Proj implements ComInterface {
 
     private final CRSFactory factory = new CRSFactory();
     private final String wgs84 = "EPSG:4326" ;
@@ -19,13 +19,13 @@ public class Projection implements ComInterface {
 
     private final BasicCoordinateTransform transform = new BasicCoordinateTransform(srcCrs, dstCrs);
 
-    private static final Projection projection = new Projection();
+    private static final Proj projection = new Proj();
 
-    public static Projection projection() {
+    public static Proj projection() {
         return projection;
     }
 
-    private Projection() {
+    private Proj() {
         // do nothing.
     }
 

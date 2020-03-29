@@ -11,6 +11,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.locationtech.proj4j.ProjCoordinate;
 
 import java.util.Calendar;
 
@@ -23,6 +24,8 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // Gets the data repository in write mode
     public SQLiteDatabase wdb;
     public SQLiteDatabase rdb;
+
+    private Proj projection = Proj.projection();
 
     public static LocationDbHelper getLocationDbHelper( Context context ) {
         if (null == dbHelper) {
@@ -90,13 +93,17 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public static void insertGpsLog(Context context, Location location) {
-        LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
-
-        // Create a new map of values, where column names are the keys
+    public void insertGpsLog(Context context, Location location) {
         ContentValues values = new ContentValues();
-        values.put("latitude", location.getLatitude());
-        values.put("longitude", location.getLongitude());
+        double latitude = location.getLatitude();;
+        double longitude = location.getLongitude();;
+        ProjCoordinate projCoord = this.projection.convertToUtmK( latitude, longitude );
+
+        values.put( "latitude", latitude );
+        values.put( "longitude", longitude );
+
+        values.put( "y", projCoord.y );
+        values.put( "x", projCoord.x );
 
         Calendar now = Calendar.getInstance();
 
@@ -121,7 +128,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         values.put( "visit_tm", visit_tm );
 
         // Insert the new row, returning the primary key value of the new row
-        SQLiteDatabase db = dbHelper.wdb;
+        SQLiteDatabase db = this.wdb;
 
         long newRowId = db.insert("gps", null, values);
     }
@@ -161,6 +168,8 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
                 double latitude = geom.getDouble( "lat" );
                 double longitude = geom.getDouble( "lon" );
 
+                ProjCoordinate projCoord = this.projection.convertToUtmK( latitude, longitude );
+
                 String info = "[%d] upDt: %s, id=%s, place = %s, patient, %s, deleted = %s, latitude = %s, longitude = %s, visitFr = %s, visitTo = %s" ;
                 info = String.format( info, i, "" + id, "" + upDt, place, patient, "" + deleted, latitude, longitude, "" + visitFr, "" + visitTo );
 
@@ -175,6 +184,8 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
                 values.put("visit_to", visitTo );
                 values.put("latitude", latitude );
                 values.put("longitude", longitude );
+                values.put("y", projCoord.y );
+                values.put("x", projCoord.x );
 
                 long newRowId = db.replace("corona", null, values);
 

@@ -87,6 +87,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private LinearLayout togglePane;
     private ImageButton hidePaneBtn ;
 
+    private Proj projection = Proj.projection();
+
     @Override
     public final int getLayoutId() {
         return R.layout.activity_02_map;
