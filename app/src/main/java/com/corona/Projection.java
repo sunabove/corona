@@ -22,12 +22,12 @@ public class Projection {
     }
 
     public static ProjCoordinate convertToUtmK(double latitude, double longitude) {
-        ProjCoordinate srcCoord = new ProjCoordinate( longitude, latitude ) ;
-        ProjCoordinate dstCoord = new ProjCoordinate();
+        ProjCoordinate src = new ProjCoordinate( longitude, latitude ) ;
+        ProjCoordinate dst = new ProjCoordinate();
 
-        transform.transform(srcCoord, dstCoord);
-        System.out.println(dstCoord.x + "," + dstCoord.y);
+        transform.transform( src, dst);
+        System.out.println( "src x = " + src.x + ", y = " + src.y + ", dst x = " + dst.x + ", y = " + dst.y);
 
-        return dstCoord;
+        return dst;
     }
 }
