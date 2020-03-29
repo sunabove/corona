@@ -70,6 +70,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private GpsLog gpsLog = new GpsLog();
     private LatLng lastGpsLatLng ;
 
+    private long coronaMaxUpDt = -1 ;
+    private int coronaMarkerZIndex = 1;
+    private HashMap<Long, Marker> coronaMarkers = new HashMap<>();
+    private Handler coronaDbShowHandler ;
+
     private EditText status ;
     private TextView mapInfo ;
     private ImageView gpsLogo;
@@ -143,7 +148,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.startCoronaMarkerDbShowHandler();
     }
 
-    private Handler coronaDbShowHandler ;
     private void startCoronaMarkerDbShowHandler() {
         if( null == this.googleMap ) {
             return ;
@@ -169,15 +173,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 startCoronaMarkerDbShowImpl();
 
                 if( isActivityAlive() ) {
-                    coronaDbShowHandler.postDelayed(this, ComInterface.CORONA_DB_GET_INTERVAL);
+                    final long delay = coronaMarkers.size() < 1 ? 5_000 : ComInterface.CORONA_DB_GET_INTERVAL ;
+                    coronaDbShowHandler.postDelayed(this, delay );
                 }
             }
         }, 1_000);
 
     }
-
-    private long coronaMaxUpDt = -1 ;
-    private int coronaMarkerZIndex = 1;
 
     private void startCoronaMarkerDbShowImpl() {
         LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
@@ -271,8 +273,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     }
     // -- startCoronaDbShowImpl
-
-    private HashMap<Long, Marker> coronaMarkers = new HashMap<>();
 
     @Override
     protected void onPause() {
