@@ -3,6 +3,7 @@ package com.corona;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -27,6 +28,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -47,6 +50,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.text.SimpleDateFormat;
@@ -381,11 +386,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        if( false ) {
-            this.googleMap.addMarker(new MarkerOptions().position(new LatLng(37.5866, 126.97)).title("청와대"));
-        }
-
         Float lat = sharedPref.getFloat("lastPhoneLat", 37.5866f );
         Float lng = sharedPref.getFloat("lastPhoneLng", 126.97f );
 
@@ -410,6 +410,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         if( valid ) { // location updater
+            ///
             LocationRequest locationRequest = LocationService.createLocationRequest();
 
             LocationCallback locationCallback = new LocationCallback() {
@@ -417,17 +418,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 @Override
                 public void onLocationResult(LocationResult locationResult) {
                     super.onLocationResult(locationResult);
-                    Log.d(TAG, String.format("locationResult update[%d]: %s", gpsUpdCnt, locationResult));
 
-                    lastLocationResult = locationResult ;
-
-                    animateGpsLogoRotate();
-
-                    showLastGpsData( locationResult );
-
-                    showCoronaMarkerFromDb();
-
-                    gpsUpdCnt ++;
+                    whenLocationUpdate( locationResult );
                 }
             };
 
@@ -471,6 +463,24 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 return false;
             }
         });
+
+        if( valid ) {
+            this.getPhoneLastLocation();
+        }
+    }
+
+    private void whenLocationUpdate( LocationResult locationResult ) {
+        Log.d(TAG, String.format("locationResult update[%d]: %s", gpsUpdCnt, locationResult));
+
+        lastLocationResult = locationResult ;
+
+        animateGpsLogoRotate();
+
+        showCoronaMarkerFromDb();
+
+        showLastGpsData( locationResult );
+
+        gpsUpdCnt ++;
     }
 
     private long lastMapMoveTime = 0 ;
@@ -604,15 +614,32 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void showLastGpsData(LocationResult locationResult ) {
+        if (null == locationResult) {
+            return;
+        }
 
-        if( null == locationResult ) {
+        Location location = locationResult.getLastLocation();
+
+        this.showLastGpsData( location );
+    }
+
+    private void showLastGpsData(Location location) {
+
+        if( null == location ) {
             return;
         }
 
         boolean isMapDetail = this.isMapDetail();
 
-        Location location = locationResult.getLastLocation();
         LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
+
+        // 최신 위치 저장
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putFloat("lastPhoneLat", (float) latLng.latitude);
+        editor.putFloat("lastPhoneLng", (float) latLng.longitude);
+        editor.commit();
+        // -- 최신 위치 저장
+
         GpsLog gpsLog = this.gpsLog ;
 
         if( 100_000 < gpsLog.size() ) {
@@ -653,10 +680,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         gpsPathPoly = googleMap.addPolyline( polyOptions );
         gpsPathPoly.setZIndex( 4 );
 
-        this.showCurrentPositionMarker( locationResult );
+        this.showCurrentPositionMarker( location );
     }
 
-    private void showCurrentPositionMarker(LocationResult locationResult ) {
+    private void showCurrentPositionMarker( Location location ) {
         float zoom = this.getZoom();
         boolean isMapDetail = this.isMapDetail();
 
@@ -666,7 +693,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
         phoneMarkerUpdCnt += 1 ;
 
-        Location location = locationResult.getLastLocation();
         LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
@@ -780,67 +806,22 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private boolean firstMove = true ;
 
-    /*
     // 핸드폰의 최근 위치를 반환한다.
     @SuppressLint("MissingPermission")
     private void getPhoneLastLocation(){
-        boolean valid = checkPermissions();
-
-        if( ! valid ) {
-            requestPermissions();
-        } else {
-            valid = valid && isLocationEnabled();
-
-            if( ! valid ) {
-                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        }
-
-        if( ! valid ) {
-            return ;
-        }
 
         fusedLocationClient.getLastLocation().addOnCompleteListener(
             new OnCompleteListener<Location>() {
-                int upCnt = 0 ;
                 @Override
                 public void onComplete(@NonNull Task<Location> task) {
                     Location location = task.getResult();
-                    if (location != null) {
-                        if (null != phoneMarker) {
-                            phoneMarker.remove();
-                        }
-
-                        upCnt ++ ;
-
-                        LatLng latLng = new LatLng( location.getLatitude(), location.getLongitude() );
-
-                        MarkerOptions options = new MarkerOptions();
-                        options.position(latLng).title(String.format("현재 나의 위치 (%d)", upCnt));
-
-                        phoneMarker = googleMap.addMarker(options);
-                        phoneMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.smart_phone_icon_02_32));
-
-                        phoneMarker.showInfoWindow();
-
-                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
-
-                        status.setText("지도를 핸드폰 현재 위치로 이동하였습니다.");
-
-                        // 최신 위치 저장
-                        SharedPreferences.Editor editor = sharedPref.edit();
-                        editor.putFloat("lastPhoneLat", (float) latLng.latitude);
-                        editor.putFloat("lastPhoneLng", (float) latLng.longitude);
-                        editor.commit();
-                        // -- 최신 위치 저장
+                    if( null != location ) {
+                        showLastGpsData( location );
                     }
                 }
             }
         );
     }
-     */
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
