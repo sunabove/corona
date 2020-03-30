@@ -350,7 +350,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             String[] args = { };
             Cursor cursor = db.rawQuery(sql, args);
 
-            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS;
+            SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm");
 
             while (cursor.moveToNext()) {
                 Corona corona = new Corona();

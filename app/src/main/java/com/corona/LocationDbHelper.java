@@ -94,12 +94,12 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public long checkCoronaInfection() {
+    public void checkCoronaInfection() {
         // Insert the new row, returning the primary key value of the new row
 
-        long prevCheckedCnt = 0 ;
-
         if( true ) {
+            long prevCheckedCnt = 0 ;
+
             String sql = " SELECT COUNT( id ) FROM corona ";
             sql += " WHERE checked = 1 ";
             String [] args = {};
@@ -111,38 +111,43 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
                 prevCheckedCnt = cursor.getLong( 0 );
             }
             cursor.close();
+
+            Log.d( TAG, "prevCheckedCnt = " + prevCheckedCnt );
         }
 
-        final long now = System.currentTimeMillis() ;
-
         if( true ) {
-            String checked_tm   = "" + now ;
+            String checked_tm   = "" + System.currentTimeMillis() ;
             String visit_gap    = "" + ( 120 * 60 * 1_000 );
             String dist_gap     = "" + 31;
             String distum_gap   = "" + (31*31);
 
-            String sql = "UPDATE corona SET ";
-            sql += " checked = 1 ";
-            sql += " , checked_tm = ? ";
-            sql += " WHERE checked = 0 AND deleted = 0 ";
-            sql += " AND id IN ( ";
-            sql += "    SELECT DISTINCT c.id FROM corona c , gps g ";
-            sql += "    WHERE c.deleted = 0 AND c.checked = 0 ";
-            sql += "    AND g.visit_tm BETWEEN c.visit_fr - ? AND c.visit_to + ? ";
-            sql += "    AND ABS( g.y - c.y ) < ? AND ABS( g.x - c.x ) < ? ";
-            sql += "    AND (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) < ? ";
-            sql += " ) ";
+            String table = "corona";
+
+            String whereClause = "";
+            whereClause += " checked = 0 AND deleted = 0 ";
+            whereClause += " AND id IN ( ";
+            whereClause += "    SELECT DISTINCT c.id FROM corona c , gps g ";
+            whereClause += "    WHERE c.deleted = 0 AND c.checked = 0 ";
+            whereClause += "    AND g.visit_tm BETWEEN c.visit_fr - ? AND c.visit_to + ? ";
+            whereClause += "    AND ABS( g.y - c.y ) < ? AND ABS( g.x - c.x ) < ? ";
+            whereClause += "    AND (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) < ? ";
+            whereClause += " ) ";
+
+            ContentValues values = new ContentValues();
+            values.put( "checked" , 1 );
+            values.put( "checked_tm" , checked_tm );
 
             SQLiteDatabase db = this.wdb;
-            String[] args = { checked_tm, visit_gap, visit_gap, dist_gap, dist_gap, distum_gap };
-            db.execSQL(sql, args);
+            String[] args = { visit_gap, visit_gap, dist_gap, dist_gap, distum_gap };
 
-            Log.d( TAG, "checked corona infection." );
+            int updCnt = db.update(table, values, whereClause, args);
+
+            Log.d( TAG, "checked corona infection. updCnt = " + updCnt );
         }
 
-        long currCheckedCnt = 0 ;
-
         if( true ) {
+            long currCheckedCnt = 0 ;
+
             String sql = " SELECT COUNT( id ) FROM corona ";
             sql += " WHERE checked = 1 ";
             String [] args = {};
@@ -154,11 +159,9 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
                 currCheckedCnt = cursor.getLong( 0 );
             }
             cursor.close();
+
+            Log.d( TAG, "currCheckCnt = " + currCheckedCnt );
         }
-
-        Log.d( TAG, "prevCheckCnt = " + prevCheckedCnt + ", currCheckCnt = " + currCheckedCnt );
-
-        return now ;
     }
 
     public void insertGpsLog( Location location) {
