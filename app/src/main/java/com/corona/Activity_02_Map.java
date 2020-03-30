@@ -195,7 +195,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
         sql += " WHERE up_dt > ? " ;
-        sql += " ORDER BY up_dt ASC" ;
+        sql += " ORDER BY up_dt ASC " ;
         ;
 
         String[] args = { "" + coronaMaxUpDt };
@@ -210,6 +210,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long visit_to;
         float latitude = 0;
         float longitude = 0 ;
+        String title, snippet, info ;
+        String up_dt_str ;
+        SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
 
         HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
         GoogleMap googleMap = this.googleMap;
@@ -227,13 +230,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
             longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
+            title = String.format("[%d] %s / %s", id, place, patient );
+            snippet = String.format( "%s ~ %s", df.format( new Date( visit_fr) ) , df.format( new Date( visit_to ) ) );
+            up_dt_str = df.format( new Date( up_dt ) ) ;
 
-            String title = String.format("[%d] %s / %s", id, place, patient );
-            String snippet = String.format( "%s ~ %s", df.format( new Date( visit_fr) ) , df.format( new Date( visit_to ) ) );
-
-            String info = String.format("corona marker title = %s, latitude = %f, longitude = %f", title, latitude, longitude ) ;
+            info = String.format("corona marker title = %s, latitude = %f, longitude = %f, up_dt = %s", title, latitude, longitude, up_dt_str ) ;
             Log.d( TAG, info );
+
             int rscId = R.drawable.map_dot_yellow_64 ;
             if( now - up_dt < ComInterface.CORONA_DB_GET_INTERVAL ) {
                 rscId = R.drawable.map_dot_pink_64 ;
