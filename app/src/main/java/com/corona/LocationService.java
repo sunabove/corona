@@ -6,9 +6,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,12 +40,18 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 
 public class LocationService extends Service implements ComInterface, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -89,9 +98,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             }
         };
 
-        this.showColonaDetectionAlarmNotification();
+        //this.showColonaDetectionAlarmNotificationImpl();
 
-        this.getCoronaDataFromServer();
+        //this.getCoronaDataFromServer();
     }
 
     @Override
@@ -233,15 +242,16 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             return;
         }
 
-        locationDbHelper.insertGpsLog( locationResult.getLastLocation());
+        this.locationDbHelper.insertGpsLog( locationResult.getLastLocation());
 
         Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult));
 
-        gpsInsCnt++;
+        this.gpsInsCnt++;
 
-        locationDbHelper.checkCoronaInfection();
+        this.getCoronaDataFromServerImpl();
     }
 
+    /*
     private void getCoronaDataFromServer() {
         final long delay = CORONA_DB_GET_INTERVAL;
 
@@ -249,17 +259,18 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                getCoronaDataFromServerImpl( handler, this , delay);
+                getCoronaDataFromServerImpl( );
+                //handler.postDelayed( this, delay);
             }
         };
 
         handler.postDelayed( runnable, 2_000);
-    }
+    }*/
 
     private int coronaDbHandlerCnt = 0;
     protected RequestQueue requestQueue ;
 
-    private void getCoronaDataFromServerImpl(final Handler handler, final Runnable runnable, final long delay) {
+    private void getCoronaDataFromServerImpl( ) {
         Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt));
 
         String url = "http://sunabove.iptime.org:8080/corona_map-1/corona/data.json";
@@ -286,10 +297,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                     @Override
                     public void onResponse(JSONArray response) {
                         Log.d(TAG, "Response: Success " + response.toString());
-
                         whenCoronaDbReceived( response );
 
-                        handler.postDelayed(runnable, delay);
+                        locationDbHelper.checkCoronaInfection();
+                        showCoronaInfectionAlarmNotifications( );
                     }
                 },
 
@@ -299,7 +310,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                         Log.d(TAG, "Response: Error Message " + error.getMessage());
                         Log.d(TAG, "Response: Error " + error.toString());
 
-                        handler.postDelayed(runnable, delay);
+                        locationDbHelper.checkCoronaInfection();
+                        showCoronaInfectionAlarmNotifications( );
                     }
                 }
         );
@@ -307,6 +319,86 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         // Access the RequestQueue through your singleton class.
         coronaDbHandlerCnt ++ ;
         this.requestQueue.add( jsonObjectRequest );
+    }
+
+    class Corona {
+        long id;
+        long deleted, checked, notification ;
+        long up_dt;
+        String place;
+        String patient;
+        long visit_fr;
+        long visit_to;
+        float latitude = 0;
+        float longitude = 0 ;
+        String title, text, content ;
+        String up_dt_str ;
+    }
+
+    private void showCoronaInfectionAlarmNotifications( ) {
+
+        if( true ) {
+            SQLiteDatabase db = this.locationDbHelper.wdb;
+            String sql = "";
+            sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to ";
+            sql += " , latitude, longitude ";
+            sql += " FROM corona ";
+            sql += " WHERE deleted = 0 AND checked = 1 AND notification = 0 ";
+            sql += " ORDER BY up_dt ASC ";
+            ;
+
+            String[] args = { };
+            Cursor cursor = db.rawQuery(sql, args);
+
+            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS;
+
+            while (cursor.moveToNext()) {
+                Corona corona = new Corona();
+                corona.id = cursor.getLong(cursor.getColumnIndex("id"));
+
+                corona.deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
+                corona.checked = cursor.getLong(cursor.getColumnIndex("checked"));
+                corona.notification = cursor.getLong(cursor.getColumnIndex("notification"));
+
+                corona.up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
+                corona.place = cursor.getString(cursor.getColumnIndex("place"));
+                corona.patient = cursor.getString(cursor.getColumnIndex("patient"));
+
+                corona.visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
+                corona.visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
+
+                corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
+                corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
+
+                corona.title = String.format("[%d] %s / %s / 동선 겹침", corona.id, corona.place, corona.patient);
+                corona.text = String.format("%s ~ %s / 자가 격리 요망", df.format(new Date(corona.visit_fr)), df.format(new Date(corona.visit_to)));
+                corona.content = "동선 겹침 / 자가 격리 요망";
+
+                corona.up_dt_str = df.format(new Date(corona.up_dt));
+
+                String info = String.format("corona notification notification = %d, title = %s, text = %s, latitude = %f, longitude = %f, up_dt = %s",
+                        corona.notification, corona.title, corona.text, corona.latitude, corona.longitude, corona.up_dt_str);
+                Log.d(TAG, info);
+
+                this.showColonaDetectionAlarmNotificationImpl(corona);
+
+                if( true ) {
+                    String table = "corona" ;
+                    String whereClause =  " id = ? ";
+
+                    ContentValues values = new ContentValues();
+                    values.put( "notification", 1 );
+
+                    args = new String[] { "" + corona.id };
+
+                    int updCnt = db.update( table , values, whereClause, args );
+
+                    Log.d( TAG, "notification updCnt = " + updCnt );
+                }
+            }
+
+            cursor.close();
+        }
     }
 
     private void whenCoronaDbReceived(JSONArray response) {
@@ -317,7 +409,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
     }
 
-    private void showColonaDetectionAlarmNotification() {
+    private void showColonaDetectionAlarmNotificationImpl( Corona corona) {
         int NOTIFICATION_ID = 888;
         String CHANNEL_ID = "999";
 
@@ -332,9 +424,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
         builder.setSmallIcon(R.drawable.corona_alarm);
-        builder.setContentTitle("강남역 사거리 / 확진자 A / 동선 겹침");
-        builder.setContentText("2020년 3월 24일  오후 2시 22분경 / 자가 격리 요망");
-        builder.setContentInfo("자가 격리 요망");
+        builder.setContentTitle( corona.title );
+        builder.setContentText( corona.text );
+        builder.setContentInfo( corona.content );
+
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }

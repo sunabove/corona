@@ -38,7 +38,7 @@ public class Proj implements ComInterface {
         ProjCoordinate dst = new ProjCoordinate();
 
         transform.transform( src, dst);
-        Log.d( TAG, "projection src x = " + src.x + ", y = " + src.y + ", dst x = " + dst.x + ", y = " + dst.y);
+        //Log.d( TAG, "projection src x = " + src.x + ", y = " + src.y + ", dst x = " + dst.x + ", y = " + dst.y);
 
         return dst;
     }

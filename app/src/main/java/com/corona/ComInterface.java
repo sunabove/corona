@@ -39,7 +39,7 @@ public interface ComInterface {
 
     public static final SimpleDateFormat yyyMMdd_HHmmSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public static final long CORONA_DB_GET_INTERVAL = 5*60*1_000;
+    public static final long CORONA_DB_GET_INTERVAL = 1*60*1_000;
     //public static final long CORONA_DB_GET_INTERVAL = 10*1_000;
 
 }

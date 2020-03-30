@@ -146,10 +146,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Log.v( TAG, "onResume");
 
         this.hideActionBar();
-
-        this.startCoronaMarkerDbShowHandler();
     }
 
+    /*
     private void startCoronaMarkerDbShowHandler() {
         if( null == this.googleMap ) {
             return ;
@@ -181,9 +180,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         }, 1_000);
 
-    }
+    }*/
 
-    private void startCoronaMarkerDbShowImpl() {
+    private void showCoronaMarkerDbImpl() {
         LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
 
         SQLiteDatabase db = dbHelper.wdb;
@@ -191,7 +190,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long coronaMaxUpDt = this.coronaMaxUpDt;
 
         String sql = "" ;
-        sql += " SELECT id, deleted, checked, up_dt, place, patient, visit_fr, visit_to " ;
+        sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
         sql += " WHERE up_dt > ? " ;
@@ -202,7 +201,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Cursor cursor = db.rawQuery(sql, args);
 
         long id;
-        long deleted, checked;
+        long deleted, checked, notification ;
         long up_dt;
         String place;
         String patient;
@@ -224,6 +223,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
             checked = cursor.getLong(cursor.getColumnIndex("checked"));
+            notification = cursor.getLong(cursor.getColumnIndex("notification"));
 
             up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
             place = cursor.getString(cursor.getColumnIndex("place"));
@@ -240,13 +240,21 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             up_dt_str = df.format( new Date( up_dt ) ) ;
 
-            info = String.format("corona marker deleted = %d, checked = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
-                    deleted, checked, title, snippet, latitude, longitude, up_dt_str ) ;
+            info = String.format("corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
+                    deleted, checked, notification, title, snippet, latitude, longitude, up_dt_str ) ;
             Log.d( TAG, info );
 
-            int rscId = R.drawable.map_dot_yellow_64 ;
-            if( Math.abs( now - up_dt ) < ComInterface.CORONA_DB_GET_INTERVAL ) {
-                rscId = R.drawable.map_dot_pink_64 ;
+            int rscId = R.drawable.map_dot_cyan_64 ; // old data
+            if( 1 == checked ) { // checked data
+                if( notification < 2 ) { // when notified
+                    rscId = R.drawable.map_dot_red_64 ;
+                } else { // when notification accepted
+                    rscId = R.drawable.map_dot_pink_64 ;
+                }
+
+            } else if( Math.abs( now - up_dt ) < 20*ComInterface.CORONA_DB_GET_INTERVAL ) {
+                // latest data
+                rscId = R.drawable.map_dot_yellow_64 ;
             }
 
             LatLng latLng = new LatLng( latitude, longitude );
@@ -348,6 +356,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
                     showLastGpsData( locationResult );
 
+                    showCoronaMarkerDbImpl();
+
                     gpsUpdCnt ++;
                 }
             };
@@ -384,8 +394,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 }
             }
         });
-
-        this.startCoronaMarkerDbShowHandler();
     }
 
     private long lastMapMoveTime = 0 ;

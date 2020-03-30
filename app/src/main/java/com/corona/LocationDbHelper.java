@@ -17,7 +17,7 @@ import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 24 ;
+    public static final int DATABASE_VERSION = 25 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static LocationDbHelper dbHelper = null;
@@ -94,10 +94,11 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public void checkCoronaInfection() {
+    public long checkCoronaInfection() {
         // Insert the new row, returning the primary key value of the new row
 
         long prevCheckedCnt = 0 ;
+
         if( true ) {
             String sql = " SELECT COUNT( id ) FROM corona ";
             sql += " WHERE checked = 1 ";
@@ -112,8 +113,10 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
             cursor.close();
         }
 
+        final long now = System.currentTimeMillis() ;
+
         if( true ) {
-            String checked_tm   = "" + System.currentTimeMillis();
+            String checked_tm   = "" + now ;
             String visit_gap    = "" + ( 120 * 60 * 1_000 );
             String dist_gap     = "" + 31;
             String distum_gap   = "" + (31*31);
@@ -125,7 +128,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
             sql += " AND id IN ( ";
             sql += "    SELECT DISTINCT c.id FROM corona c , gps g ";
             sql += "    WHERE c.deleted = 0 AND c.checked = 0 ";
-            sql += "    AND g.visit_tm BETWEEN ( c.visit_fr - ? , c.visit_to + ? ) ";
+            sql += "    AND g.visit_tm BETWEEN c.visit_fr - ? AND c.visit_to + ? ";
             sql += "    AND ABS( g.y - c.y ) < ? AND ABS( g.x - c.x ) < ? ";
             sql += "    AND (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) < ? ";
             sql += " ) ";
@@ -155,6 +158,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
         Log.d( TAG, "prevCheckCnt = " + prevCheckedCnt + ", currCheckCnt = " + currCheckedCnt );
 
+        return now ;
     }
 
     public void insertGpsLog( Location location) {
@@ -242,6 +246,8 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
                 values.put("id", id );
                 values.put("deleted", "1".equals("" + deleted) ? 1 : 0 );
                 values.put("up_dt", upDt );
+                values.put("checked", 0 );
+                values.put("checked_tm", 0 );
                 values.put("place", place );
                 values.put("patient", patient );
                 values.put("visit_fr", visitFr );
