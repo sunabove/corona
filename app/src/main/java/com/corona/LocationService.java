@@ -98,9 +98,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             }
         };
 
-        //this.showColonaDetectionAlarmNotificationImpl();
-
-        //this.getCoronaDataFromServer();
+        this.startCoronaDataFromServerHandler();
     }
 
     @Override
@@ -248,29 +246,44 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         this.gpsInsCnt++;
 
-        this.getCoronaDataFromServerImpl();
+        this.getCoronaDataFromServer();
     }
 
-    /*
-    private void getCoronaDataFromServer() {
+    private void startCoronaDataFromServerHandler() {
         final long delay = CORONA_DB_GET_INTERVAL;
 
         final Handler handler = new Handler();
         final Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                getCoronaDataFromServerImpl( );
+                getCoronaDataFromServer( );
                 //handler.postDelayed( this, delay);
             }
         };
 
         handler.postDelayed( runnable, 2_000);
-    }*/
+    }
+
+    private boolean gettingCoronaDataFromServer = false ;
+
+    private void getCoronaDataFromServer() {
+        try {
+            if( ! gettingCoronaDataFromServer ) {
+                gettingCoronaDataFromServer = true ;
+                getCoronaDataFromServerImpl2();
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        } finally {
+            gettingCoronaDataFromServer = false ;
+        }
+
+    }
 
     private int coronaDbHandlerCnt = 0;
     protected RequestQueue requestQueue ;
 
-    private void getCoronaDataFromServerImpl( ) {
+    private void getCoronaDataFromServerImpl2( ) {
         Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt));
 
         String url = "http://sunabove.iptime.org:8080/corona_map-1/corona/data.json";
@@ -300,6 +313,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                         whenCoronaDbReceived( response );
 
                         locationDbHelper.checkCoronaInfection();
+
                         showCoronaInfectionAlarmNotifications( );
                     }
                 },

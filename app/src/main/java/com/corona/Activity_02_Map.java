@@ -220,7 +220,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
-        sql += " WHERE up_dt > ? or id = ? " ;
+        sql += " WHERE up_dt >= ? or id = ? " ;
         sql += " ORDER BY up_dt ASC " ;
         ;
 

@@ -17,7 +17,7 @@ import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 29 ;
+    public static final int DATABASE_VERSION = 30 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static LocationDbHelper dbHelper = null;
@@ -116,10 +116,11 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
         }
 
         if( true ) {
+            final long min_dist = 31;
             String checked_tm   = "" + System.currentTimeMillis() ;
             String visit_gap    = "" + ( 120 * 60 * 1_000 );
-            String dist_gap     = "" + 31;
-            String distum_gap   = "" + (31*31);
+            String dist_gap     = "" + min_dist;
+            String distum_gap   = "" + (min_dist*min_dist);
 
             String table = "corona";
 
