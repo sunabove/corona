@@ -257,7 +257,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             @Override
             public void run() {
                 getCoronaDataFromServer( );
-                //handler.postDelayed( this, delay);
+                handler.postDelayed( this, delay);
             }
         };
 
@@ -417,7 +417,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private void whenCoronaDbReceived(JSONArray response) {
         try {
-            LocationDbHelper.getLocationDbHelper(this).whenCoronaDbReceived( response );
+            this.locationDbHelper.whenCoronaDbReceived( response );
         } catch (Exception e) {
             e.printStackTrace();
         }

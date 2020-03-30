@@ -252,6 +252,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
                 values.put("up_dt", upDt );
                 values.put("checked", 0 );
                 values.put("checked_tm", 0 );
+                values.put("notification", 0 );
                 values.put("place", place );
                 values.put("patient", patient );
                 values.put("visit_fr", visitFr );
