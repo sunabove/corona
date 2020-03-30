@@ -17,7 +17,7 @@ import java.util.Calendar;
 
 public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 23 ;
+    public static final int DATABASE_VERSION = 24 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static LocationDbHelper dbHelper = null;
@@ -114,24 +114,24 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
 
         if( true ) {
             String checked_tm   = "" + System.currentTimeMillis();
-            String visit_gap    = "" + ( 30 * 60 * 1_000 );
+            String visit_gap    = "" + ( 120 * 60 * 1_000 );
             String dist_gap     = "" + 31;
             String distum_gap   = "" + (31*31);
 
             String sql = "UPDATE corona SET ";
             sql += " checked = 1 ";
             sql += " , checked_tm = ? ";
-            sql += " WHERE checked = 0 ";
+            sql += " WHERE checked = 0 AND deleted = 0 ";
             sql += " AND id IN ( ";
             sql += "    SELECT DISTINCT c.id FROM corona c , gps g ";
-            sql += "    WHERE c.deleted = 1 AND c.checked = 0 ";
-            sql += "    AND g.visit_tm IN ( c.visit_fr - ? , c.visit_to + ? ) ";
+            sql += "    WHERE c.deleted = 0 AND c.checked = 0 ";
+            sql += "    AND g.visit_tm BETWEEN ( c.visit_fr - ? , c.visit_to + ? ) ";
             sql += "    AND g.y - c.y < ? AND g.x - c.x < ? ";
             sql += "    AND (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) < ? ";
             sql += " ) ";
 
             SQLiteDatabase db = this.wdb;
-            String[] args = { checked_tm, visit_gap, visit_gap,  dist_gap, dist_gap, distum_gap };
+            String[] args = { checked_tm, visit_gap, visit_gap, dist_gap, dist_gap, distum_gap };
             db.execSQL(sql, args);
 
             Log.d( TAG, "checked corona infection." );

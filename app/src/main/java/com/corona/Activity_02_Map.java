@@ -191,7 +191,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long coronaMaxUpDt = this.coronaMaxUpDt;
 
         String sql = "" ;
-        sql += " SELECT id, deleted, up_dt, place, patient, visit_fr, visit_to " ;
+        sql += " SELECT id, deleted, checked, up_dt, place, patient, visit_fr, visit_to " ;
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
         sql += " WHERE up_dt > ? " ;
@@ -202,7 +202,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Cursor cursor = db.rawQuery(sql, args);
 
         long id;
-        long deleted;
+        long deleted, checked;
         long up_dt;
         String place;
         String patient;
@@ -221,24 +221,31 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         while ( this.isActivityAlive() && cursor.moveToNext()) {
             id = cursor.getLong(cursor.getColumnIndex("id"));
+
             deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
+            checked = cursor.getLong(cursor.getColumnIndex("checked"));
+
             up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
             place = cursor.getString(cursor.getColumnIndex("place"));
             patient = cursor.getString(cursor.getColumnIndex("patient"));
+
             visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
             visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
+
             latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
             longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
             title = String.format("[%d] %s / %s", id, place, patient );
             snippet = String.format( "%s ~ %s", df.format( new Date( visit_fr) ) , df.format( new Date( visit_to ) ) );
+
             up_dt_str = df.format( new Date( up_dt ) ) ;
 
-            info = String.format("corona marker title = %s, latitude = %f, longitude = %f, up_dt = %s", title, latitude, longitude, up_dt_str ) ;
+            info = String.format("corona marker deleted = %d, checked = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
+                    deleted, checked, title, snippet, latitude, longitude, up_dt_str ) ;
             Log.d( TAG, info );
 
             int rscId = R.drawable.map_dot_yellow_64 ;
-            if( now - up_dt < ComInterface.CORONA_DB_GET_INTERVAL ) {
+            if( Math.abs( now - up_dt ) < ComInterface.CORONA_DB_GET_INTERVAL ) {
                 rscId = R.drawable.map_dot_pink_64 ;
             }
 
