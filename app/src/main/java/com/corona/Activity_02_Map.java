@@ -1,5 +1,6 @@
 package com.corona;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -383,6 +384,24 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        final ComActivity activity = this;
+        if(requestCode == PERMISSION_ID ){
+            if( grantResults.length>0 && grantResults[0]==PackageManager.PERMISSION_GRANTED ) {
+                this.whenPermissionGranted();
+            } else {
+                String info = "앱을 다시 실행하여 권한을 부여하여 주세요.";
+                status.setText( info);
+                Toast.makeText( activity, info, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void whenPermissionGranted() {
+        this.onMapReady( this.googleMap );
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
         this.googleMap = googleMap;
 
@@ -399,6 +418,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( ! valid ) {
             requestPermissions();
+
+            return ;
         } else {
             valid = valid && isLocationEnabled();
 
@@ -410,7 +431,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         if( valid ) { // location updater
-            ///
             LocationRequest locationRequest = LocationService.createLocationRequest();
 
             LocationCallback locationCallback = new LocationCallback() {
@@ -821,16 +841,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 }
             }
         );
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_ID) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Granted. Start getting the location information
-            }
-        }
     }
 
 }

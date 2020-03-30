@@ -210,11 +210,16 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
     protected static final int PERMISSION_ID = 44;
 
     protected boolean checkPermissions() {
+        boolean permission = false ;
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            return true;
+
+            permission = true;
         }
-        return false;
+
+        Log.d( TAG, "checkPermission = " + permission );
+        return permission ;
     }
 
     protected void requestPermissions() {
@@ -223,13 +228,21 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
                 PERMISSION_ID
         );
+
+        Log.d( TAG, "requestPermissions " );
+
     }
 
     protected boolean isLocationEnabled() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+
+        boolean locationEnabled =  locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
                 LocationManager.NETWORK_PROVIDER
         );
+
+        Log.d( TAG, "locationEnabled = " + locationEnabled );
+
+        return locationEnabled;
     }
 
     // 두 위경도 사이의 거리를 m로 구한다.
