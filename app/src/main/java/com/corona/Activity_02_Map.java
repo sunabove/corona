@@ -1,6 +1,7 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -87,6 +88,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private LinearLayout togglePane;
     private ImageButton hidePaneBtn ;
 
+    LocationDbHelper locationDbHelper;
     private Proj projection = Proj.projection();
 
     @Override
@@ -130,6 +132,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 whenShowCalendarClicked();
             }
         });
+
+        this.locationDbHelper = LocationDbHelper.getLocationDbHelper(this.getApplicationContext() );
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -211,7 +215,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         float longitude = 0 ;
         String title, snippet, info ;
         String up_dt_str ;
-        SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
         HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
         GoogleMap googleMap = this.googleMap;
@@ -235,7 +239,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
             longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-            title = String.format("[%d] %s / %s", id, place, patient );
+            String infection = 1 == checked ? "동선 겹침" : "" ;
+
+            title = String.format("[%d] %s / %s / %s", id, place, patient , infection );
             snippet = String.format( "%s ~ %s", df.format( new Date( visit_fr) ) , df.format( new Date( visit_to ) ) );
 
             up_dt_str = df.format( new Date( up_dt ) ) ;
@@ -279,6 +285,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 }
 
                 Marker marker = googleMap.addMarker(markerOptions);
+                String tag = String.format("%d:%d", id, notification);
+                marker.setTag( tag );
                 coronaMarkers.put(id, marker);
             }
 
@@ -297,6 +305,42 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     }
     // -- startCoronaDbShowImpl
+
+    private void whenMarkerClicked( Marker marker ) {
+        Object obj = marker.getTag();
+        String id = null ;
+        String notification = null ;
+        if( obj instanceof String ) {
+            String tag = (String) obj;
+            if( 0 < tag.length() ) {
+                String [] infos = tag.split( ":" );
+                if( null != infos && 1 < infos.length ) {
+                    id = infos[0];
+                    notification = infos[1];
+                }
+            }
+        }
+
+        if( null == id || null == notification  || "2".equals( notification )) {
+            return;
+        }
+
+        LocationDbHelper locationDbHelper = this.locationDbHelper;
+
+        SQLiteDatabase db = locationDbHelper.wdb;
+        String table = "corona";
+
+        ContentValues values = new ContentValues();
+        values.put( "notification", 2 );
+
+        String whereClause = " id = ? ";
+        String [] args = { id };
+
+        int updCnt = db.update( table, values, whereClause, args );
+
+        Log.d( TAG, String.format("Corona marker [%s] notification update cnt = %d", id, updCnt ) );
+    }
+    // whenMarkerClicked
 
     @Override
     protected void onPause() {
@@ -394,6 +438,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 }
             }
         });
+
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                whenMarkerClicked( marker );
+                return false;
+            }
+        });
     }
 
     private long lastMapMoveTime = 0 ;
@@ -437,7 +489,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenCameraZoomChanged() {
-        this.showGpsDb();
+        this.showGpsLogFromDb();
 
         this.showLastGpsData( this.lastLocationResult );
 
@@ -452,10 +504,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         return ( zoom > 17.0 );
     }
 
-    private void showGpsDb() {
-        LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(this.getApplicationContext() );
+    private void showGpsLogFromDb() {
+        LocationDbHelper locationDbHelper = this.locationDbHelper;
 
-        SQLiteDatabase db = dbHelper.rdb;
+        SQLiteDatabase db = locationDbHelper.rdb;
         Calendar now = Calendar.getInstance();
 
         long yyyy = now.get(Calendar.YEAR);
