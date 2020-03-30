@@ -126,7 +126,7 @@ public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
             sql += "    SELECT DISTINCT c.id FROM corona c , gps g ";
             sql += "    WHERE c.deleted = 0 AND c.checked = 0 ";
             sql += "    AND g.visit_tm BETWEEN ( c.visit_fr - ? , c.visit_to + ? ) ";
-            sql += "    AND g.y - c.y < ? AND g.x - c.x < ? ";
+            sql += "    AND ABS( g.y - c.y ) < ? AND ABS( g.x - c.x ) < ? ";
             sql += "    AND (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) < ? ";
             sql += " ) ";
 
