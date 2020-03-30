@@ -424,7 +424,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             valid = valid && isLocationEnabled();
 
             if( ! valid ) {
-                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG  ).show();
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
             }
