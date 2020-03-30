@@ -186,10 +186,33 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     }*/
 
-    private void showCoronaMarkerDbImpl() {
-        LocationDbHelper dbHelper = LocationDbHelper.getLocationDbHelper(context);
+    private boolean showingCoronaMarkerDb = false ;
 
-        SQLiteDatabase db = dbHelper.wdb;
+    private void showCoronaMarkerFromDb( ) {
+        showCoronaMarkerFromDb( -1 );
+    }
+
+    private void showCoronaMarkerFromDb( long id ) {
+        try {
+            if( this.showingCoronaMarkerDb ) {
+                return ;
+            }
+
+            this.showingCoronaMarkerDb = true;
+
+            showCoronaMarkerFromDbImpl2( id );
+        } catch( Exception e ) {
+            e.printStackTrace();
+        } finally {
+            this.showingCoronaMarkerDb = false ;
+        }
+    }
+
+    private void showCoronaMarkerFromDbImpl2(final long spec_id) {
+
+        LocationDbHelper locationDbHelper = this.locationDbHelper;
+
+        SQLiteDatabase db = locationDbHelper.wdb;
 
         long coronaMaxUpDt = this.coronaMaxUpDt;
 
@@ -197,11 +220,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
-        sql += " WHERE up_dt > ? " ;
+        sql += " WHERE up_dt > ? or id = ? " ;
         sql += " ORDER BY up_dt ASC " ;
         ;
 
-        String[] args = { "" + coronaMaxUpDt };
+        String[] args = { "" + coronaMaxUpDt , "" + spec_id };
         Cursor cursor = db.rawQuery(sql, args);
 
         long id;
@@ -339,6 +362,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         int updCnt = db.update( table, values, whereClause, args );
 
         Log.d( TAG, String.format("Corona marker [%s] notification update cnt = %d", id, updCnt ) );
+
+        this.showCoronaMarkerFromDb( Long.valueOf( id ).longValue() );
     }
     // whenMarkerClicked
 
@@ -400,7 +425,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
                     showLastGpsData( locationResult );
 
-                    showCoronaMarkerDbImpl();
+                    showCoronaMarkerFromDb();
 
                     gpsUpdCnt ++;
                 }
