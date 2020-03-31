@@ -649,6 +649,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private void whenLocationUpdate( LocationResult locationResult ) {
         Log.d(TAG, String.format("locationResult update[%d]: %s", gpsUpdCnt, locationResult));
 
+        long now = System.currentTimeMillis() ;
+
+        if( now > this.gpsLogSeekBarMoveTime + 30*1_000 ) {
+            this.gpsLogSeekBar.setProgress( 0 );
+            this.gpsLogSeekBarMovedCnt = 0 ;
+        }
+
         lastLocationResult = locationResult ;
 
         animateGpsLogoRotate();
@@ -784,12 +791,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         option.visitTimeFr = System.currentTimeMillis() - 24*60*60*1_000; // condition for yesterday;
         option.visitTimeTo = this.mapReadyTime ;
 
-        if( progress < 1 && null != gpsLogPathPoly ) {
-            gpsLogPathPoly.remove();
-
-            gpsLogPathPoly = null;
-        }
-
         if( progress < 100 ) {
             option.visitTimeTo = (long) ( option.visitTimeFr + Math.abs( option.visitTimeTo - option.visitTimeFr )*( progress + 0.0)/100.0 );
         }
@@ -871,15 +872,17 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         this.gpsLogTimeTo.setText( dfUi.format( new Date( option.visitTimeTo ) ) );
 
+        if (null != gpsLogPathPoly) {
+            gpsLogPathPoly.remove();
+
+            gpsLogPathPoly = null;
+        }
+
         if( latLng != null ) {
 
             while( cnt < 2 ) {
                 polyOptions.add( latLng );
                 cnt ++ ;
-            }
-
-            if (null != gpsLogPathPoly) {
-                gpsLogPathPoly.remove();
             }
 
             gpsLogPathPoly = googleMap.addPolyline(polyOptions);
