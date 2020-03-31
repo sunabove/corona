@@ -819,8 +819,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             SQLiteDatabase db = dbHelper.rdb;
 
-            String sql = "SELECT MIN( visit_tm ) , MAX( visti_tm ) FROM gps ";
-            sql += " WHERE visit_tm BETWEN ? AND ? " ;
+            String sql = "SELECT MIN( visit_tm ) , MAX( visit_tm ) FROM gps ";
+            sql += " WHERE visit_tm BETWEEN ? AND ? " ;
             sql += " LIMIT 1 ";
 
             String[] args = { "" + option.visitTimeFr, "" + option.visitTimeTo };
