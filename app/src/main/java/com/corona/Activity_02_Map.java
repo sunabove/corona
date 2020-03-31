@@ -156,7 +156,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                gpsLogSeekBarProgress.setText( progress + " %" );
+                gpsLogSeekBarProgress.setText( progress + "%" );
                 if( fromUser ) {
                     whenGpsLogSeekBarMoved();
                 }else {
@@ -861,9 +861,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         option.color = Color.GRAY;
         option.lineWidth = isMapDetail ? 30: 15 ;
 
-        option.visitTimeFr = System.currentTimeMillis() - ONE_DAY_TIME ; // condition for yesterday;
-        option.visitTimeTo = this.mapReadyTime ;
-
         if( 0 < calendarTime ) {
             SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
             Log.d( TAG, "showGpsLogFromDb calendarTime = " + df.format( new Date( calendarTime) ) );
@@ -872,6 +869,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             if( option.visitTimeTo > this.mapReadyTime ) {
                 option.visitTimeTo = this.mapReadyTime ;
             }
+        } else {
+            long now = System.currentTimeMillis();
+            long todayStartTime = this.getTodayStartTime() ;
+            if( todayStartTime < now - 2*ONE_HOUR_TIME ) {
+                option.visitTimeFr = now - 2*ONE_HOUR_TIME ;
+            } else {
+                option.visitTimeFr = todayStartTime;
+            }
+            option.visitTimeTo = this.mapReadyTime ;
         }
 
         option.visitTimeToUi = option.visitTimeTo ;
@@ -914,6 +920,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private int showGpsLogFromDbWithOptionCnt = 0 ;
+
     private void showGpsLogFromDbWithOption( GpsLogPaintOption option ) {
 
         SimpleDateFormat dfLog = ComInterface.yyyMMdd_HHmmSS;
@@ -954,7 +961,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( true ) {
             this.gpsLogTimeFr.setText( dfUi.format( new Date( option.visitTimeFr )));
-            this.gpsLogSeekBarProgress.setText( option.progress + " %");
+            this.gpsLogSeekBarProgress.setText( option.progress + "%");
         }
 
         int idx = 0 ;

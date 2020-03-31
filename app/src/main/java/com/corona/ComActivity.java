@@ -34,6 +34,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Calendar;
 
 import io.socket.client.Socket;
 
@@ -257,6 +258,26 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
         } else {
             startService(new Intent(this, LocationService.class));
         }
+    }
+
+    public void setCalendarHourMinSecAsZero(Calendar calendar) {
+        calendar.set( Calendar.HOUR_OF_DAY, 0 );
+        calendar.set( Calendar.MINUTE, 0 );
+        calendar.set( Calendar.SECOND, 0 );
+        calendar.set( Calendar.MILLISECOND, 0 );
+    }
+
+    public Calendar getTodayStartCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set( Calendar.HOUR_OF_DAY, 0 );
+        calendar.set( Calendar.MINUTE, 0 );
+        calendar.set( Calendar.SECOND, 0 );
+        calendar.set( Calendar.MILLISECOND, 0 );
+        return calendar;
+    }
+
+    public long getTodayStartTime() {
+        return this.getTodayStartCalendar().getTimeInMillis();
     }
 
 }
