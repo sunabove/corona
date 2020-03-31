@@ -799,6 +799,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     class GpsLogPaintOption {
         long visitTimeFr;
         long visitTimeTo;
+        long visitTimeToUi;
+
         int color = Color.GRAY ;
         int lineWidth = 30;
         int progress = 0 ;
@@ -864,6 +866,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 option.visitTimeTo = this.mapReadyTime ;
             }
         }
+
+        option.visitTimeToUi = option.visitTimeToUi;
 
         option.progress = progress;
 
@@ -956,17 +960,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             latLng = new LatLng( latitude, longitude );
             polyOptions.add( latLng );
 
-            if( 0 == idx ) {
-                this.gpsLogTimeFr.setText( dfUi.format( new Date( visit_tm )));
-                this.gpsLogSeekBarProgress.setText( option.progress + " %");
-            }
-
             cnt ++ ;
             idx ++ ;
         }
         cursor.close();
 
-        this.gpsLogTimeTo.setText( dfUi.format( new Date( option.visitTimeTo ) ) );
+        this.gpsLogTimeTo.setText( dfUi.format( new Date( option.visitTimeToUi) ) );
 
         if (null != gpsLogPathPoly) {
             gpsLogPathPoly.remove();
