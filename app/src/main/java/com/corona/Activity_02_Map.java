@@ -13,7 +13,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,7 +32,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -91,7 +89,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private ImageButton hidePaneBtn ;
     private TextView gpsLogTimeFr ;
     private TextView gpsLogTimeTo ;
-    private TextView gpsLogTimeCurr ;
+    private TextView gpsLogSeekBarProgress ;
     private SeekBar gpsLogSeekBar ;
 
     private FusedLocationProviderClient fusedLocationClient;
@@ -137,7 +135,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.hidePaneBtn = this.findViewById(R.id.hidePaneBtn);
         this.gpsLogTimeFr = this.findViewById(R.id.gpsLogTimeFr);
         this.gpsLogTimeTo = this.findViewById(R.id.gpsLogTimeTo);
-        this.gpsLogTimeCurr = this.findViewById(R.id.gpsLogTimeCurr);
+        this.gpsLogSeekBarProgress = this.findViewById(R.id.gpsLogSeekBarProgress);
         this.gpsLogSeekBar = this.findViewById(R.id.gpsLogSeekBar);
 
         this.hidePaneBtn.setOnClickListener(new View.OnClickListener() {
@@ -152,6 +150,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                gpsLogSeekBarProgress.setText( progress + " %" );
                 if( fromUser ) {
                     whenGpsLogSeekBarMoved();
                 }else {
@@ -649,25 +648,22 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private void whenLocationUpdate( LocationResult locationResult ) {
         Log.d(TAG, String.format("locationResult update[%d]: %s", gpsUpdCnt, locationResult));
 
-        long now = System.currentTimeMillis() ;
+        this.whenMapLongIdle();
 
-        if( now > this.gpsLogSeekBarMoveTime + 30*1_000 ) {
-            this.gpsLogSeekBar.setProgress( 0 );
-            this.gpsLogSeekBarMovedCnt = 0 ;
-        }
+        this.animateGpsLogoRotate();
+
+        this.showCoronaMarkerFromDb();
 
         lastLocationResult = locationResult ;
 
-        animateGpsLogoRotate();
-
-        showCoronaMarkerFromDb();
-
-        showCurrentGpsData( locationResult );
+        this.showCurrentGpsData( locationResult );
 
         gpsUpdCnt ++;
     }
 
     private long lastMapMoveTime = 0 ;
+
+    private long calendarTime = 0 ;
 
     private void whenShowCalendarClicked() {
         if( View.INVISIBLE == togglePane.getVisibility() ) {
@@ -675,6 +671,27 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         togglePane.setVisibility( togglePane.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
+
+        if( togglePane.getVisibility() == View.VISIBLE ) {
+            this.calendarTime = this.calendar.getDate();
+
+            this.showGpsLogFromDb(100, this.calendarTime );
+        }
+    }
+
+    private void whenMapLongIdle() {
+        long now = System.currentTimeMillis() ;
+
+        if( now > this.gpsLogSeekBarMoveTime + 30*1_000 ) {
+            this.gpsLogSeekBar.setProgress( 0 );
+            this.gpsLogSeekBarMovedCnt = 0 ;
+        }
+
+        if( this.calendar.getVisibility() == View.INVISIBLE ) {
+            if( calendarTime > 0 && now > calendarTime + 30_1000 ) {
+                this.calendarTime = 0 ;
+            }
+        }
     }
 
     int gpsUpdCnt = 0;
@@ -694,12 +711,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         mapInfo.setText( info );
 
-        long now = System.currentTimeMillis() ;
-
-        if( now > this.gpsLogSeekBarMoveTime + 30*1_000 ) {
-            this.gpsLogSeekBar.setProgress( 0 );
-            this.gpsLogSeekBarMovedCnt = 0 ;
-        }
+        whenMapLongIdle();
 
         if( zoom != this.lastZoom ) {
             whenCameraZoomChanged();
@@ -717,7 +729,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenCameraZoomChanged() {
-        this.showGpsLogFromDb( this.gpsLogSeekBarMovedCnt < 1 ? 100 : this.gpsLogSeekBar.getProgress() );
+        this.showGpsLogFromDb( this.gpsLogSeekBarMovedCnt < 1 ? 100 : this.gpsLogSeekBar.getProgress() , this.calendarTime );
 
         this.showCurrentGpsData( this.lastLocationResult );
 
@@ -738,6 +750,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long visitTimeTo;
         int color = Color.GRAY ;
         int lineWidth = 30;
+        int progress = 0 ;
     }
 
     private int gpsLogSeekBarMovedCnt = 0 ;
@@ -761,7 +774,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                     progress = 100 < progress ? 100 : progress ;
 
                     if( isActivityAlive() ) {
-                        showGpsLogFromDb(progress);
+                        showGpsLogFromDb(progress, calendarTime);
                     } else {
                         Log.d( TAG, "gpsLogSeekBar activity is not alive" );
                     }
@@ -777,7 +790,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         handler.postDelayed(runnable, 300 );
     }
 
-    private void showGpsLogFromDb(int progress) {
+    private void showGpsLogFromDb(final int progress, final long calendarTime) {
         boolean  isMapDetail = this.isMapDetail() ;
 
         if( this.mapReadyTime < 1 ) {
@@ -790,6 +803,36 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         option.visitTimeFr = System.currentTimeMillis() - 24*60*60*1_000; // condition for yesterday;
         option.visitTimeTo = this.mapReadyTime ;
+
+        if( 0 < calendarTime ) {
+            option.visitTimeFr = calendarTime;
+            option.visitTimeTo = calendarTime + 24*60*60+1_000 -1 ;
+            if( option.visitTimeTo > this.mapReadyTime ) {
+                option.visitTimeTo = this.mapReadyTime ;
+            }
+        }
+
+        option.progress = progress;
+
+        if( true ) {
+            DbHelper dbHelper = this.dbHelper;
+
+            SQLiteDatabase db = dbHelper.rdb;
+
+            String sql = "SELECT MIN( visit_tm ) , MAX( visti_tm ) FROM gps ";
+            sql += " WHERE visit_tm BETWEN ? AND ? " ;
+            sql += " LIMIT 1 ";
+
+            String[] args = { "" + option.visitTimeFr, "" + option.visitTimeTo };
+            Cursor cursor = db.rawQuery(sql, args);
+
+            while( cursor.moveToNext() ) {
+                option.visitTimeFr = cursor.getLong( 0 );
+                option.visitTimeTo = cursor.getLong( 1 );
+            }
+
+            cursor.close();
+        }
 
         if( progress < 100 ) {
             option.visitTimeTo = (long) ( option.visitTimeFr + Math.abs( option.visitTimeTo - option.visitTimeFr )*( progress + 0.0)/100.0 );
@@ -836,7 +879,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( true ) {
             this.gpsLogTimeFr.setText( dfUi.format( new Date( option.visitTimeFr )));
-            this.gpsLogTimeCurr.setText( "" );
+            this.gpsLogSeekBarProgress.setText( option.progress + " %");
         }
 
         int idx = 0 ;
@@ -862,7 +905,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             if( 0 == idx ) {
                 this.gpsLogTimeFr.setText( dfUi.format( new Date( visit_tm )));
-                this.gpsLogTimeCurr.setText( "" );
+                this.gpsLogSeekBarProgress.setText( option.progress + " %");
             }
 
             cnt ++ ;
