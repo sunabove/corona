@@ -111,7 +111,7 @@
 
                     <ImageView
                         android:id="@+id/imageView2"
-                        android:layout_width="40dp"
+                        android:layout_width="35dp"
                         android:layout_height="wrap_content"
                         android:layout_margin="5dp"
                         android:scaleType="fitCenter"
@@ -190,6 +190,21 @@
                     android:layout_weight="1" />
 
                 <TextView
+                    android:id="@+id/gpsLogTimeCurr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="06:00:00"
+                    android:textSize="18sp"/>
+
+                <Space
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    />
+
+                <TextView
                     android:id="@+id/gpsLogTimeTo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -200,7 +215,7 @@
             </LinearLayout>
 
             <SeekBar
-                android:id="@+id/seekBar"
+                android:id="@+id/gpsLogSeekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

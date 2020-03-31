@@ -27,6 +27,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,6 +76,22 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private static String TAG = "sun_above map" ;
 
     private GoogleMap googleMap;
+
+    private EditText status ;
+    private TextView mapInfo ;
+    private ImageView gpsLogo;
+
+    private LocationResult lastLocationResult ;
+
+    protected FloatingActionButton showCalendar ;
+    private CalendarView calendar ;
+    private LinearLayout togglePane;
+    private ImageButton hidePaneBtn ;
+    private TextView gpsLogTimeFr ;
+    private TextView gpsLogTimeTo ;
+    private TextView gpsLogTimeCurr ;
+    private SeekBar gpsLogSeekBar ;
+
     private FusedLocationProviderClient fusedLocationClient;
 
     private Marker phoneMarker;
@@ -84,21 +101,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private GpsLog gpsLog = new GpsLog();
     private LatLng lastGpsLatLng ;
 
+    private float lastZoom ;
     private int coronaMarkerZIndex = 1;
     private HashMap<Long, Marker> coronaMarkers = new HashMap<>();
     private Handler coronaDbShowHandler ;
-
-    private EditText status ;
-    private TextView mapInfo ;
-    private ImageView gpsLogo;
-
-    private LocationResult lastLocationResult ;
-    private float lastZoom ;
-
-    protected FloatingActionButton showCalendar ;
-    private CalendarView calendar ;
-    private LinearLayout togglePane;
-    private ImageButton hidePaneBtn ;
 
     private DbHelper dbHelper;
     private Proj projection = Proj.projection();
@@ -124,6 +130,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.calendar = this.findViewById(R.id.calendar);
         this.togglePane = this.findViewById(R.id.togglePane) ;
         this.hidePaneBtn = this.findViewById(R.id.hidePaneBtn);
+        this.gpsLogTimeFr = this.findViewById(R.id.gpsLogTimeFr);
+        this.gpsLogTimeTo = this.findViewById(R.id.gpsLogTimeTo);
+        this.gpsLogTimeCurr = this.findViewById(R.id.gpsLogTimeCurr);
+        this.gpsLogSeekBar = this.findViewById(R.id.gpsLogSeekBar);
 
         this.hidePaneBtn.setOnClickListener(new View.OnClickListener() {
             @Override
