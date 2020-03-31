@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -32,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -142,6 +144,25 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View v) {
                 whenShowCalendarClicked();
+            }
+        });
+
+        this.gpsLogSeekBar.setMax( 100 );
+
+        this.gpsLogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                whenGpsLogSeekBarMoved( progress );
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
 
@@ -701,6 +722,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         int lineWidth = 30;
     }
 
+    private void whenGpsLogSeekBarMoved( int progress ) {
+        Log.d( TAG, "gpsLogSeekBar progress = " + progress );
+    }
+
     private void showGpsLogFromDb() {
         boolean  isMapDetail = this.isMapDetail() ;
 
@@ -710,7 +735,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         GpsLogPaintOption option = new GpsLogPaintOption();
         option.visitTimeFr = System.currentTimeMillis() - 24*60*60*1_000; // condition for yesterday;
-        option.visitTimeFr = this.mapReadyTime ;
+        option.visitTimeTo = this.mapReadyTime ;
         option.color = Color.GRAY;
         option.lineWidth = isMapDetail ? 30: 15 ;
 
@@ -723,7 +748,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         SQLiteDatabase db = dbHelper.rdb;
 
         String sql = "SELECT id, latitude, longitude, visit_tm FROM gps ";
-        sql += " WHERE visit_tm >= ? AND visit_tm <= ? " ;
+        sql += " WHERE visit_tm BETWEEN ? AND ? " ;
         sql += " ORDER BY visit_tm ASC ";
 
         String[] args = { "" + option.visitTimeFr, "" + option.visitTimeTo };
