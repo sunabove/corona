@@ -48,6 +48,7 @@ import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.Gap;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PatternItem;
@@ -57,13 +58,17 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import org.locationtech.proj4j.ProjCoordinate;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
@@ -286,8 +291,34 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void showCoronaMarkerFromDbImpl(final long spec_id) {
+        // remove at first
+        HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
+        Iterator<Map.Entry<Long, Marker>> it = coronaMarkers.entrySet().iterator();
+
+        while ( this.isActivityAlive() && it.hasNext() ) {
+            Marker marker = it.next().getValue();
+            marker.remove();
+            it.remove();
+        }
+
+        if( ! this.isActivityAlive() ) {
+            return ;
+        }
 
         DbHelper dbHelper = this.dbHelper;
+
+        GoogleMap googleMap = this.googleMap;
+        LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
+        LatLng sw = bounds.southwest;
+        LatLng ne = bounds.northeast;
+        Proj proj = this.projection;
+        ProjCoordinate swTm = proj.convertToUtmK( sw );
+        ProjCoordinate neTm = proj.convertToUtmK( ne );
+
+        double minX = swTm.x < neTm.x ? swTm.x : neTm.x ;
+        double minY = swTm.y < neTm.y ? swTm.y : neTm.y ;
+        double maxX = swTm.x > neTm.x ? swTm.x : neTm.x ;
+        double maxY = swTm.y > neTm.y ? swTm.y : neTm.y ;
 
         SQLiteDatabase db = dbHelper.wdb;
 
@@ -295,11 +326,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
-        sql += " WHERE up_dt >= ? or id = ? " ;
+        sql += " WHERE  id = ? " ;
+        sql += " OR ( x >= ? AND x <= ? AND y >= ? AND y <= ? )" ;
         sql += " ORDER BY up_dt ASC " ;
         ;
 
-        String[] args = { "" + 1 , "" + spec_id };
+        String[] args = { "" + spec_id, "" + minX , "" + maxX , "" + minY , "" + maxY };
         Cursor cursor = db.rawQuery(sql, args);
 
         long id;
@@ -315,8 +347,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         String up_dt_str ;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
-        HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
-        GoogleMap googleMap = this.googleMap;
         ArrayList<Long> deletedIds = new ArrayList<>();
         final long now = System.currentTimeMillis();
 
@@ -367,10 +397,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             if( 18.0 < zoom ) {
                 ratio = 1.0;
+            } else if( 16.8 < zoom ) {
+                ratio = 0.75;
             } else if( 13 < zoom ) {
                 ratio = 0.5;
             } else {
-                ratio = 0.25;
+                ratio = 0.38;
             }
 
             int width = (int)( b.getWidth()*ratio );
@@ -617,6 +649,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( zoom != this.lastZoom ) {
             whenCameraZoomChanged();
+        } else {
+            this.showCoronaMarkerFromDb();
         }
 
         this.lastZoom = zoom ;
