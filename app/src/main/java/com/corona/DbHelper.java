@@ -169,13 +169,13 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         ContentValues values = new ContentValues();
         double latitude = location.getLatitude();;
         double longitude = location.getLongitude();;
-        ProjCoordinate projCoord = this.projection.convertToUtmK( latitude, longitude );
+        ProjCoordinate coord = this.projection.convertToUtmK( latitude, longitude );
 
         values.put( "latitude", latitude );
         values.put( "longitude", longitude );
 
-        values.put( "y", projCoord.y );
-        values.put( "x", projCoord.x );
+        values.put( "y", coord.y );
+        values.put( "x", coord.x );
 
         Calendar now = Calendar.getInstance();
 
@@ -195,7 +195,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         values.put("ss", ss);
         values.put("zz", zz);
 
-        long visit_tm = location.getTime() ;
+        long visit_tm = System.currentTimeMillis();
 
         values.put( "visit_tm", visit_tm );
 

@@ -497,7 +497,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         showCoronaMarkerFromDb();
 
-        showLastGpsData( locationResult );
+        showCurrentGpsData( locationResult );
 
         gpsUpdCnt ++;
     }
@@ -545,7 +545,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private void whenCameraZoomChanged() {
         this.showGpsLogFromDb();
 
-        this.showLastGpsData( this.lastLocationResult );
+        this.showCurrentGpsData( this.lastLocationResult );
 
     }
 
@@ -604,7 +604,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             String info = "Gps Log on DB: id = %d, lon = %f, lat = %f, visit_tm = %s ";
             info = String.format(info, id, longitude, latitude, dateTime);
-            //Log.d(TAG, info);
+            Log.d(TAG, info);
 
             LatLng latLng = new LatLng( latitude, longitude );
             polyOptions.add( latLng );
@@ -632,17 +632,17 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         CalendarView calendar = this.calendar;
     }
 
-    private void showLastGpsData(LocationResult locationResult ) {
+    private void showCurrentGpsData(LocationResult locationResult ) {
         if (null == locationResult) {
             return;
         }
 
         Location location = locationResult.getLastLocation();
 
-        this.showLastGpsData( location );
+        this.showCurrentGpsData( location );
     }
 
-    private void showLastGpsData(Location location) {
+    private void showCurrentGpsData(Location location) {
 
         if( null == location ) {
             return;
@@ -732,7 +732,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         phoneMarker = googleMap.addMarker(markerOptions);
 
-        double gpsHeading = gpsLog.getGpsHeading( 0 );
+        //double gpsHeading = gpsLog.getGpsHeading( 0 );
+        double gpsHeading = location.getBearing();
 
         phoneMarker.setRotation( (float) gpsHeading );
 
@@ -835,7 +836,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 public void onComplete(@NonNull Task<Location> task) {
                     Location location = task.getResult();
                     if( null != location ) {
-                        showLastGpsData( location );
+                        showCurrentGpsData( location );
                     }
                 }
             }
