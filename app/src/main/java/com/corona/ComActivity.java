@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
@@ -19,7 +18,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,13 +52,8 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
     }
 
     protected Context context ;
-
     protected SharedPreferences sharedPref = null;
-
     protected RequestQueue requestQueue ;
-
-    protected Socket socket = null;
-
     protected FloatingActionButton goBack ;
 
     public abstract int getLayoutId() ;
@@ -207,8 +200,6 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
         }
     }
 
-    protected static final int PERMISSION_ID = 44;
-
     protected boolean checkPermissions() {
         boolean permission = false ;
 
@@ -226,7 +217,7 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
         ActivityCompat.requestPermissions(
                 this,
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
-                PERMISSION_ID
+                PERMISSION_REQUEST_ID
         );
 
         Log.d( TAG, "requestPermissions " );
