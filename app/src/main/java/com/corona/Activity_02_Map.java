@@ -86,7 +86,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     protected FloatingActionButton goBack ;
 
     protected FloatingActionButton showCalendar ;
-    private CalendarView calendar ;
+    private CalendarView calendarView;
     private LinearLayout togglePane;
     private ImageButton hideCalendarPaneBtn;
     private TextView gpsLogTimeFr ;
@@ -132,7 +132,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.mapInfo = this.findViewById(R.id.mapInfo);
         this.gpsLogo = this.findViewById(R.id.gpsLogo);
         this.showCalendar = this.findViewById(R.id.showCalendar);
-        this.calendar = this.findViewById(R.id.calendar);
+        this.calendarView = this.findViewById(R.id.calendarView);
         this.togglePane = this.findViewById(R.id.togglePane) ;
         this.hideCalendarPaneBtn = this.findViewById(R.id.hideCalenearPaneBtn);
         this.gpsLogTimeFr = this.findViewById(R.id.gpsLogTimeFr);
@@ -195,7 +195,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         });
 
-        this.calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+        this.calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
                 whenCalendarViewClicked( year, month, dayOfMonth );
@@ -707,14 +707,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         togglePane.setVisibility( togglePane.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
-
-        if( togglePane.getVisibility() == View.INVISIBLE ) {
-            this.calendarTime = 0 ;
-        }
     }
+
+    private long calendarViewClickTime = 0 ;
 
     private void whenCalendarViewClicked( int year, int month, int dayOfMonth ) {
         Log.d( TAG, String.format("calendarView year = %d, month = %d, day = %d",  year, month, dayOfMonth ) );
+
+        calendarViewClickTime = System.currentTimeMillis();
 
         Calendar calendar = Calendar.getInstance();
         calendar.set( Calendar.YEAR, year );
@@ -738,8 +738,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             this.gpsLogSeekBarMovedCnt = 0 ;
         }
 
-        if( this.calendar.getVisibility() == View.INVISIBLE ) {
-            if( calendarTime > 0 && now > calendarTime + 30_1000 ) {
+        if( this.calendarView.getVisibility() == View.INVISIBLE ) {
+            if( calendarViewClickTime > 0 && now > calendarViewClickTime + 30_1000 ) {
+                this.calendarViewClickTime = 0 ;
                 this.calendarTime = 0 ;
             }
         }
@@ -854,20 +855,20 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         option.color = Color.GRAY;
         option.lineWidth = isMapDetail ? 30: 15 ;
 
-        option.visitTimeFr = System.currentTimeMillis() - 24*60*60*1_000; // condition for yesterday;
+        option.visitTimeFr = System.currentTimeMillis() - ONE_DAY_TIME ; // condition for yesterday;
         option.visitTimeTo = this.mapReadyTime ;
 
         if( 0 < calendarTime ) {
             SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
             Log.d( TAG, "showGpsLogFromDb calendarTime = " + df.format( new Date( calendarTime) ) );
             option.visitTimeFr = calendarTime;
-            option.visitTimeTo = calendarTime + 24*60*60+1_000 -1 ;
+            option.visitTimeTo = calendarTime + ONE_DAY_TIME -1 ;
             if( option.visitTimeTo > this.mapReadyTime ) {
                 option.visitTimeTo = this.mapReadyTime ;
             }
         }
 
-        option.visitTimeToUi = option.visitTimeToUi;
+        option.visitTimeToUi = option.visitTimeTo ;
 
         option.progress = progress;
 
@@ -991,7 +992,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         cal.set( Calendar.DAY_OF_MONTH, 22 );
 
         dates.add( cal );
-        CalendarView calendar = this.calendar;
+        CalendarView calendar = this.calendarView;
     }
 
     private void showCurrentGpsData(LocationResult locationResult ) {

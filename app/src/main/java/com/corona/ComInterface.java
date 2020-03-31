@@ -10,6 +10,8 @@ public interface ComInterface {
 
     int PERMISSION_REQUEST_ID = 44;
 
+    long ONE_DAY_TIME = 24*60*60*1000;
+
     long HANDLER_DELAY_SPINNER_ITEM = 200;
 
     long HANDLER_DELAY_05_MAX = 4000;
