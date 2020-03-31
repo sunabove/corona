@@ -243,6 +243,40 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         this.gpsInsCnt++;
 
         this.getCoronaDataFromServer();
+
+        this.checkCurrDataAndRemoveOldGpsData();
+    }
+
+    private long prevCheckDataTime = 0 ;
+
+    private long timeCheckCnt = 0 ;
+    private static final long TWO_WEEK_TIME = 14*ONE_DAY_TIME;
+
+    private void checkCurrDataAndRemoveOldGpsData() {
+        if( timeCheckCnt%10_000 != 0) {
+            timeCheckCnt ++ ;
+            return;
+        }
+
+        long now = System.currentTimeMillis();
+
+        if( 0 == prevCheckDataTime || now - prevCheckDataTime > ONE_DAY_TIME ) {
+
+            long two_weeks_ags = now - TWO_WEEK_TIME ;
+
+            DbHelper dbHelper = this.dbHelper;
+            SQLiteDatabase db = dbHelper.wdb ;
+            String whereClause = " visit_tm < ? ";
+            String [] args = { "" + two_weeks_ags };
+
+            int updCnt = db.delete( "gps", whereClause, args );
+
+            Log.d( TAG, "gps two weeks ago del cnt = " + updCnt );
+
+            prevCheckDataTime = now ;
+        }
+
+        timeCheckCnt ++ ;
     }
 
     private void startCoronaDataFromServerHandler() {
