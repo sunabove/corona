@@ -179,7 +179,7 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
         }
     }
 
-    protected boolean checkPermissions() {
+    protected boolean checkLocationPermissions() {
         boolean permission = false ;
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
@@ -192,7 +192,7 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
         return permission ;
     }
 
-    protected void requestPermissions() {
+    protected void requestLocationPermissions() {
         ActivityCompat.requestPermissions(
                 this,
                 new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION},
@@ -249,6 +249,14 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
 
     public boolean isActivityAlive() {
         return getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.RESUMED);
+    }
+
+    public void startLocationService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(new Intent(this, LocationService.class));
+        } else {
+            startService(new Intent(this, LocationService.class));
+        }
     }
 
 }

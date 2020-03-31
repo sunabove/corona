@@ -604,12 +604,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         status.setText( "지도가 로드되었습니다.");
 
-        boolean valid = checkPermissions();
+        boolean valid = checkLocationPermissions();
 
         if( ! valid ) {
-            requestPermissions();
-
-            return ;
+            requestLocationPermissions();
         } else {
             valid = valid && isLocationEnabled();
 
@@ -621,6 +619,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         if( valid ) { // location updater
+            this.startLocationService();
+
             LocationRequest locationRequest = LocationService.createLocationRequest();
 
             LocationCallback locationCallback = new LocationCallback() {
@@ -644,7 +644,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         });
 
         googleMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-
             @Override
             public void onCameraIdle() {
                 whenCameraIdle();
@@ -749,29 +748,36 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     int gpsUpdCnt = 0;
 
     private void whenCameraIdle() {
-        if( this.isLocationEnabled() ) {
-            this.gpsLogo.setImageResource(R.drawable.gps_recording_02);
+        boolean valid = checkLocationPermissions();
+
+        if( ! valid ) {
+            requestLocationPermissions();
         } else {
-            this.gpsLogo.setImageResource(R.drawable.gps_recording_00);
+
+            if (this.isLocationEnabled()) {
+                this.gpsLogo.setImageResource(R.drawable.gps_recording_02);
+            } else {
+                this.gpsLogo.setImageResource(R.drawable.gps_recording_00);
+            }
+
+            TextView mapInfo = this.mapInfo;
+            float zoom = this.getZoom();
+
+            String info = "Zoom: %02.1f,  GPS: %d ";
+            info = String.format(info, zoom, gpsUpdCnt);
+
+            mapInfo.setText(info);
+
+            whenMapLongIdle();
+
+            if (zoom != this.lastZoom) {
+                whenCameraZoomChanged();
+            } else {
+                this.showCoronaMarkerFromDb();
+            }
+
+            this.lastZoom = zoom;
         }
-
-        TextView mapInfo = this.mapInfo;
-        float zoom = this.getZoom();
-
-        String info = "Zoom: %02.1f,  GPS: %d ";
-        info = String.format(info, zoom, gpsUpdCnt );
-
-        mapInfo.setText( info );
-
-        whenMapLongIdle();
-
-        if( zoom != this.lastZoom ) {
-            whenCameraZoomChanged();
-        } else {
-            this.showCoronaMarkerFromDb();
-        }
-
-        this.lastZoom = zoom ;
     }
 
     private float getZoom() {
@@ -815,7 +821,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         gpsLogSeekBarMovedCnt ++ ;
         gpsLogSeekBarMoveTime = System.currentTimeMillis();
 
-        Log.d( TAG, "gpsLogSeekBarMoveTime = " + gpsLogSeekBarMoveTime );
+        //Log.d( TAG, "gpsLogSeekBarMoveTime = " + gpsLogSeekBarMoveTime );
 
         Runnable runnable = new Runnable() {
             private long reqTime = gpsLogSeekBarMoveTime ;
@@ -885,8 +891,16 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             Cursor cursor = db.rawQuery(sql, args);
 
             while( cursor.moveToNext() ) {
-                option.visitTimeFr = cursor.getLong( 0 );
-                option.visitTimeTo = cursor.getLong( 1 );
+                long minTm = cursor.getLong( 0 );
+                long maxTm = cursor.getLong( 1 );
+
+                Log.d( TAG, "min visit_tm = " + minTm );
+                Log.d( TAG, "max visit_tm = " + maxTm );
+
+                if( minTm > 0 && maxTm > 0) {
+                    option.visitTimeFr = minTm ;
+                    option.visitTimeTo = maxTm ;
+                }
             }
 
             cursor.close();
@@ -902,7 +916,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private int showGpsLogFromDbWithOptionCnt = 0 ;
     private void showGpsLogFromDbWithOption( GpsLogPaintOption option ) {
 
+        SimpleDateFormat dfLog = ComInterface.yyyMMdd_HHmmSS;
+
         Log.d( TAG, String.format("[%d] showGpsLogFromDbWithOption", showGpsLogFromDbWithOptionCnt) );
+        Log.d( TAG, "visitTimeFr = " + dfLog.format( new Date( option.visitTimeFr)) );
+        Log.d( TAG, "visitTimeTo = " + dfLog.format( new Date( option.visitTimeTo)) );
         showGpsLogFromDbWithOptionCnt ++ ;
 
         DbHelper dbHelper = this.dbHelper;
@@ -931,9 +949,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long visit_tm = 0 ;
         double latitude, longitude;
         String dateTimeTextLog;
-        SimpleDateFormat dfLog = ComInterface.yyyMMdd_HHmmSS;
         String dateTimeTextUi;
-        SimpleDateFormat dfUi = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat dfUi = new SimpleDateFormat("HH:mm");
 
         if( true ) {
             this.gpsLogTimeFr.setText( dfUi.format( new Date( option.visitTimeFr )));

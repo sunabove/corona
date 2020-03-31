@@ -31,11 +31,6 @@ public class Activity_01_Splash extends ComActivity {
 
         this.hideActionBar();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            startForegroundService(new Intent(this, LocationService.class));
-        else
-            startService(new Intent(this, LocationService.class));
-
         this.moveToNextActivity();
     }
 
