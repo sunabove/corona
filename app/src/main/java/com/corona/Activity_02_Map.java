@@ -83,10 +83,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private LocationResult lastLocationResult ;
 
+    protected FloatingActionButton goBack ;
+
     protected FloatingActionButton showCalendar ;
     private CalendarView calendar ;
     private LinearLayout togglePane;
-    private ImageButton hidePaneBtn ;
+    private ImageButton hideCalendarPaneBtn;
     private TextView gpsLogTimeFr ;
     private TextView gpsLogTimeTo ;
     private TextView gpsLogSeekBarProgress ;
@@ -132,20 +134,24 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.showCalendar = this.findViewById(R.id.showCalendar);
         this.calendar = this.findViewById(R.id.calendar);
         this.togglePane = this.findViewById(R.id.togglePane) ;
-        this.hidePaneBtn = this.findViewById(R.id.hidePaneBtn);
+        this.hideCalendarPaneBtn = this.findViewById(R.id.hideCalenearPaneBtn);
         this.gpsLogTimeFr = this.findViewById(R.id.gpsLogTimeFr);
         this.gpsLogTimeTo = this.findViewById(R.id.gpsLogTimeTo);
         this.gpsLogSeekBarProgress = this.findViewById(R.id.gpsLogSeekBarProgress);
         this.gpsLogSeekBar = this.findViewById(R.id.gpsLogSeekBar);
 
-        this.hidePaneBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                whenShowCalendarClicked();
-            }
-        });
-
         this.gpsLogSeekBar.setMax( 100 );
+        this.gpsLogSeekBar.setProgress( 100 );
+
+        this.goBack = this.findViewById(R.id.goBack);
+
+        if( null != goBack ) {
+            this.goBack.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    onBackPressed();
+                }
+            });
+        }
 
         this.gpsLogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -176,9 +182,23 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         // hide keyboard always
         this.status.setInputType(InputType.TYPE_NULL);
 
+        this.hideCalendarPaneBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                whenShowCalendarClicked();
+            }
+        });
+
         this.showCalendar.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 whenShowCalendarClicked();
+            }
+        });
+
+        this.calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                whenCalendarViewClicked( year, month, dayOfMonth );
             }
         });
 
@@ -534,7 +554,23 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     @Override
     public void onBackPressed() {
-        finish();
+        if( this.togglePane.getVisibility() == View.VISIBLE ) {
+            this.whenShowCalendarClicked();
+        } else {
+            TextView status = findViewById(R.id.status);
+
+            if( null != status ) {
+                status.setText( "이전 화면으로 돌아갑니다." );
+            }
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // 이전 화면으로 돌아감.
+                    finish();
+                }
+            }, 300);
+        }
     }
 
     @Override
@@ -672,18 +708,33 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         togglePane.setVisibility( togglePane.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
 
-        if( togglePane.getVisibility() == View.VISIBLE ) {
-            this.calendarTime = this.calendar.getDate();
-
-            this.showGpsLogFromDb(100, this.calendarTime );
+        if( togglePane.getVisibility() == View.INVISIBLE ) {
+            this.calendarTime = 0 ;
         }
+    }
+
+    private void whenCalendarViewClicked( int year, int month, int dayOfMonth ) {
+        Log.d( TAG, String.format("calendarView year = %d, month = %d, day = %d",  year, month, dayOfMonth ) );
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set( Calendar.YEAR, year );
+        calendar.set( Calendar.MONTH , month );
+        calendar.set( Calendar.DAY_OF_MONTH , dayOfMonth );
+        calendar.set( Calendar.HOUR_OF_DAY, 0 );
+        calendar.set( Calendar.MINUTE, 0 );
+        calendar.set( Calendar.SECOND, 0 );
+        calendar.set( Calendar.MILLISECOND, 0 );
+
+        this.calendarTime = calendar.getTimeInMillis();
+
+        this.showGpsLogFromDb(100, this.calendarTime );
     }
 
     private void whenMapLongIdle() {
         long now = System.currentTimeMillis() ;
 
         if( now > this.gpsLogSeekBarMoveTime + 30*1_000 ) {
-            this.gpsLogSeekBar.setProgress( 0 );
+            this.gpsLogSeekBar.setProgress( 100 );
             this.gpsLogSeekBarMovedCnt = 0 ;
         }
 
@@ -805,6 +856,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         option.visitTimeTo = this.mapReadyTime ;
 
         if( 0 < calendarTime ) {
+            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
+            Log.d( TAG, "showGpsLogFromDb calendarTime = " + df.format( new Date( calendarTime) ) );
             option.visitTimeFr = calendarTime;
             option.visitTimeTo = calendarTime + 24*60*60+1_000 -1 ;
             if( option.visitTimeTo > this.mapReadyTime ) {

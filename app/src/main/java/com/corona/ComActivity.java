@@ -54,7 +54,7 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
     protected Context context ;
     protected SharedPreferences sharedPref = null;
     protected RequestQueue requestQueue ;
-    protected FloatingActionButton goBack ;
+
 
     public abstract int getLayoutId() ;
 
@@ -71,27 +71,6 @@ public abstract class ComActivity extends AppCompatActivity implements ComInterf
 
         this.requestQueue = Volley.newRequestQueue(this);
 
-        this.goBack = this.findViewById(R.id.goBack);
-
-        if( null != goBack ) {
-            this.goBack.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    TextView status = findViewById(R.id.status);
-
-                    if( null != status ) {
-                        status.setText( "이전 화면으로 돌아갑니다." );
-                    }
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            // 이전 화면으로 돌아감.
-                            finish();
-                        }
-                    }, 300);
-                }
-            });
-        }
     }
 
     public double prettyDegree( double degree ) {
