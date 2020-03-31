@@ -40,8 +40,6 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
@@ -49,9 +47,7 @@ import org.json.JSONArray;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 
 public class LocationService extends Service implements ComInterface, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -64,7 +60,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private LocationCallback locationCallback;
 
     private Proj projection = Proj.projection();
-    private LocationDbHelper locationDbHelper;
+    private DbHelper dbHelper;
 
     int gpsInsCnt = 0;
 
@@ -82,7 +78,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         super.onCreate();
 
         this.requestQueue = Volley.newRequestQueue(this);
-        this.locationDbHelper = LocationDbHelper.getLocationDbHelper( this );
+        this.dbHelper = DbHelper.getLocationDbHelper( this );
 
         this.buildGoogleApiClient();
 
@@ -240,7 +236,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             return;
         }
 
-        this.locationDbHelper.insertGpsLog( locationResult.getLastLocation());
+        this.dbHelper.insertGpsLog( locationResult.getLastLocation());
 
         Log.d(TAG, String.format("locationResult gps data inserted[%d]: %s", gpsInsCnt, locationResult));
 
@@ -289,7 +285,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         String url = "http://sunabove.iptime.org:8080/corona_map-1/corona/data.json";
 
         String up_dt = "";
-        long coronaMaxUpDt = LocationDbHelper.getLocationDbHelper( this ).getCoronaMaxUpDt();
+        long coronaMaxUpDt = DbHelper.getLocationDbHelper( this ).getCoronaMaxUpDt();
 
         if( coronaMaxUpDt < 1 ) {
             up_dt = "" ;
@@ -312,7 +308,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                         Log.d(TAG, "Response: Success " + response.toString());
                         whenCoronaDbReceived( response );
 
-                        locationDbHelper.checkCoronaInfection();
+                        dbHelper.checkCoronaInfection();
 
                         showCoronaInfectionAlarmNotifications( );
                     }
@@ -324,7 +320,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                         Log.d(TAG, "Response: Error Message " + error.getMessage());
                         Log.d(TAG, "Response: Error " + error.toString());
 
-                        locationDbHelper.checkCoronaInfection();
+                        dbHelper.checkCoronaInfection();
                         showCoronaInfectionAlarmNotifications( );
                     }
                 }
@@ -352,7 +348,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private void showCoronaInfectionAlarmNotifications( ) {
 
         if( true ) {
-            SQLiteDatabase db = this.locationDbHelper.wdb;
+            SQLiteDatabase db = this.dbHelper.wdb;
             String sql = "";
             sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to ";
             sql += " , latitude, longitude ";
@@ -417,7 +413,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private void whenCoronaDbReceived(JSONArray response) {
         try {
-            this.locationDbHelper.whenCoronaDbReceived( response );
+            this.dbHelper.whenCoronaDbReceived( response );
         } catch (Exception e) {
             e.printStackTrace();
         }

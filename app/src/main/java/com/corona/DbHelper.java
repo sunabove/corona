@@ -15,26 +15,26 @@ import org.locationtech.proj4j.ProjCoordinate;
 
 import java.util.Calendar;
 
-public class LocationDbHelper extends SQLiteOpenHelper implements ComInterface {
+public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 31 ;
     public static final String DATABASE_NAME = "Corona.db";
 
-    private static LocationDbHelper dbHelper = null;
+    private static DbHelper dbHelper = null;
     // Gets the data repository in write mode
     public SQLiteDatabase wdb;
     public SQLiteDatabase rdb;
 
     private Proj projection = Proj.projection();
 
-    public static LocationDbHelper getLocationDbHelper( Context context ) {
+    public static DbHelper getLocationDbHelper(Context context ) {
         if (null == dbHelper) {
-            dbHelper = new LocationDbHelper(context);
+            dbHelper = new DbHelper(context);
         }
         return dbHelper;
     }
 
-    private LocationDbHelper(Context context) {
+    private DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
 
         wdb = this.getWritableDatabase();

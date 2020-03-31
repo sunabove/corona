@@ -1,6 +1,5 @@
 package com.corona;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -94,7 +93,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private LinearLayout togglePane;
     private ImageButton hidePaneBtn ;
 
-    LocationDbHelper locationDbHelper;
+    private DbHelper dbHelper;
     private Proj projection = Proj.projection();
 
     @Override
@@ -139,7 +138,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         });
 
-        this.locationDbHelper = LocationDbHelper.getLocationDbHelper(this.getApplicationContext() );
+        this.dbHelper = DbHelper.getLocationDbHelper(this.getApplicationContext() );
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -216,9 +215,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void showCoronaMarkerFromDbImpl2(final long spec_id) {
 
-        LocationDbHelper locationDbHelper = this.locationDbHelper;
+        DbHelper dbHelper = this.dbHelper;
 
-        SQLiteDatabase db = locationDbHelper.wdb;
+        SQLiteDatabase db = dbHelper.wdb;
 
         long coronaMaxUpDt = this.coronaMaxUpDt;
 
@@ -354,9 +353,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             return;
         }
 
-        LocationDbHelper locationDbHelper = this.locationDbHelper;
+        DbHelper dbHelper = this.dbHelper;
 
-        SQLiteDatabase db = locationDbHelper.wdb;
+        SQLiteDatabase db = dbHelper.wdb;
         String table = "corona";
 
         ContentValues values = new ContentValues();
@@ -560,9 +559,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void showGpsLogFromDb() {
-        LocationDbHelper locationDbHelper = this.locationDbHelper;
+        DbHelper dbHelper = this.dbHelper;
 
-        SQLiteDatabase db = locationDbHelper.rdb;
+        SQLiteDatabase db = dbHelper.rdb;
         Calendar now = Calendar.getInstance();
 
         long yyyy = now.get(Calendar.YEAR);
@@ -621,8 +620,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             gpsLogPathPoly = googleMap.addPolyline(polyOptions);
         }
-
     }
+    // showGpsLogFromDb
 
     private void setHighlightedDays() {
         List<Calendar> dates = new ArrayList<>();
