@@ -152,7 +152,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                whenGpsLogSeekBarMoved( progress );
+                if( fromUser ) {
+                    whenGpsLogSeekBarMoved();
+                }else {
+                    Log.d( TAG, "gpsLogSeekBar is not fromUser." );
+                }
             }
 
             @Override
@@ -683,6 +687,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         mapInfo.setText( info );
 
+        long now = System.currentTimeMillis() ;
+
+        if( now > this.gpsLogSeekBarMoveTime + 30*1_000 ) {
+            this.gpsLogSeekBar.setProgress( 0 );
+            this.gpsLogSeekBarMovedCnt = 0 ;
+        }
+
         if( zoom != this.lastZoom ) {
             whenCameraZoomChanged();
         } else {
@@ -699,7 +710,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenCameraZoomChanged() {
-        this.showGpsLogFromDb();
+        this.showGpsLogFromDb( this.gpsLogSeekBarMovedCnt < 1 ? 100 : this.gpsLogSeekBar.getProgress() );
 
         this.showCurrentGpsData( this.lastLocationResult );
 
@@ -722,11 +733,44 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         int lineWidth = 30;
     }
 
-    private void whenGpsLogSeekBarMoved( int progress ) {
-        Log.d( TAG, "gpsLogSeekBar progress = " + progress );
+    private int gpsLogSeekBarMovedCnt = 0 ;
+
+    private long gpsLogSeekBarMoveTime = 0 ;
+
+    private void whenGpsLogSeekBarMoved( ) {
+        gpsLogSeekBarMovedCnt ++ ;
+        gpsLogSeekBarMoveTime = System.currentTimeMillis();
+
+        Log.d( TAG, "gpsLogSeekBarMoveTime = " + gpsLogSeekBarMoveTime );
+
+        Runnable runnable = new Runnable() {
+            private long reqTime = gpsLogSeekBarMoveTime ;
+            @Override
+            public void run() {
+                if( this.reqTime == gpsLogSeekBarMoveTime ) {
+                    int progress = gpsLogSeekBar.getProgress();
+
+                    progress = 0 > progress ? 0 : progress;
+                    progress = 100 < progress ? 100 : progress ;
+
+                    if( isActivityAlive() ) {
+                        showGpsLogFromDb(progress);
+                    } else {
+                        Log.d( TAG, "gpsLogSeekBar activity is not alive" );
+                    }
+
+                    Log.d( TAG, "gpsLogSeekBar progress = " + progress );
+                } else {
+                    Log.d( TAG, "reqTime is not valid." );
+                }
+            }
+        };
+
+        Handler handler = new Handler();
+        handler.postDelayed(runnable, 300 );
     }
 
-    private void showGpsLogFromDb() {
+    private void showGpsLogFromDb(int progress) {
         boolean  isMapDetail = this.isMapDetail() ;
 
         if( this.mapReadyTime < 1 ) {
@@ -734,15 +778,31 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         GpsLogPaintOption option = new GpsLogPaintOption();
-        option.visitTimeFr = System.currentTimeMillis() - 24*60*60*1_000; // condition for yesterday;
-        option.visitTimeTo = this.mapReadyTime ;
         option.color = Color.GRAY;
         option.lineWidth = isMapDetail ? 30: 15 ;
+
+        option.visitTimeFr = System.currentTimeMillis() - 24*60*60*1_000; // condition for yesterday;
+        option.visitTimeTo = this.mapReadyTime ;
+
+        if( progress < 1 && null != gpsLogPathPoly ) {
+            gpsLogPathPoly.remove();
+
+            gpsLogPathPoly = null;
+        }
+
+        if( progress < 100 ) {
+            option.visitTimeTo = (long) ( option.visitTimeFr + Math.abs( option.visitTimeTo - option.visitTimeFr )*( progress + 0.0)/100.0 );
+        }
 
         this.showGpsLogFromDbWithOption( option );
     }
 
+    private int showGpsLogFromDbWithOptionCnt = 0 ;
     private void showGpsLogFromDbWithOption( GpsLogPaintOption option ) {
+
+        Log.d( TAG, String.format("[%d] showGpsLogFromDbWithOption", showGpsLogFromDbWithOptionCnt) );
+        showGpsLogFromDbWithOptionCnt ++ ;
+
         DbHelper dbHelper = this.dbHelper;
 
         SQLiteDatabase db = dbHelper.rdb;
@@ -773,9 +833,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         String dateTimeTextUi;
         SimpleDateFormat dfUi = new SimpleDateFormat("HH:mm:ss");
 
-        int idx = 0 ;
+        if( true ) {
+            this.gpsLogTimeFr.setText( dfUi.format( new Date( option.visitTimeFr )));
+            this.gpsLogTimeCurr.setText( "" );
+        }
 
+        int idx = 0 ;
         LatLng latLng = null ;
+
+        Log.d( TAG, "gps log db cursor count = " + cursor.getCount() ) ;
 
         while (cursor.moveToNext()) {
             id = cursor.getLong(cursor.getColumnIndex("id"));
@@ -803,9 +869,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
         cursor.close();
 
-        if( latLng != null ) {
+        this.gpsLogTimeTo.setText( dfUi.format( new Date( option.visitTimeTo ) ) );
 
-            this.gpsLogTimeTo.setText( dfUi.format( new Date( visit_tm ) ) );
+        if( latLng != null ) {
 
             while( cnt < 2 ) {
                 polyOptions.add( latLng );
@@ -818,8 +884,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             gpsLogPathPoly = googleMap.addPolyline(polyOptions);
         }
-
-
     }
     // showGpsLogFromDb
 
