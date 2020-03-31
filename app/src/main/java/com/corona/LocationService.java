@@ -266,12 +266,24 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
             DbHelper dbHelper = this.dbHelper;
             SQLiteDatabase db = dbHelper.wdb ;
-            String whereClause = " visit_tm < ? ";
-            String [] args = { "" + two_weeks_ags };
 
-            int updCnt = db.delete( "gps", whereClause, args );
+            if( true ) {
+                String whereClause = " visit_tm < ? ";
+                String[] args = {"" + two_weeks_ags};
 
-            Log.d( TAG, "gps two weeks ago del cnt = " + updCnt );
+                int updCnt = db.delete("gps", whereClause, args);
+
+                Log.d(TAG, "gps two weeks ago del cnt = " + updCnt);
+            }
+
+            if( true ) {
+                String whereClause = " visit_to < ? ";
+                String[] args = {"" + two_weeks_ags};
+
+                int updCnt = db.delete("corona", whereClause, args);
+
+                Log.d(TAG, "corona two weeks ago del cnt = " + updCnt);
+            }
 
             prevCheckDataTime = now ;
         }
