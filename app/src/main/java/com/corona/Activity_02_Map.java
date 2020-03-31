@@ -8,6 +8,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.location.Location;
@@ -40,6 +42,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Dot;
 import com.google.android.gms.maps.model.Gap;
@@ -76,7 +79,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private GpsLog gpsLog = new GpsLog();
     private LatLng lastGpsLatLng ;
 
-    private long coronaMaxUpDt = -1 ;
     private int coronaMarkerZIndex = 1;
     private HashMap<Long, Marker> coronaMarkers = new HashMap<>();
     private Handler coronaDbShowHandler ;
@@ -205,7 +207,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             this.showingCoronaMarkerDb = true;
 
-            showCoronaMarkerFromDbImpl2( id );
+            showCoronaMarkerFromDbImpl( id );
         } catch( Exception e ) {
             e.printStackTrace();
         } finally {
@@ -213,13 +215,81 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
     }
 
-    private void showCoronaMarkerFromDbImpl2(final long spec_id) {
+    private HashMap<Integer, Double> mapScales = null ;
+
+    private double getRefScale( double zoom ) {
+        if( null == mapScales ) {
+            mapScales = new HashMap<>();
+            mapScales.put( 20, 1128.497220 );
+            mapScales.put( 19, 2256.994440 );
+            mapScales.put( 18, 4513.988880 );
+            mapScales.put( 17, 9027.977761 );
+            mapScales.put( 16, 18055.955520 );
+            mapScales.put( 15, 36111.911040 );
+            mapScales.put( 14, 72223.822090 );
+            mapScales.put( 13, 144447.644200 );
+            mapScales.put( 12, 288895.288400 );
+            mapScales.put( 11, 577790.576700 );
+            mapScales.put( 10, 1155581.153000 );
+            mapScales.put(  9, 2311162.307000 );
+            mapScales.put(  8, 4622324.614000 );
+            mapScales.put(  7, 9244649.227000 );
+            mapScales.put(  6, 18489298.450000 );
+            mapScales.put(  5, 36978596.910000 );
+            mapScales.put(  4, 73957193.820000 );
+            mapScales.put(  3, 147914387.600000 );
+            mapScales.put(  2, 295828775.300000 );
+            mapScales.put(  1, 591657550.500000 );
+
+            /*
+            20 : 1128.497220
+            19 : 2256.994440
+            18 : 4513.988880
+            17 : 9027.977761
+            16 : 18055.955520
+            15 : 36111.911040
+            14 : 72223.822090
+            13 : 144447.644200
+            12 : 288895.288400
+            11 : 577790.576700
+            10 : 1155581.153000
+            9  : 2311162.307000
+            8  : 4622324.614000
+            7  : 9244649.227000
+            6  : 18489298.450000
+            5  : 36978596.910000
+            4  : 73957193.820000
+            3  : 147914387.600000
+            2  : 295828775.300000
+            1  : 591657550.500000
+            */
+        }
+        double scale = mapScales.get( (int) zoom ) ;
+
+        return scale;
+    }
+
+    private double getMapScaleRatio(double zoom) {
+        if( zoom == (int) zoom ) {
+            return this.getRefScale( zoom );
+        }
+
+        int zoomPrev = (int) zoom ;
+        int zoomNext = (int) ( zoom - 1 );
+
+        double scalePrev = this.getRefScale( zoomPrev ) ;
+        double scaleNext = this.getRefScale( zoomNext );
+
+        double scale = scalePrev + (scaleNext - scalePrev)*(zoom - zoomPrev);
+
+        return scale;
+    }
+
+    private void showCoronaMarkerFromDbImpl(final long spec_id) {
 
         DbHelper dbHelper = this.dbHelper;
 
         SQLiteDatabase db = dbHelper.wdb;
-
-        long coronaMaxUpDt = this.coronaMaxUpDt;
 
         String sql = "" ;
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
@@ -229,7 +299,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         sql += " ORDER BY up_dt ASC " ;
         ;
 
-        String[] args = { "" + coronaMaxUpDt , "" + spec_id };
+        String[] args = { "" + 1 , "" + spec_id };
         Cursor cursor = db.rawQuery(sql, args);
 
         long id;
@@ -278,49 +348,65 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                     deleted, checked, notification, title, snippet, latitude, longitude, up_dt_str ) ;
             Log.d( TAG, info );
 
-            int rscId = R.drawable.map_dot_cyan_64 ; // old data
+            int rscId = R.drawable.map_dot_corona_old_64; // old data
             if( 1 == checked ) { // checked data
                 if( notification < 2 ) { // when notified
-                    rscId = R.drawable.map_dot_red_64 ;
+                    rscId = R.drawable.map_dot_corona_notifying_64;
                 } else { // when notification accepted
-                    rscId = R.drawable.map_dot_pink_64 ;
+                    rscId = R.drawable.map_dot_corona_notified_64;
                 }
-
             } else if( Math.abs( now - up_dt ) < 20*ComInterface.CORONA_DB_GET_INTERVAL ) {
                 // latest data
-                rscId = R.drawable.map_dot_yellow_64 ;
+                rscId = R.drawable.map_dot_corona_latest_data_64;
             }
+
+            Bitmap b = BitmapFactory.decodeResource(getResources(), rscId );
+
+            double ratio = 1.0;
+            float zoom = this.getZoom();
+
+            if( 18.0 < zoom ) {
+                ratio = 1.0;
+            } else if( 13 < zoom ) {
+                ratio = 0.5;
+            } else {
+                ratio = 0.25;
+            }
+
+            int width = (int)( b.getWidth()*ratio );
+            int height = (int)( b.getHeight()*ratio );
+
+            Bitmap markerIconResized = Bitmap.createScaledBitmap(b, width, height, false);
+            BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromBitmap( markerIconResized );
 
             LatLng latLng = new LatLng( latitude, longitude );
             MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
+            markerOptions.position( latLng );
             markerOptions.title( title );
             markerOptions.snippet( snippet );
             markerOptions.flat(true);
-            markerOptions.icon(BitmapDescriptorFactory.fromResource( rscId ));
+            markerOptions.icon( markerIcon );
             markerOptions.zIndex( coronaMarkerZIndex );
 
             if( 1 == deleted ) {
                 deletedIds.add( id );
-                Marker marker = coronaMarkers.get( id );
-                marker.remove();
-                coronaMarkers.remove( id );
-            } else {
-
-                if (!this.isActivityAlive()) {
-                    Log.d(TAG, "Activity is not alive skipped to add corona marker.");
-                    break;
-                }
-
-                Marker marker = googleMap.addMarker(markerOptions);
-                String tag = String.format("%d:%d", id, notification);
-                marker.setTag( tag );
-                coronaMarkers.put(id, marker);
             }
 
-            if( up_dt > this.coronaMaxUpDt ) {
-                this.coronaMaxUpDt = up_dt ;
+            if (!this.isActivityAlive()) {
+                Log.d(TAG, "Activity is not alive skipped to add corona marker.");
+                break;
             }
+
+            Marker markerPrev = coronaMarkers.get( id );
+            if( null != markerPrev ) {
+                markerPrev.remove();
+                coronaMarkers.remove(id);
+            }
+
+            Marker marker = googleMap.addMarker(markerOptions);
+            String tag = String.format("%d:%d", id, notification);
+            marker.setTag( tag );
+            coronaMarkers.put(id, marker);
 
             coronaMarkerZIndex ++ ;
         }
@@ -547,6 +633,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         this.showCurrentGpsData( this.lastLocationResult );
 
+        this.showCoronaMarkerFromDb();
     }
 
     private void whenMapClick(LatLng latLng) {
@@ -699,10 +786,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         gpsPathPoly = googleMap.addPolyline( polyOptions );
         gpsPathPoly.setZIndex( 4 );
 
-        this.showCurrentPositionMarker( location );
+        this.showCurrentPosMarker( location );
     }
 
-    private void showCurrentPositionMarker( Location location ) {
+    private void showCurrentPosMarker(Location location ) {
         float zoom = this.getZoom();
         boolean isMapDetail = this.isMapDetail();
 
@@ -718,7 +805,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         markerOptions.title(String.format("현재 위치 [%04d]", phoneMarkerUpdCnt));
         markerOptions.flat(true);
 
-        int mapIconRscId = R.drawable.smart_phone_icon_01_64;
+        int mapIconRscId = R.drawable.smart_phone_icon_03_16;
         if( zoom > 18.4 ) {
             mapIconRscId = R.drawable.smart_phone_icon_01_64;
         } else if( zoom > 13 ) {
