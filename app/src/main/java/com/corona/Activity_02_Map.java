@@ -108,6 +108,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private DbHelper dbHelper;
     private Proj projection = Proj.projection();
+    private long mapReadyTime = System.currentTimeMillis();
 
     @Override
     public final int getLayoutId() {
@@ -118,6 +119,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        this.mapReadyTime = System.currentTimeMillis();
 
         this.hideActionBar();
 
@@ -613,6 +616,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( valid ) {
             this.getPhoneLastLocation();
+
+            this.mapReadyTime = System.currentTimeMillis();
         }
     }
 
@@ -689,29 +694,45 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         return ( zoom > 17.0 );
     }
 
+    class GpsLogPaintOption {
+        long visitTimeFr;
+        long visitTimeTo;
+        int color = Color.GRAY ;
+        int lineWidth = 30;
+    }
+
     private void showGpsLogFromDb() {
+        boolean  isMapDetail = this.isMapDetail() ;
+
+        if( this.mapReadyTime < 1 ) {
+            this.mapReadyTime = System.currentTimeMillis();
+        }
+
+        GpsLogPaintOption option = new GpsLogPaintOption();
+        option.visitTimeFr = System.currentTimeMillis() - 24*60*60*1_000; // condition for yesterday;
+        option.visitTimeFr = this.mapReadyTime ;
+        option.color = Color.GRAY;
+        option.lineWidth = isMapDetail ? 30: 15 ;
+
+        this.showGpsLogFromDbWithOption( option );
+    }
+
+    private void showGpsLogFromDbWithOption( GpsLogPaintOption option ) {
         DbHelper dbHelper = this.dbHelper;
 
         SQLiteDatabase db = dbHelper.rdb;
-        Calendar now = Calendar.getInstance();
-
-        long yyyy = now.get(Calendar.YEAR);
-        long mm = now.get(Calendar.MONTH) + 1; // Note: zero based!
-        long dd = now.get(Calendar.DAY_OF_MONTH) - 2 ; // condition for yesterday
-        long visit_tm = now.getTimeInMillis() - 24*60*60*1_000; // condition for yesterday
 
         String sql = "SELECT id, latitude, longitude, visit_tm FROM gps ";
-        sql += " WHERE yyyy = ? AND mm = ? AND dd > ? AND visit_tm > ? " ;
+        sql += " WHERE visit_tm >= ? AND visit_tm <= ? " ;
         sql += " ORDER BY visit_tm ASC ";
 
-        String[] args = { "" + yyyy, "" + mm, "" + dd, "" + visit_tm };
+        String[] args = { "" + option.visitTimeFr, "" + option.visitTimeTo };
         Cursor cursor = db.rawQuery(sql, args);
 
-        boolean  isMapDetail = this.isMapDetail() ;
-        int color = Color.GRAY ;
-        int width = isMapDetail ? 30: 15 ;
+        int color = option.color ;
+        int lineWidth = option.lineWidth;
 
-        PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
+        PolylineOptions polyOptions = new PolylineOptions().width( lineWidth ).color( color ).geodesic(true);
         polyOptions.jointType(JointType.ROUND);
 
         //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
@@ -720,9 +741,16 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         int cnt = 0 ;
         long id;
+        long visit_tm = 0 ;
         double latitude, longitude;
-        String dateTime;
-        SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS;
+        String dateTimeTextLog;
+        SimpleDateFormat dfLog = ComInterface.yyyMMdd_HHmmSS;
+        String dateTimeTextUi;
+        SimpleDateFormat dfUi = new SimpleDateFormat("HH:mm:ss");
+
+        int idx = 0 ;
+
+        LatLng latLng = null ;
 
         while (cursor.moveToNext()) {
             id = cursor.getLong(cursor.getColumnIndex("id"));
@@ -731,26 +759,42 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             visit_tm = cursor.getLong(cursor.getColumnIndex("visit_tm"));
 
-            dateTime = df.format( new Date( visit_tm ) ) ;
+            dateTimeTextLog = dfLog.format( new Date( visit_tm ) ) ;
 
             String info = "Gps Log on DB: id = %d, lon = %f, lat = %f, visit_tm = %s ";
-            info = String.format(info, id, longitude, latitude, dateTime);
+            info = String.format(info, id, longitude, latitude, dateTimeTextLog );
             Log.d(TAG, info);
 
-            LatLng latLng = new LatLng( latitude, longitude );
+            latLng = new LatLng( latitude, longitude );
             polyOptions.add( latLng );
 
+            if( 0 == idx ) {
+                this.gpsLogTimeFr.setText( dfUi.format( new Date( visit_tm )));
+                this.gpsLogTimeCurr.setText( "" );
+            }
+
             cnt ++ ;
+            idx ++ ;
         }
         cursor.close();
 
-        if( cnt > 2 ) {
+        if( latLng != null ) {
+
+            this.gpsLogTimeTo.setText( dfUi.format( new Date( visit_tm ) ) );
+
+            while( cnt < 2 ) {
+                polyOptions.add( latLng );
+                cnt ++ ;
+            }
+
             if (null != gpsLogPathPoly) {
                 gpsLogPathPoly.remove();
             }
 
             gpsLogPathPoly = googleMap.addPolyline(polyOptions);
         }
+
+
     }
     // showGpsLogFromDb
 

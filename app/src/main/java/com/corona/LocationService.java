@@ -331,20 +331,6 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         this.requestQueue.add( jsonObjectRequest );
     }
 
-    class Corona {
-        long id;
-        long deleted, checked, notification ;
-        long up_dt;
-        String place;
-        String patient;
-        long visit_fr;
-        long visit_to;
-        float latitude = 0;
-        float longitude = 0 ;
-        String title, text, content ;
-        String up_dt_str ;
-    }
-
     private void showCoronaInfectionAlarmNotifications( ) {
 
         if( true ) {
