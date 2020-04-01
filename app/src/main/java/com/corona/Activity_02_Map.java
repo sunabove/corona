@@ -729,6 +729,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Log.d( TAG, "gps all min visit_tm = " + df.format( minTm ) );
                 Log.d( TAG, "gps all max visit_tm = " + df.format( maxTm ) );
 
+                // max date 을 먼저 설정하여야 제대로 UI에 반영된다. android 버그인 듯 함.
                 this.calendarView.setMaxDate( maxTm );
                 this.calendarView.setMinDate( minTm );
             }
