@@ -10,7 +10,6 @@ public class CoronaModel {
     @Getter @Setter private String version_number;
     @Getter @Setter private String feature;
 
-
     public CoronaModel() {
     }
 

@@ -16,10 +16,10 @@ import java.util.ArrayList;
 
 public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View.OnClickListener{
 
-    private ArrayList<CoronaModel> dataSet;
-    Context mContext;
+    public ArrayList<CoronaModel> dataSet ;
+    private Context context;
+    private int lastPosition = -1;
 
-    // View lookup cache
     private static class ViewHolder {
         TextView txtName;
         TextView txtType;
@@ -27,17 +27,13 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
         ImageView info;
     }
 
-    public CoronaDataAdapter(ArrayList<CoronaModel> data, Context context) {
-        super(context, R.layout.corona_row_item, data);
-        this.dataSet = data;
-        this.mContext=context;
-
+    public CoronaDataAdapter(Context context, ArrayList<CoronaModel> dataSet) {
+        super(context, R.layout.corona_row_item, dataSet);
+        this.context = context;
     }
-
 
     @Override
     public void onClick(View v) {
-
         int position=(Integer) v.getTag();
         Object object= getItem(position);
         CoronaModel coronaModel =(CoronaModel)object;
@@ -50,8 +46,6 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
                 break;
         }
     }
-
-    private int lastPosition = -1;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -79,17 +73,16 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
             result=convertView;
         }
 
-        Animation animation = AnimationUtils.loadAnimation(mContext, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
+        Animation animation = AnimationUtils.loadAnimation(context, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
         result.startAnimation(animation);
         lastPosition = position;
-
 
         viewHolder.txtName.setText(coronaModel.getName());
         viewHolder.txtType.setText(coronaModel.getType());
         viewHolder.txtVersion.setText(coronaModel.getVersion_number());
         viewHolder.info.setOnClickListener(this);
         viewHolder.info.setTag(position);
-        // Return the completed view to render on screen
+
         return convertView;
     }
 
