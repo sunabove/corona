@@ -32,6 +32,18 @@
         app:maxImageSize="40dp"
         app:srcCompat="@drawable/calendar_01" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/showCoronaDataListBtn"
+        style="@style/Theme.MaterialComponents.Light.NoActionBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginRight="131dp"
+        android:layout_marginBottom="10dp"
+        app:backgroundTint="#8BC34A"
+        app:maxImageSize="40dp"
+        app:srcCompat="@drawable/corona_data_list" />
+
     <fragment
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"

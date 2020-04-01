@@ -85,11 +85,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private LocationResult lastLocationResult ;
 
     protected FloatingActionButton goBack ;
-
     protected FloatingActionButton showCalendar ;
+    protected FloatingActionButton showCoronaDataListBtn ;
+
     private CalendarView calendarView;
     private LinearLayout togglePane;
     private ImageButton hideCalendarPaneBtn;
+
     private TextView gpsLogTimeFr ;
     private TextView gpsLogTimeTo ;
     private TextView gpsLogSeekBarProgress ;
@@ -145,6 +147,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogSeekBar.setProgress( 100 );
 
         this.goBack = this.findViewById(R.id.goBack);
+
+        this.showCoronaDataListBtn = this.findViewById(R.id.showCoronaDataListBtn);
+
+        this.showCoronaDataListBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                whenShowCoronaDataListBtnClicked();
+            }
+        });
 
         if( null != goBack ) {
             this.goBack.setOnClickListener(new View.OnClickListener() {
@@ -222,6 +233,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         this.hideActionBar();
     }
+
+    // whenShowCoronaDataListBtnClicked
+    private void whenShowCoronaDataListBtnClicked () {
+        startActivity(new android.content.Intent(this, Activity_03_CoronaList.class));
+    }
+    // -- whenShowCoronaDataListBtnClicked
 
     /*
     private void startCoronaMarkerDbShowHandler() {

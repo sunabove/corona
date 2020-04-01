@@ -198,13 +198,11 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     final int NOTIFICATION_ID = 100;
 
     private void showNotificationAndStartForegroundService() {
-
         final String CHANNEL_ID = BuildConfig.APPLICATION_ID.concat("_notification_id");
         final String CHANNEL_NAME = BuildConfig.APPLICATION_ID.concat("_notification_name");
 
         NotificationCompat.Builder builder;
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         String serviceName = getString(R.string.location_service_name);
         String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
@@ -221,15 +219,18 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             builder.setSmallIcon(R.mipmap.ic_launcher);
             builder.setContentTitle(serviceName);
             builder.setContentText(contentText);
+
             startForeground(NOTIFICATION_ID, builder.build());
         } else {
             builder = new NotificationCompat.Builder(this, CHANNEL_ID);
             builder.setSmallIcon(R.mipmap.ic_launcher);
             builder.setContentTitle(serviceName);
             builder.setContentText(contentText);
+
             startForeground(NOTIFICATION_ID, builder.build());
         }
     }
+    // -- showNotificationAndStartForegroundService
 
     private void whenLocationUpdated(LocationResult locationResult) {
         if( null == locationResult || null == locationResult.getLastLocation() ) {
@@ -246,6 +247,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         this.checkCurrDataAndRemoveOldGpsData();
     }
+    // -- whenLocationUpdated
 
     private long prevCheckDataTime = 0 ;
 
@@ -451,12 +453,13 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
     }
 
-    private void showColonaDetectionAlarmNotificationImpl( Corona corona) {
+    private void showColonaDetectionAlarmNotificationImpl( Corona corona ) {
         int NOTIFICATION_ID = 888;
         String CHANNEL_ID = "999";
 
         // Create an Intent for the activity you want to start
-        Intent resultIntent = new Intent(this, Activity_02_Map.class);
+        Intent resultIntent = new Intent(this, Activity_02_Map.class );
+
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addNextIntentWithParentStack(resultIntent);
@@ -465,7 +468,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
-        builder.setSmallIcon(R.drawable.corona_alarm);
+        builder.setSmallIcon( R.drawable.corona_alarm );
         builder.setContentTitle( corona.title );
         builder.setContentText( corona.text );
         builder.setContentInfo( corona.content );
