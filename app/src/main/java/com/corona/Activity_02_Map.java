@@ -157,7 +157,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                gpsLogSeekBarProgress.setText(String.format("%02d%s", progress, "%" ));
+                gpsLogSeekBarProgress.setText(String.format("%d%s", progress, "%" ));
 
                 if( fromUser ) {
                     whenGpsLogSeekBarMoved();
@@ -429,7 +429,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             String infection = 1 == checked ? "동선 겹침" : "" ;
 
             title = String.format("[%d] %s / %s / %s", id, place, patient , infection );
-            snippet = String.format( "%s ~ %s", df.format( new Date( visit_fr) ) , df.format( new Date( visit_to ) ) );
+            snippet = String.format( "%s ~ %s", df.format( visit_fr ) , df.format( visit_to ) );
 
             up_dt_str = df.format( new Date( up_dt ) ) ;
 
@@ -717,7 +717,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             sql += " , IFNULL( MAX( visit_tm ), ? ) AS visit_tm_max FROM gps ";
             sql += " LIMIT 1 ";
 
-            String[] args = { "" + todayStartTime, "" + now};
+            String[] args = { "" + todayStartTime, "" + now };
             Cursor cursor = db.rawQuery(sql, args);
 
             SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
@@ -897,7 +897,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( 0 < calendarTime ) {
             SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
-            Log.d( TAG, "showGpsLogFromDb calendarTime = " + df.format( new Date( calendarTime) ) );
+            Log.d( TAG, "showGpsLogFromDb calendarTime = " + df.format( calendarTime ) );
             option.visitTimeFr = calendarTime;
             option.visitTimeTo = calendarTime + ONE_DAY_TIME -1 ;
             if( option.visitTimeTo > this.mapReadyTime ) {
@@ -906,10 +906,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         } else {
             long now = System.currentTimeMillis();
             long todayStartTime = this.getTodayStartTime() ;
-            if( todayStartTime < now - 2*ONE_HOUR_TIME ) {
-                option.visitTimeFr = now - 2*ONE_HOUR_TIME ;
-            } else {
+            if( now > todayStartTime + 2*ONE_HOUR_TIME ) {
+                Log.d( TAG, "now is larger than today + 2 hr." );
                 option.visitTimeFr = todayStartTime;
+            } else {
+                Log.d( TAG, "now is less than today + 2 hr." );
+                option.visitTimeFr = now - 2*ONE_HOUR_TIME ;
             }
             option.visitTimeTo = this.mapReadyTime ;
         }
@@ -960,8 +962,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         SimpleDateFormat dfLog = ComInterface.yyyMMdd_HHmmSS;
 
         Log.d( TAG, String.format("[%d] showGpsLogFromDbWithOption", showGpsLogFromDbWithOptionCnt) );
-        Log.d( TAG, "visitTimeFr = " + dfLog.format( new Date( option.visitTimeFr)) );
-        Log.d( TAG, "visitTimeTo = " + dfLog.format( new Date( option.visitTimeTo)) );
+        Log.d( TAG, "visitTimeFr = " + dfLog.format( option.visitTimeFr) );
+        Log.d( TAG, "visitTimeTo = " + dfLog.format( option.visitTimeTo) );
         showGpsLogFromDbWithOptionCnt ++ ;
 
         DbHelper dbHelper = this.dbHelper;
@@ -991,11 +993,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         double latitude, longitude;
         String dateTimeTextLog;
         String dateTimeTextUi;
-        SimpleDateFormat dfUi = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat dfUi = new SimpleDateFormat("HH:mm" );
 
         if( true ) {
-            this.gpsLogTimeFr.setText( dfUi.format( new Date( option.visitTimeFr )));
-            this.gpsLogSeekBarProgress.setText(String.format("%02d%s", option.progress, "%" ));
+            this.gpsLogTimeFr.setText( dfUi.format( option.visitTimeFr ));
+            this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "%" ));
         }
 
         int idx = 0 ;
@@ -1010,7 +1012,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             visit_tm = cursor.getLong(cursor.getColumnIndex("visit_tm"));
 
-            dateTimeTextLog = dfLog.format( new Date( visit_tm ) ) ;
+            dateTimeTextLog = dfLog.format( visit_tm ) ;
 
             String info = "Gps Log on DB: id = %d, lon = %f, lat = %f, visit_tm = %s ";
             info = String.format(info, id, longitude, latitude, dateTimeTextLog );
@@ -1027,11 +1029,11 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         if( 99 < option.progress ) {
             this.gpsLogSeekBarProgress.setText( "100%" );
         } else {
-            String visitTmToText = dfUi.format(new Date(option.visitTimeTo));
-            this.gpsLogSeekBarProgress.setText(String.format("%02d%s", option.progress, "% " + visitTmToText));
+            String visitTmToText = dfUi.format( option.visitTimeTo );
+            this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "% " + visitTmToText));
         }
 
-        this.gpsLogTimeTo.setText( dfUi.format( new Date( option.visitTimeToUi) ) );
+        this.gpsLogTimeTo.setText( dfUi.format( option.visitTimeToUi ) );
 
         if (null != gpsLogPathPoly) {
             gpsLogPathPoly.remove();
