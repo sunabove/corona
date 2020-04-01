@@ -413,10 +413,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
                 corona.title = String.format("[%d] %s / %s / 동선 겹침", corona.id, corona.place, corona.patient);
-                corona.text = String.format("%s ~ %s / 자가 격리 요망", df.format(new Date(corona.visit_fr)), df.format(new Date(corona.visit_to)));
+                corona.text = String.format("%s ~ %s / 자가 격리 요망", df.format( corona.visit_fr ), df.format( corona.visit_to ));
                 corona.content = "동선 겹침 / 자가 격리 요망";
 
-                corona.up_dt_str = df.format(new Date(corona.up_dt));
+                corona.up_dt_str = df.format( corona.up_dt );
 
                 String info = String.format("corona notification notification = %d, title = %s, text = %s, latitude = %f, longitude = %f, up_dt = %s",
                         corona.notification, corona.title, corona.text, corona.latitude, corona.longitude, corona.up_dt_str);
