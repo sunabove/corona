@@ -28,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -706,6 +707,35 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             this.setHighlightedDays();
         }
 
+        if( togglePane.getVisibility() == View.INVISIBLE ) {
+            SQLiteDatabase db = this.dbHelper.rdb;
+
+            long todayStartTime = this.getTodayStartTime() ;
+            long now = System.currentTimeMillis();
+
+            String sql = "SELECT IFNULL( MIN( visit_tm ) , ? ) AS visit_tm_min " ;
+            sql += " , IFNULL( MAX( visit_tm ), ? ) AS visit_tm_max FROM gps ";
+            sql += " LIMIT 1 ";
+
+            String[] args = { "" + todayStartTime, "" + now};
+            Cursor cursor = db.rawQuery(sql, args);
+
+            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
+
+            while( cursor.moveToNext() ) {
+                long minTm = cursor.getLong( 0 );
+                long maxTm = cursor.getLong( 1 );
+
+                Log.d( TAG, "gps all min visit_tm = " + df.format( minTm ) );
+                Log.d( TAG, "gps all max visit_tm = " + df.format( maxTm ) );
+
+                this.calendarView.setMaxDate( maxTm );
+                this.calendarView.setMinDate( minTm );
+            }
+
+            cursor.close();
+        }
+
         togglePane.setVisibility( togglePane.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
     }
 
@@ -726,6 +756,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         calendar.set( Calendar.MILLISECOND, 0 );
 
         this.calendarTime = calendar.getTimeInMillis();
+
+        this.gpsLogSeekBar.setProgress( 100 );
 
         this.showGpsLogFromDb(100, this.calendarTime );
     }
@@ -991,9 +1023,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
         cursor.close();
 
-        String visitTmToText = dfUi.format( new Date( option.visitTimeTo ) ) ;
-
-        this.gpsLogSeekBarProgress.setText(String.format("%02d%s", option.progress, "% " + visitTmToText ) );
+        if( 99 < option.progress ) {
+            this.gpsLogSeekBarProgress.setText( "100%" );
+        } else {
+            String visitTmToText = dfUi.format(new Date(option.visitTimeTo));
+            this.gpsLogSeekBarProgress.setText(String.format("%02d%s", option.progress, "% " + visitTmToText));
+        }
 
         this.gpsLogTimeTo.setText( dfUi.format( new Date( option.visitTimeToUi) ) );
 
