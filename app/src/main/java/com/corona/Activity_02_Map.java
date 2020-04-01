@@ -156,7 +156,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                gpsLogSeekBarProgress.setText( progress + "%" );
+                gpsLogSeekBarProgress.setText(String.format("%02d%s", progress, "%" ));
+
                 if( fromUser ) {
                     whenGpsLogSeekBarMoved();
                 }else {
@@ -961,7 +962,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( true ) {
             this.gpsLogTimeFr.setText( dfUi.format( new Date( option.visitTimeFr )));
-            this.gpsLogSeekBarProgress.setText( option.progress + "%");
+            this.gpsLogSeekBarProgress.setText(String.format("%02d%s", option.progress, "%" ));
         }
 
         int idx = 0 ;
@@ -989,6 +990,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             idx ++ ;
         }
         cursor.close();
+
+        String visitTmToText = dfUi.format( new Date( option.visitTimeTo ) ) ;
+
+        this.gpsLogSeekBarProgress.setText(String.format("%02d%s", option.progress, "% " + visitTmToText ) );
 
         this.gpsLogTimeTo.setText( dfUi.format( new Date( option.visitTimeToUi) ) );
 
