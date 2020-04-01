@@ -20,13 +20,6 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
     private Context context;
     private int lastPosition = -1;
 
-    private static class ViewHolder {
-        TextView txtName;
-        TextView txtType;
-        TextView txtVersion;
-        ImageView info;
-    }
-
     public CoronaDataAdapter(Context context, ArrayList<CoronaModel> dataSet) {
         super(context, R.layout.corona_row_item, dataSet);
         this.context = context;
@@ -38,12 +31,9 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
         Object object= getItem(position);
         CoronaModel coronaModel =(CoronaModel)object;
 
-        switch (v.getId()) {
-            case R.id.item_info:
-                Snackbar.make(v, "Release date " + coronaModel.getFeature(), Snackbar.LENGTH_LONG)
-                        .setAction("No action", null).show();
-
-                break;
+        if (v.getId() == R.id.item_info ) {
+            Snackbar.make(v, "Release date " + coronaModel.getFeature(), Snackbar.LENGTH_LONG)
+                    .setAction("No action", null).show();
         }
     }
 
@@ -51,6 +41,14 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
         CoronaModel coronaModel = getItem(position);
+
+        class ViewHolder {
+            TextView txtName;
+            TextView txtType;
+            TextView txtVersion;
+            ImageView info;
+        }
+
         // Check if an existing view is being reused, otherwise inflate the view
         ViewHolder viewHolder; // view lookup cache stored in tag
 
