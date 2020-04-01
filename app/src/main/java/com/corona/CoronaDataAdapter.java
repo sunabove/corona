@@ -14,9 +14,9 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
-public class CustomAdapter extends ArrayAdapter<DataModel> implements View.OnClickListener{
+public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View.OnClickListener{
 
-    private ArrayList<DataModel> dataSet;
+    private ArrayList<CoronaModel> dataSet;
     Context mContext;
 
     // View lookup cache
@@ -27,7 +27,7 @@ public class CustomAdapter extends ArrayAdapter<DataModel> implements View.OnCli
         ImageView info;
     }
 
-    public CustomAdapter(ArrayList<DataModel> data, Context context) {
+    public CoronaDataAdapter(ArrayList<CoronaModel> data, Context context) {
         super(context, R.layout.corona_row_item, data);
         this.dataSet = data;
         this.mContext=context;
@@ -40,11 +40,11 @@ public class CustomAdapter extends ArrayAdapter<DataModel> implements View.OnCli
 
         int position=(Integer) v.getTag();
         Object object= getItem(position);
-        DataModel dataModel=(DataModel)object;
+        CoronaModel coronaModel =(CoronaModel)object;
 
         switch (v.getId()) {
             case R.id.item_info:
-                Snackbar.make(v, "Release date " +dataModel.getFeature(), Snackbar.LENGTH_LONG)
+                Snackbar.make(v, "Release date " + coronaModel.getFeature(), Snackbar.LENGTH_LONG)
                         .setAction("No action", null).show();
 
                 break;
@@ -56,7 +56,7 @@ public class CustomAdapter extends ArrayAdapter<DataModel> implements View.OnCli
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        DataModel dataModel = getItem(position);
+        CoronaModel coronaModel = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view
         ViewHolder viewHolder; // view lookup cache stored in tag
 
@@ -84,9 +84,9 @@ public class CustomAdapter extends ArrayAdapter<DataModel> implements View.OnCli
         lastPosition = position;
 
 
-        viewHolder.txtName.setText(dataModel.getName());
-        viewHolder.txtType.setText(dataModel.getType());
-        viewHolder.txtVersion.setText(dataModel.getVersion_number());
+        viewHolder.txtName.setText(coronaModel.getName());
+        viewHolder.txtType.setText(coronaModel.getType());
+        viewHolder.txtVersion.setText(coronaModel.getVersion_number());
         viewHolder.info.setOnClickListener(this);
         viewHolder.info.setTag(position);
         // Return the completed view to render on screen
