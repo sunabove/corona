@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".Activity_03_CoronaList">
 
-    <CoronaListView
+    <com.corona.CoronaListView
         android:id="@+id/coronaListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
