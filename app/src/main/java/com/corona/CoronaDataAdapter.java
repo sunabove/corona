@@ -35,15 +35,25 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
     }
 
     @Override
-    public void onClick(View v) {
-        int position=(Integer) v.getTag();
+    public void onClick(View view) {
+        int position=(Integer) view.getTag();
 
         Corona corona =(Corona) this.getItem(position) ;
 
-        if (v.getId() == R.id.item_info ) {
-            String info = this.getSnackbarInfo(corona);
-            Snackbar.make(v, info, Snackbar.LENGTH_LONG)
-                    .setAction("No action", null).show();
+        if (view.getId() == R.id.item_info ) {
+            String info = "Info = " + this.getSnackbarInfo(corona);
+            Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_LONG);
+            snackbar.setAction("No action", null);
+            snackbar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                }
+
+                @Override
+                public void onShown(Snackbar snackbar) {
+                }
+            });
+            snackbar.show();
         }
     }
 

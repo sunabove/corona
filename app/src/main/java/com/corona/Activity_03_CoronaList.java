@@ -30,8 +30,18 @@ public class Activity_03_CoronaList extends ComActivity {
 
                 String info = coronaListView.adapter.getSnackbarInfo( corona );
 
-                Snackbar.make(view, info, Snackbar.LENGTH_LONG)
-                        .setAction("No action", null).show();
+                Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_LONG);
+                snackbar.setAction("No action", null);
+                snackbar.addCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event) {
+                    }
+
+                    @Override
+                    public void onShown(Snackbar snackbar) {
+                    }
+                });
+                snackbar.show();
             }
         });
 
