@@ -23,7 +23,7 @@
                 android:layout_width="30dp"
                 android:layout_height="match_parent"
                 android:scaleType="fitCenter"
-                app:srcCompat="@drawable/corona_pin_02" />
+                app:srcCompat="@drawable/corona_place_01" />
 
             <TextView
                 android:id="@+id/textView13"
