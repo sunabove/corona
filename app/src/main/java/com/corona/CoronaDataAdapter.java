@@ -75,6 +75,7 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
 
         Animation animation = AnimationUtils.loadAnimation(context, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
         convertView.startAnimation(animation);
+
         lastPosition = position;
 
         SimpleDateFormat df = ComInterface.MMdd_HHmmSS;

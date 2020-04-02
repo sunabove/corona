@@ -33,4 +33,11 @@ public class Activity_03_CoronaList extends ComActivity {
         });
 
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        this.coronaListView.initData();
+    }
 }

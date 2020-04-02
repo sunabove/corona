@@ -380,8 +380,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             return ;
         }
 
-        DbHelper dbHelper = this.dbHelper;
-
         GoogleMap googleMap = this.googleMap;
         LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
         LatLng sw = bounds.southwest;
@@ -394,6 +392,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         double minY = swTm.y < neTm.y ? swTm.y : neTm.y ;
         double maxX = swTm.x > neTm.x ? swTm.x : neTm.x ;
         double maxY = swTm.y > neTm.y ? swTm.y : neTm.y ;
+
+        DbHelper dbHelper = this.dbHelper;
 
         SQLiteDatabase db = dbHelper.wdb;
 
@@ -447,7 +447,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             title = String.format("[%d] %s / %s / %s", id, place, patient , infection );
             snippet = String.format( "%s ~ %s", df.format( visit_fr ) , df.format( visit_to ) );
 
-            up_dt_str = df.format( new Date( up_dt ) ) ;
+            up_dt_str = df.format( up_dt ) ;
 
             info = String.format("corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
                     deleted, checked, notification, title, snippet, latitude, longitude, up_dt_str ) ;
