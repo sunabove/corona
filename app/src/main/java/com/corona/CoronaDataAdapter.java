@@ -52,27 +52,24 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
         // Check if an existing view is being reused, otherwise inflate the view
         ViewHolder viewHolder; // view lookup cache stored in tag
 
-        final View result;
-
         if (convertView == null) {
-            viewHolder = new ViewHolder();
             LayoutInflater inflater = LayoutInflater.from(getContext());
             convertView = inflater.inflate(R.layout.corona_row_item, parent, false);
+
+            viewHolder = new ViewHolder();
+
             viewHolder.txtName = (TextView) convertView.findViewById(R.id.name);
             viewHolder.txtType = (TextView) convertView.findViewById(R.id.type);
             viewHolder.txtVersion = (TextView) convertView.findViewById(R.id.version_number);
             viewHolder.info = (ImageView) convertView.findViewById(R.id.item_info);
 
-            result=convertView;
-
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
-            result=convertView;
         }
 
         Animation animation = AnimationUtils.loadAnimation(context, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
-        result.startAnimation(animation);
+        convertView.startAnimation(animation);
         lastPosition = position;
 
         viewHolder.txtName.setText(coronaModel.getName());
