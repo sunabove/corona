@@ -37,7 +37,8 @@ public interface ComInterface {
     float LOCATION_REQUEST_DISPLACEMENT_METERS = 5.0f;
     int LOCATION_REQUEST_PRIORITY = LocationRequest.PRIORITY_HIGH_ACCURACY ;
 
-    SimpleDateFormat yyyMMdd_HHmmSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat yyyyMMdd_HHmmSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat MMdd_HHmmSS = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     long CORONA_DB_GET_INTERVAL = 1*60*1_000;
     //long CORONA_DB_GET_INTERVAL = 10*1_000;

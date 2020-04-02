@@ -28,7 +28,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.SimpleExpandableListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -737,7 +736,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             String[] args = { "" + todayStartTime, "" + now };
             Cursor cursor = db.rawQuery(sql, args);
 
-            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
+            SimpleDateFormat df = ComInterface.yyyyMMdd_HHmmSS;
 
             while( cursor.moveToNext() ) {
                 long minTm = cursor.getLong( 0 );
@@ -913,7 +912,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         option.lineWidth = isMapDetail ? 30: 15 ;
 
         if( 0 < calendarTime ) {
-            SimpleDateFormat df = ComInterface.yyyMMdd_HHmmSS ;
+            SimpleDateFormat df = ComInterface.yyyyMMdd_HHmmSS;
             Log.d( TAG, "showGpsLogFromDb calendarTime = " + df.format( calendarTime ) );
             option.visitTimeFr = calendarTime;
             option.visitTimeTo = calendarTime + ONE_DAY_TIME -1 ;
@@ -976,7 +975,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void showGpsLogFromDbWithOption( GpsLogPaintOption option ) {
 
-        SimpleDateFormat dfLog = ComInterface.yyyMMdd_HHmmSS;
+        SimpleDateFormat dfLog = ComInterface.yyyyMMdd_HHmmSS;
 
         Log.d( TAG, String.format("[%d] showGpsLogFromDbWithOption", showGpsLogFromDbWithOptionCnt) );
         Log.d( TAG, "visitTimeFr = " + dfLog.format( option.visitTimeFr) );
