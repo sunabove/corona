@@ -41,7 +41,7 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         Corona corona =(Corona) this.getItem(position) ;
 
         if (view.getId() == R.id.item_info ) {
-            String info = "Info = " + this.getSnackbarInfo(corona);
+            String info = " " + this.getSnackbarInfo(corona);
             Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_LONG);
             snackbar.setAction("No action", null);
             snackbar.addCallback(new Snackbar.Callback() {
