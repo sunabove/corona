@@ -14,13 +14,13 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
-public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View.OnClickListener{
+public class CoronaDataAdapter extends ArrayAdapter<Corona> implements View.OnClickListener{
 
-    public ArrayList<CoronaModel> dataSet ;
+    public ArrayList<Corona> dataSet ;
     private Context context;
     private int lastPosition = -1;
 
-    public CoronaDataAdapter(Context context, ArrayList<CoronaModel> dataSet) {
+    public CoronaDataAdapter(Context context, ArrayList<Corona> dataSet) {
         super(context, R.layout.corona_row_item, dataSet);
         this.context = context;
     }
@@ -29,10 +29,10 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
     public void onClick(View v) {
         int position=(Integer) v.getTag();
         Object object= getItem(position);
-        CoronaModel coronaModel =(CoronaModel)object;
+        Corona corona =(Corona)object;
 
         if (v.getId() == R.id.item_info ) {
-            Snackbar.make(v, "Release date " + coronaModel.getVisitTimeTo(), Snackbar.LENGTH_LONG)
+            Snackbar.make(v, "Release date " + corona.visit_to, Snackbar.LENGTH_LONG)
                     .setAction("No action", null).show();
         }
     }
@@ -40,7 +40,7 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
-        CoronaModel coronaModel = getItem(position);
+        Corona corona = getItem(position);
 
         class ViewHolder {
             TextView txtName;
@@ -60,7 +60,7 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
 
             viewHolder.txtName = (TextView) convertView.findViewById(R.id.coronaPatient);
             viewHolder.txtType = (TextView) convertView.findViewById(R.id.coronaPlace);
-            viewHolder.txtVersion = (TextView) convertView.findViewById(R.id.coronaVisitTimeFr);
+            viewHolder.txtVersion = (TextView) convertView.findViewById(R.id.coronaVisitFr);
             viewHolder.info = (ImageView) convertView.findViewById(R.id.item_info);
 
             convertView.setTag(viewHolder);
@@ -72,9 +72,9 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
         convertView.startAnimation(animation);
         lastPosition = position;
 
-        viewHolder.txtName.setText(coronaModel.getPlace());
-        viewHolder.txtType.setText(coronaModel.getPatient());
-        viewHolder.txtVersion.setText(coronaModel.getVisitTimeFr());
+        viewHolder.txtName.setText(corona.place);
+        viewHolder.txtType.setText(corona.patient);
+        viewHolder.txtVersion.setText( "" + corona.visit_fr);
         viewHolder.info.setOnClickListener(this);
         viewHolder.info.setTag(position);
 

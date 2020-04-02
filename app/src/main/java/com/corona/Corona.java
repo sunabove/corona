@@ -14,4 +14,14 @@ public class Corona {
 
     String title, text, content ;
     String up_dt_str ;
+
+    public Corona() {
+    }
+
+    public Corona(String place, String patient, long visit_fr, long visit_to) {
+        this.place = place;
+        this.patient = patient;
+        this.visit_fr = visit_fr;
+        this.visit_to = visit_to;
+    }
 }

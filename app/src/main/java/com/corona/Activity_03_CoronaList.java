@@ -25,9 +25,9 @@ public class Activity_03_CoronaList extends ComActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                CoronaModel coronaModel = coronaListView.dataSet.get(position);
+                Corona coronaModel = coronaListView.dataSet.get(position);
 
-                Snackbar.make(view, coronaModel.getPlace()+"\n"+ coronaModel.getPatient()+" API: "+ coronaModel.getVisitTimeFr(), Snackbar.LENGTH_LONG)
+                Snackbar.make(view, coronaModel.place+"\n"+ coronaModel.patient+" API: "+ coronaModel.visit_fr, Snackbar.LENGTH_LONG)
                         .setAction("No action", null).show();
             }
         });
