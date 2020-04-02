@@ -92,9 +92,9 @@ public class CoronaListView extends ListView implements ComInterface {
                 corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
                 corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-                String infection = 1 == corona.checked ? "동선 겹침" : "" ;
+                corona.infection = 1 == corona.checked ? "동선 겹침" : "" ;
 
-                corona.title = String.format("[%d] %s / %s / %s", corona.id, corona.place, corona.patient , infection );
+                corona.title = String.format("[%d] %s / %s / %s", corona.id, corona.place, corona.patient , corona.infection );
                 String snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
 
                 corona.up_dt_str = df.format( corona.up_dt ) ;

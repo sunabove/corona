@@ -7,11 +7,13 @@ public class Corona {
 
     String place;
     String patient;
+
     long visit_fr;
     long visit_to;
     float latitude = 0;
     float longitude = 0 ;
 
+    String infection ;
     String title, text, content ;
     String up_dt_str ;
 
