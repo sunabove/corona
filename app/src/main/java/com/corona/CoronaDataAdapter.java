@@ -28,8 +28,8 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
 
     public String getSnackbarInfo(Corona corona) {
         Corona c = corona;
-        SimpleDateFormat df = ComInterface.MMdd_HHmmSS ;
-        String info = String.format("동선 겹침: %s ~ %s, 위도 %.4f, 경도 %.4f", df.format(c.visit_fr), df.format(c.visit_to), c.latitude, c.longitude ) ;
+        SimpleDateFormat df = ComInterface.MMdd_HHmm ;
+        String info = String.format("동선 겹침: %s ~ %s\n위도 %.4f, 경도 %.4f", df.format(c.visit_fr), df.format(c.visit_to), c.latitude, c.longitude ) ;
 
         return info;
     }
