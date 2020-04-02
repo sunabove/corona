@@ -80,8 +80,8 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
 
         SimpleDateFormat df = ComInterface.MMdd_HHmmSS;
 
-        viewHolder.patient.setText(corona.place);
-        viewHolder.place.setText(corona.patient);
+        viewHolder.patient.setText(corona.patient);
+        viewHolder.place.setText(corona.place);
         viewHolder.visitFr.setText( df.format( corona.visit_fr ));
         viewHolder.visitTo.setText( df.format( corona.visit_to ));
 
