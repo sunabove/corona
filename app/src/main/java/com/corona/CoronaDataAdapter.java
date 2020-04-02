@@ -32,7 +32,7 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
         CoronaModel coronaModel =(CoronaModel)object;
 
         if (v.getId() == R.id.item_info ) {
-            Snackbar.make(v, "Release date " + coronaModel.getFeature(), Snackbar.LENGTH_LONG)
+            Snackbar.make(v, "Release date " + coronaModel.getVisitTimeTo(), Snackbar.LENGTH_LONG)
                     .setAction("No action", null).show();
         }
     }
@@ -58,9 +58,9 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
 
             viewHolder = new ViewHolder();
 
-            viewHolder.txtName = (TextView) convertView.findViewById(R.id.name);
-            viewHolder.txtType = (TextView) convertView.findViewById(R.id.type);
-            viewHolder.txtVersion = (TextView) convertView.findViewById(R.id.version_number);
+            viewHolder.txtName = (TextView) convertView.findViewById(R.id.coronaPatient);
+            viewHolder.txtType = (TextView) convertView.findViewById(R.id.coronaPlace);
+            viewHolder.txtVersion = (TextView) convertView.findViewById(R.id.coronaVisitTimeFr);
             viewHolder.info = (ImageView) convertView.findViewById(R.id.item_info);
 
             convertView.setTag(viewHolder);
@@ -72,9 +72,9 @@ public class CoronaDataAdapter extends ArrayAdapter<CoronaModel> implements View
         convertView.startAnimation(animation);
         lastPosition = position;
 
-        viewHolder.txtName.setText(coronaModel.getName());
-        viewHolder.txtType.setText(coronaModel.getType());
-        viewHolder.txtVersion.setText(coronaModel.getVersion_number());
+        viewHolder.txtName.setText(coronaModel.getPlace());
+        viewHolder.txtType.setText(coronaModel.getPatient());
+        viewHolder.txtVersion.setText(coronaModel.getVisitTimeFr());
         viewHolder.info.setOnClickListener(this);
         viewHolder.info.setTag(position);
 

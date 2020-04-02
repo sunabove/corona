@@ -27,7 +27,7 @@ public class Activity_03_CoronaList extends ComActivity {
 
                 CoronaModel coronaModel = coronaListView.dataSet.get(position);
 
-                Snackbar.make(view, coronaModel.getName()+"\n"+ coronaModel.getType()+" API: "+ coronaModel.getVersion_number(), Snackbar.LENGTH_LONG)
+                Snackbar.make(view, coronaModel.getPlace()+"\n"+ coronaModel.getPatient()+" API: "+ coronaModel.getVisitTimeFr(), Snackbar.LENGTH_LONG)
                         .setAction("No action", null).show();
             }
         });

@@ -5,19 +5,19 @@ import lombok.Setter;
 
 public class CoronaModel {
 
-    @Getter @Setter private String name;
-    @Getter @Setter private String type;
-    @Getter @Setter private String version_number;
-    @Getter @Setter private String feature;
+    @Getter @Setter private String place;
+    @Getter @Setter private String patient;
+    @Getter @Setter private String visitTimeFr;
+    @Getter @Setter private String visitTimeTo;
 
     public CoronaModel() {
     }
 
-    public CoronaModel(String name, String type, String version_number, String feature ) {
-        this.name=name;
-        this.type=type;
-        this.version_number=version_number;
-        this.feature=feature;
+    public CoronaModel(String place, String patient, String visitTimeFr, String visitTimeTo) {
+        this.place = place;
+        this.patient = patient;
+        this.visitTimeFr = visitTimeFr;
+        this.visitTimeTo = visitTimeTo;
     }
 
 }
