@@ -5,6 +5,7 @@
       <w>coord</w>
       <w>datemillis</w>
       <w>distum</w>
+      <w>snackbar</w>
     </words>
   </dictionary>
 </component>

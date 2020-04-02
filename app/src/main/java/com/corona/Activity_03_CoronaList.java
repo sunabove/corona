@@ -6,6 +6,8 @@ import android.widget.AdapterView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.text.SimpleDateFormat;
+
 public class Activity_03_CoronaList extends ComActivity {
 
     private CoronaListView coronaListView;
@@ -24,10 +26,11 @@ public class Activity_03_CoronaList extends ComActivity {
         coronaListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Corona corona = coronaListView.dataSet.get(position);
 
-                Corona coronaModel = coronaListView.dataSet.get(position);
+                String info = coronaListView.adapter.getSnackbarInfo( corona );
 
-                Snackbar.make(view, coronaModel.place+"\n"+ coronaModel.patient+" API: "+ coronaModel.visit_fr, Snackbar.LENGTH_LONG)
+                Snackbar.make(view, info, Snackbar.LENGTH_LONG)
                         .setAction("No action", null).show();
             }
         });

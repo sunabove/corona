@@ -26,6 +26,14 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         this.context = context;
     }
 
+    public String getSnackbarInfo(Corona corona) {
+        Corona c = corona;
+        SimpleDateFormat df = ComInterface.yyyyMMdd_HHmmSS ;
+        String info = String.format("동선 겹침:\n시긴 %s ~ %s\n위치: 위도 %.4f, 경도 %.4f", df.format(c.visit_fr), df.format(c.visit_to), c.latitude, c.longitude ) ;
+
+        return info;
+    }
+
     @Override
     public void onClick(View v) {
         int position=(Integer) v.getTag();
@@ -33,7 +41,8 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         Corona corona =(Corona) this.getItem(position) ;
 
         if (v.getId() == R.id.item_info ) {
-            Snackbar.make(v, "Release date " + corona.visit_to, Snackbar.LENGTH_LONG)
+            String info = this.getSnackbarInfo(corona);
+            Snackbar.make(v, info, Snackbar.LENGTH_LONG)
                     .setAction("No action", null).show();
         }
     }

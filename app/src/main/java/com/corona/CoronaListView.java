@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class CoronaListView extends ListView implements ComInterface {
-    private CoronaDataAdapter adapter;
+    public CoronaDataAdapter adapter;
     public ArrayList<Corona> dataSet = new ArrayList<>();
 
     public CoronaListView(Context context) {
