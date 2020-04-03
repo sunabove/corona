@@ -614,9 +614,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Log.d( TAG, "resultCode = " + resultCode );
 
         if(INTENT_RESULT_CORONA_SELECTED == resultCode ) {
-            Corona corona = data.getParcelableExtra( "corona" );
-            if( null != corona ) {
-                Log.d( TAG, "corona id = " + corona.id );
+            Bundle bundle = data.getExtras();
+            if( null != bundle ) {
+                Corona corona = (Corona) bundle.getSerializable("corona");
+                if ( null != corona ) {
+                    Log.d(TAG, "corona id = " + corona.id);
+                }
             }
         }
     }

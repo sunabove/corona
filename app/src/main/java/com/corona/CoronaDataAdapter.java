@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,7 +70,9 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
                     Activity activity = getActivity(view) ;
 
                     Intent intent=new Intent();
-                    intent.putExtra( "corona", corona ) ;
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable( "corona", corona ) ;
+                    intent.putExtras(bundle);
                     activity.setResult( INTENT_RESULT_CORONA_SELECTED, intent );
 
                     activity.finish();//finishing activity
