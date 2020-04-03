@@ -231,6 +231,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         for( int i = 0 ; i < response.length() ; i ++ ) {
             try {
                 obj = response.getJSONObject( i );
+
                 long id = obj.getLong( "id" );
                 Object deleted = obj.get( "deleted" );
                 long upDt = obj.getLong( "upDt" );

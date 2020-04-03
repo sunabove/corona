@@ -196,17 +196,15 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
      * This Method shows notification for ForegroundService
      * Start Foreground Service and Show Notification to user for android all version
      */
-    final int NOTIFICATION_ID = 100;
+    static final int NOTIFICATION_ID = 100;
+
+    static final String CHANNEL_ID = BuildConfig.APPLICATION_ID.concat("_notification_id");
+    static final String CHANNEL_NAME = BuildConfig.APPLICATION_ID.concat("_notification_name");
 
     private void showNotificationAndStartForegroundService() {
-        final String CHANNEL_ID = BuildConfig.APPLICATION_ID.concat("_notification_id");
-        final String CHANNEL_NAME = BuildConfig.APPLICATION_ID.concat("_notification_name");
-
-        NotificationCompat.Builder builder;
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        String serviceName = getString(R.string.location_service_name);
-        String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
+        final NotificationCompat.Builder builder = this.createBuilder();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_NONE;
@@ -216,22 +214,35 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 mChannel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance);
                 notificationManager.createNotificationChannel(mChannel);
             }
-            builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-            builder.setSmallIcon(R.mipmap.ic_launcher);
-            builder.setContentTitle(serviceName);
-            builder.setContentText(contentText);
-
-            startForeground(NOTIFICATION_ID, builder.build());
-        } else {
-            builder = new NotificationCompat.Builder(this, CHANNEL_ID);
-            builder.setSmallIcon(R.mipmap.ic_launcher);
-            builder.setContentTitle(serviceName);
-            builder.setContentText(contentText);
-
-            startForeground(NOTIFICATION_ID, builder.build());
         }
+
+        startForeground( NOTIFICATION_ID, builder.build());
     }
     // -- showNotificationAndStartForegroundService
+
+    private NotificationCompat.Builder createBuilder() {
+
+        String serviceName = getString(R.string.location_service_name);
+        if( this.gpsInsCnt > 0 ) {
+            serviceName = String.format("%s [%d][%d]", serviceName, this.gpsInsCnt, this.coronaDbRecSuccCnt);
+        }
+
+        String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle(serviceName);
+        builder.setContentText(contentText);
+
+        return builder;
+    }
+
+    private void updateServiceNotificationTitleAndText() {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        final NotificationCompat.Builder builder = this.createBuilder();
+
+        notificationManager.notify( NOTIFICATION_ID, builder.build());
+    }
 
     private void whenLocationUpdated(LocationResult locationResult) {
         if( null == locationResult || null == locationResult.getLastLocation() ) {
@@ -247,6 +258,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         this.getCoronaDataFromServer();
 
         this.checkCurrDataAndRemoveOldGpsData();
+
+        this.updateServiceNotificationTitleAndText();
     }
     // -- whenLocationUpdated
 
@@ -315,7 +328,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         try {
             if( ! gettingCoronaDataFromServer ) {
                 gettingCoronaDataFromServer = true ;
-                getCoronaDataFromServerImpl2();
+                getCoronaDataFromServerImpl();
             }
         } catch ( Exception e ) {
             e.printStackTrace();
@@ -328,7 +341,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private int coronaDbHandlerCnt = 0;
     protected RequestQueue requestQueue ;
 
-    private void getCoronaDataFromServerImpl2( ) {
+    private void getCoronaDataFromServerImpl( ) {
         Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt));
 
         String url = "http://sunabove.iptime.org:8080/corona_map-1/corona/data.json";
@@ -377,11 +390,11 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         // Access the RequestQueue through your singleton class.
         coronaDbHandlerCnt ++ ;
+
         this.requestQueue.add( jsonObjectRequest );
     }
 
-    private void showCoronaInfectionAlarmNotifications( ) {
-
+    private void showCoronaInfectionAlarmNotifications() {
         ArrayList<Corona> coronaList = this.dbHelper.getCoronaListInfected( 0 ) ;
 
         for( Corona corona : coronaList ) {
@@ -391,9 +404,15 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
     }
 
+    private int coronaDbRecSuccCnt = 0 ;
     private void whenCoronaDbReceived(JSONArray response) {
         try {
-            this.dbHelper.whenCoronaDbReceived( response );
+            if( 0 < response.length() ) {
+                coronaDbRecSuccCnt ++ ;
+
+                this.dbHelper.whenCoronaDbReceived( response );
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
