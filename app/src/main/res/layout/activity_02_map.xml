@@ -42,7 +42,7 @@
         android:layout_marginBottom="10dp"
         app:backgroundTint="#8BC34A"
         app:maxImageSize="40dp"
-        app:srcCompat="@drawable/corona_data_list" />
+        app:srcCompat="@drawable/corona_data_list_01_no_data" />
 
     <fragment
         android:id="@+id/map"

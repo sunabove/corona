@@ -49,55 +49,11 @@ public class CoronaListView extends ListView implements ComInterface {
         dataSet.clear();
 
         if( true ) {
-            SQLiteDatabase db = DbHelper.getLocationDbHelper(this.getContext()).rdb;
+            DbHelper dbHelper = DbHelper.getLocationDbHelper(this.getContext()) ;
 
-            String sql = "" ;
-            sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
-            sql += " , latitude, longitude " ;
-            sql += " FROM corona " ;
-            sql += " WHERE  1 = 1 " ;
-            sql += " ORDER BY up_dt DESC, visit_fr, visit_to, place, patient " ;
-            ;
+            ArrayList<Corona> list = dbHelper.getCoronaListInfected();
 
-            String[] args = { };
-            Cursor cursor = db.rawQuery(sql, args);
-
-            Corona corona;
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-
-            while ( cursor.moveToNext()) {
-                corona = new Corona();
-                corona.id = cursor.getLong(cursor.getColumnIndex("id"));
-
-                corona.deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
-                corona.checked = cursor.getLong(cursor.getColumnIndex("checked"));
-                corona.notification = cursor.getLong(cursor.getColumnIndex("notification"));
-
-                corona.up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
-                corona.place = cursor.getString(cursor.getColumnIndex("place"));
-                corona.patient = cursor.getString(cursor.getColumnIndex("patient"));
-
-                corona.visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
-                corona.visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
-
-                corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
-                corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
-
-                corona.infection = 1 == corona.checked ? "동선 겹침" : "" ;
-
-                corona.title = String.format("[%d] %s / %s / %s", corona.id, corona.place, corona.patient , corona.infection );
-                String snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
-
-                corona.up_dt_str = df.format( corona.up_dt ) ;
-
-                String info = String.format("corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
-                        corona.deleted, corona.checked, corona.notification, corona.title, snippet, corona.latitude, corona.longitude, corona.up_dt_str ) ;
-                Log.d( TAG, info );
-
-                dataSet.add( corona );
-            }
-
-            cursor.close();
+            dataSet.addAll( list );
         }
 
         if( test ) {
