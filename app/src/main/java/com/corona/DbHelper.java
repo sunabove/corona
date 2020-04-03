@@ -275,18 +275,30 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     }
     // whenCoronaDbReceived
 
-    public long getCoronaListInfectedCount( int notification ) {
+    public long getCoronaListInfectedCount( int ... notifications ) {
         long cnt = 0 ;
         SQLiteDatabase db = this.rdb;
+
+        int notiLen = null == notifications ? 9 : notifications.length ;
 
         String sql = "";
         sql += " SELECT IFNULL( COUNT( DISTINCT id), 0 ) AS cnt ";
         sql += " FROM corona ";
-        sql += " WHERE deleted = 0 AND checked = 1 AND notification <= ? ";
-        ;
+        sql += " WHERE deleted = 0 AND checked = 1 " ;
+        sql += " AND notification IN (  ";
 
-        String[] args = { "" + notification };
-        Cursor cursor = db.rawQuery(sql, args);
+        for( int i = 0 ; i < notiLen ; i ++ ) {
+            sql += 0 > i ? ", ?" : "?" ;
+        }
+
+        sql += " ) " ;
+
+        String [] args = new String[ notiLen ] ;
+        for( int i = 0 ; i < notiLen ; i ++ ) {
+            args[ i ] = "" + notifications[ i ] ;
+        }
+
+        Cursor cursor = db.rawQuery(sql, args );
 
         while (cursor.moveToNext()) {
             cnt = cursor.getLong( 0 );
@@ -298,18 +310,32 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     }
     // -- getCoronaListInfectedCount
 
-    public ArrayList<Corona> getCoronaListInfected( int notification ) {
+    public ArrayList<Corona> getCoronaListInfected( int ... notifications ) {
         SQLiteDatabase db = this.rdb;
+
+        int notiLen = null == notifications ? 9 : notifications.length ;
 
         String sql = "" ;
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
-        sql += " WHERE deleted = 0 AND checked = 1 AND notification <= ? ";
+        sql += " WHERE deleted = 0 AND checked = 1 ";
+        sql += " AND notification IN (  ";
+
+        for( int i = 0 ; i < notiLen ; i ++ ) {
+            sql += 0 > i ? ", ?" : "?" ;
+        }
+
+        sql += " ) " ;
         sql += " ORDER BY notification, up_dt DESC, visit_fr, visit_to, place, patient " ;
         ;
 
-        String[] args = { "" + notification };
+
+        String [] args = new String[ notiLen ] ;
+        for( int i = 0 ; i < notiLen ; i ++ ) {
+            args[ i ] = "" + notifications[ i ] ;
+        }
+        
         Cursor cursor = db.rawQuery(sql, args);
 
         ArrayList<Corona> dataSet = new ArrayList<>();

@@ -48,13 +48,11 @@ public class CoronaListView extends ListView implements ComInterface {
 
         dataSet.clear();
 
-        if( true ) {
-            DbHelper dbHelper = DbHelper.getLocationDbHelper(this.getContext()) ;
+        DbHelper dbHelper = DbHelper.getLocationDbHelper(this.getContext()) ;
 
-            ArrayList<Corona> list = dbHelper.getCoronaListInfected( 2 );
+        ArrayList<Corona> list = dbHelper.getCoronaListInfected( 0, 1, 2 );
 
-            dataSet.addAll( list );
-        }
+        dataSet.addAll( list );
 
         if( test ) {
             dataSet.add(new Corona("Apple Pie", "Android 1.0", 1, 1));
