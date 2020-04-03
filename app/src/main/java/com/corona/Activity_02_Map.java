@@ -58,6 +58,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.locationtech.proj4j.ProjCoordinate;
 
@@ -845,13 +846,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             this.gpsLogo.setImageResource(R.drawable.gps_recording_00);
         }
 
-        TextView mapInfo = this.mapInfo;
-        float zoom = this.getZoom();
+        final float zoom = this.getZoom();
 
-        String info = "Zoom: %02.1f,  GPS: %d ";
-        info = String.format(info, zoom, gpsUpdCnt);
+        if( true ) {
+            TextView mapInfo = this.mapInfo;
+            String info = "Zoom: %02.1f,  GPS: %d ";
+            info = String.format(info, zoom, gpsUpdCnt);
 
-        mapInfo.setText(info);
+            mapInfo.setText(info);
+        }
 
         whenMapLongIdle();
 
@@ -876,7 +879,21 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         long coronaInfectedCnt = this.dbHelper.getCoronaListInfectedCount();
 
-        this.showCoronaDataListBtn.setImageResource( coronaInfectedCnt > 0 ? R.drawable.corona_data_list_02_data : R.drawable.corona_data_list_01_no_data );
+        if( 1 > coronaInfectedCnt ) {
+            this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_02_data );
+
+            this.status.setText( "지도가 로드 되었습니다.");
+        } else {
+            this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_01_no_data);
+
+            String info = String.format("%d건의 확진자 중첩 정보가 있습니다.", coronaInfectedCnt ) ;
+
+            this.status.setText( info );
+
+            Snackbar snackbar = Snackbar.make( this.status, info, Snackbar.LENGTH_SHORT );
+            snackbar.setAction("No action", null);
+            snackbar.show();
+        }
 
         this.lastZoom = zoom;
     }
