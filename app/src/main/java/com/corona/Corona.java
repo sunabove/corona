@@ -1,6 +1,8 @@
 package com.corona;
 
-public class Corona {
+import java.io.Serializable;
+
+public class Corona implements Serializable {
     long id;
     long deleted, checked, notification ;
     long up_dt;

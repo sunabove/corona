@@ -1,6 +1,9 @@
 package com.corona;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,25 +37,49 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         return info;
     }
 
+    private Activity getActivity(View view) {
+        Context context = view.getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity)context;
+            }
+            context = ((ContextWrapper)context).getBaseContext();
+        }
+        return null;
+    }
+
     @Override
     public void onClick(View view) {
         int position=(Integer) view.getTag();
 
-        Corona corona =(Corona) this.getItem(position) ;
+        final Corona corona =(Corona) this.getItem(position) ;
 
         if (view.getId() == R.id.item_info ) {
-            String info = " " + this.getSnackbarInfo(corona);
+            Corona c = corona;
+            SimpleDateFormat df = ComInterface.MMdd_HHmm ;
+            String info = String.format("동선 겹침: %s ~ %s 위도 %.4f, 경도 %.4f", df.format(c.visit_fr), df.format(c.visit_to), c.latitude, c.longitude ) ;
+            info += "\n 잠시후 지도로 이동합니다.";
+
             Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_LONG);
             snackbar.setAction("No action", null);
+
             snackbar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar snackbar, int event) {
+                    Activity activity = getActivity(view) ;
+
+                    Intent intent=new Intent();
+                    intent.putExtra( "corona", corona ) ;
+                    activity.setResult( INTENT_RESULT_CORONA_SELECTED, intent );
+
+                    activity.finish();//finishing activity
                 }
 
                 @Override
                 public void onShown(Snackbar snackbar) {
                 }
             });
+
             snackbar.show();
         }
     }

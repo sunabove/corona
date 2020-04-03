@@ -45,4 +45,6 @@ public interface ComInterface {
     long CORONA_DB_GET_INTERVAL = 1*60*1_000;
     //long CORONA_DB_GET_INTERVAL = 10*1_000;
 
+    int INTENT_RESULT_CORONA_SELECTED = 200 ;
+
 }

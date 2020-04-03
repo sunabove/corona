@@ -605,6 +605,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // check if the request code is same as what is passed  here it is 2
+        if(requestCode==2) {
+        }
+    }
+
     private void whenPermissionGranted() {
         this.onMapReady( this.googleMap );
     }
