@@ -218,12 +218,12 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private NotificationCompat.Builder createNotificationBuilder() {
 
-        String serviceName = getString(R.string.location_service_name);
-        if( this.gpsInsCnt > 0 ) {
-            serviceName = String.format("%s [ %d ] [ %d ]", serviceName, this.gpsInsCnt, this.coronaDbRecSuccCnt);
-        }
+        final String serviceName = getString(R.string.location_service_name);
 
         String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
+        if( this.gpsInsCnt > 0 ) {
+            contentText = String.format("%s [ %d ] [ %d ]", contentText, this.gpsInsCnt, this.coronaDbRecSuccCnt);
+        }
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setSmallIcon(R.mipmap.ic_launcher);
