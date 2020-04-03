@@ -858,7 +858,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         } else {
             this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_02_data );
 
-            String info = String.format("%d건의 확진자 중첩 정보가 있습니다.", coronaInfectedCnt ) ;
+            String info = String.format("%d건의 미확인 확진자 중첩 정보가 있습니다.", coronaInfectedCnt ) ;
 
             this.status.setText( info );
 
