@@ -235,7 +235,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     // whenShowCoronaDataListBtnClicked
     private void whenShowCoronaDataListBtnClicked () {
-        startActivity(new android.content.Intent(this, Activity_03_CoronaList.class));
+        Intent intent = new Intent(this, Activity_03_CoronaList.class );
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivityForResult(intent, ComInterface.INTENT_RESULT_CORONA_SELECTED );
     }
     // -- whenShowCoronaDataListBtnClicked
 
@@ -608,6 +610,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        Log.d( TAG, "resultCode = " + resultCode );
 
         if(INTENT_RESULT_CORONA_SELECTED == resultCode ) {
             Corona corona = data.getParcelableExtra( "corona" );
