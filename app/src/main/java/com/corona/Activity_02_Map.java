@@ -999,7 +999,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         PolylineOptions polyOptions = new PolylineOptions().width( lineWidth ).color( color ).geodesic(true);
         polyOptions.jointType(JointType.ROUND);
 
-        //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
         List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(10));
         polyOptions.pattern( pattern );
 
@@ -1007,9 +1006,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long id;
         long visit_tm = 0 ;
         double latitude, longitude;
+
         String dateTimeTextLog;
-        String dateTimeTextUi;
-        SimpleDateFormat dfUi = new SimpleDateFormat("HH:mm" );
+        SimpleDateFormat dfUi = ComInterface.MMdd_HHmm;
 
         if( true ) {
             this.gpsLogTimeFr.setText( dfUi.format( option.visitTimeFr ));
@@ -1045,7 +1044,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         if( 99 < option.progress ) {
             this.gpsLogSeekBarProgress.setText( "100%" );
         } else {
-            String visitTmToText = dfUi.format( option.visitTimeTo );
+            SimpleDateFormat dfUiCurr = ComInterface.HHmmSS ;
+            String visitTmToText = dfUiCurr.format( option.visitTimeTo );
             this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "% " + visitTmToText));
         }
 
