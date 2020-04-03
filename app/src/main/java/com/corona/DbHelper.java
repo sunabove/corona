@@ -275,17 +275,17 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     }
     // whenCoronaDbReceived
 
-    public long getCoronaListInfectedCount() {
+    public long getCoronaListInfectedCount( int notification ) {
         long cnt = 0 ;
         SQLiteDatabase db = this.rdb;
 
         String sql = "";
         sql += " SELECT IFNULL( COUNT( DISTINCT id), 0 ) AS cnt ";
         sql += " FROM corona ";
-        sql += " WHERE  1 = 1 ";
+        sql += " WHERE deleted = 0 AND checked = 1 AND notification <= ? ";
         ;
 
-        String[] args = {};
+        String[] args = { "" + notification };
         Cursor cursor = db.rawQuery(sql, args);
 
         while (cursor.moveToNext()) {
@@ -296,19 +296,20 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
 
         return cnt;
     }
+    // -- getCoronaListInfectedCount
 
-    public ArrayList<Corona> getCoronaListInfected() {
+    public ArrayList<Corona> getCoronaListInfected( int notification ) {
         SQLiteDatabase db = this.rdb;
 
         String sql = "" ;
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
         sql += " , latitude, longitude " ;
         sql += " FROM corona " ;
-        sql += " WHERE  1 = 1 " ;
-        sql += " ORDER BY up_dt DESC, visit_fr, visit_to, place, patient " ;
+        sql += " WHERE deleted = 0 AND checked = 1 AND notification <= ? ";
+        sql += " ORDER BY notification, up_dt DESC, visit_fr, visit_to, place, patient " ;
         ;
 
-        String[] args = { };
+        String[] args = { "" + notification };
         Cursor cursor = db.rawQuery(sql, args);
 
         ArrayList<Corona> dataSet = new ArrayList<>();
@@ -338,6 +339,9 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
 
             corona.title = String.format("[%d] %s / %s / %s", corona.id, corona.place, corona.patient , corona.infection );
             String snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
+            corona.content = "동선 겹침 / 자가 격리 요망";
+
+            corona.up_dt_str = df.format( corona.up_dt );
 
             corona.up_dt_str = df.format( corona.up_dt ) ;
 
@@ -352,4 +356,24 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
 
         return dataSet ;
     }
+    // getCoronaListInfected
+
+    public void updateCoronaNotification( Corona corona , int notification ) {
+        String table = "corona" ;
+        String whereClause =  " id = ? ";
+
+        ContentValues values = new ContentValues();
+        values.put( "notification", notification );
+
+        SQLiteDatabase db = this.wdb;
+
+        String [] args = new String[] { "" + corona.id };
+
+        int updCnt = db.update( table , values, whereClause, args );
+
+        Log.d( TAG, "notification updCnt = " + updCnt );
+    }
+    // -- updateCoronaNotification
+
+
 }

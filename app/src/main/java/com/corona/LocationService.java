@@ -47,6 +47,7 @@ import org.json.JSONArray;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class LocationService extends Service implements ComInterface, GoogleApiClient.ConnectionCallbacks,
@@ -381,67 +382,12 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private void showCoronaInfectionAlarmNotifications( ) {
 
-        if( true ) {
-            SQLiteDatabase db = this.dbHelper.wdb;
-            String sql = "";
-            sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to ";
-            sql += " , latitude, longitude ";
-            sql += " FROM corona ";
-            sql += " WHERE deleted = 0 AND checked = 1 AND notification = 0 ";
-            sql += " ORDER BY up_dt ASC ";
-            ;
+        ArrayList<Corona> coronaList = this.dbHelper.getCoronaListInfected( 0 ) ;
 
-            String[] args = { };
-            Cursor cursor = db.rawQuery(sql, args);
+        for( Corona corona : coronaList ) {
+            this.showColonaDetectionAlarmNotificationImpl(corona);
 
-            SimpleDateFormat df = new SimpleDateFormat("yy-MM-dd HH:mm");
-
-            while (cursor.moveToNext()) {
-                Corona corona = new Corona();
-                corona.id = cursor.getLong(cursor.getColumnIndex("id"));
-
-                corona.deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
-                corona.checked = cursor.getLong(cursor.getColumnIndex("checked"));
-                corona.notification = cursor.getLong(cursor.getColumnIndex("notification"));
-
-                corona.up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
-                corona.place = cursor.getString(cursor.getColumnIndex("place"));
-                corona.patient = cursor.getString(cursor.getColumnIndex("patient"));
-
-                corona.visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
-                corona.visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
-
-                corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
-                corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
-
-                corona.title = String.format("[%d] %s / %s / 동선 겹침", corona.id, corona.place, corona.patient);
-                corona.text = String.format("%s ~ %s / 자가 격리 요망", df.format( corona.visit_fr ), df.format( corona.visit_to ));
-                corona.content = "동선 겹침 / 자가 격리 요망";
-
-                corona.up_dt_str = df.format( corona.up_dt );
-
-                String info = String.format("corona notification notification = %d, title = %s, text = %s, latitude = %f, longitude = %f, up_dt = %s",
-                        corona.notification, corona.title, corona.text, corona.latitude, corona.longitude, corona.up_dt_str);
-                Log.d(TAG, info);
-
-                this.showColonaDetectionAlarmNotificationImpl(corona);
-
-                if( true ) {
-                    String table = "corona" ;
-                    String whereClause =  " id = ? ";
-
-                    ContentValues values = new ContentValues();
-                    values.put( "notification", 1 );
-
-                    args = new String[] { "" + corona.id };
-
-                    int updCnt = db.update( table , values, whereClause, args );
-
-                    Log.d( TAG, "notification updCnt = " + updCnt );
-                }
-            }
-
-            cursor.close();
+            this.dbHelper.updateCoronaNotification( corona, 1 );
         }
     }
 

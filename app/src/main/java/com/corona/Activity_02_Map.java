@@ -411,58 +411,52 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         String[] args = { "" + spec_id, "" + minX , "" + maxX , "" + minY , "" + maxY };
         Cursor cursor = db.rawQuery(sql, args);
 
-        long id;
-        long deleted, checked, notification ;
-        long up_dt;
-        String place;
-        String patient;
-        long visit_fr;
-        long visit_to;
-        float latitude = 0;
-        float longitude = 0 ;
-        String title, snippet, info ;
-        String up_dt_str ;
+        Corona corona ;
+
+        String snippet, info ;
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 
         ArrayList<Long> deletedIds = new ArrayList<>();
         final long now = System.currentTimeMillis();
 
         while ( this.isActivityAlive() && cursor.moveToNext()) {
-            id = cursor.getLong(cursor.getColumnIndex("id"));
+            corona = new Corona() ;
+            corona.id = cursor.getLong(cursor.getColumnIndex("id"));
 
-            deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
-            checked = cursor.getLong(cursor.getColumnIndex("checked"));
-            notification = cursor.getLong(cursor.getColumnIndex("notification"));
+            corona.deleted = cursor.getLong(cursor.getColumnIndex("deleted"));
+            corona.checked = cursor.getLong(cursor.getColumnIndex("checked"));
+            corona.notification = cursor.getLong(cursor.getColumnIndex("notification"));
 
-            up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
-            place = cursor.getString(cursor.getColumnIndex("place"));
-            patient = cursor.getString(cursor.getColumnIndex("patient"));
+            corona.up_dt = cursor.getLong(cursor.getColumnIndex("up_dt"));
+            corona.place = cursor.getString(cursor.getColumnIndex("place"));
+            corona.patient = cursor.getString(cursor.getColumnIndex("patient"));
 
-            visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
-            visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
+            corona.visit_fr = cursor.getLong(cursor.getColumnIndex("visit_fr"));
+            corona.visit_to = cursor.getLong(cursor.getColumnIndex("visit_to"));
 
-            latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
-            longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
+            corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
+            corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-            String infection = 1 == checked ? "동선 겹침" : "" ;
+            String infection = 1 == corona.checked ? "동선 겹침" : "" ;
 
-            title = String.format("[%d] %s / %s / %s", id, place, patient , infection );
-            snippet = String.format( "%s ~ %s", df.format( visit_fr ) , df.format( visit_to ) );
+            corona.title = String.format("[%d] %s / %s / %s", corona.id, corona.place, corona.patient , infection );
+            snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
 
-            up_dt_str = df.format( up_dt ) ;
+            corona.up_dt_str = df.format( corona.up_dt ) ;
 
-            info = String.format("corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
-                    deleted, checked, notification, title, snippet, latitude, longitude, up_dt_str ) ;
+            info = "corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s" ;
+            info = String.format( info, corona.deleted, corona.checked, corona.notification, corona.title, snippet,
+                    corona.latitude, corona.longitude, corona.up_dt_str ) ;
             Log.d( TAG, info );
 
             int rscId = R.drawable.map_dot_corona_old_64; // old data
-            if( 1 == checked ) { // checked data
-                if( notification < 2 ) { // when notified
+            if( 1 == corona.checked ) { // checked data
+                if( corona.notification < 2 ) { // when notified
                     rscId = R.drawable.map_dot_corona_notifying_64;
                 } else { // when notification accepted
                     rscId = R.drawable.map_dot_corona_notified_64;
                 }
-            } else if( Math.abs( now - up_dt ) < 20*ComInterface.CORONA_DB_GET_INTERVAL ) {
+            } else if( Math.abs( now - corona.up_dt ) < 20*ComInterface.CORONA_DB_GET_INTERVAL ) {
                 // latest data
                 rscId = R.drawable.map_dot_corona_latest_data_64;
             }
@@ -488,17 +482,17 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             Bitmap markerIconResized = Bitmap.createScaledBitmap(b, width, height, false);
             BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromBitmap( markerIconResized );
 
-            LatLng latLng = new LatLng( latitude, longitude );
+            LatLng latLng = new LatLng( corona.latitude, corona.longitude );
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position( latLng );
-            markerOptions.title( title );
+            markerOptions.title( corona.title );
             markerOptions.snippet( snippet );
             markerOptions.flat(true);
             markerOptions.icon( markerIcon );
             markerOptions.zIndex( coronaMarkerZIndex );
 
-            if( 1 == deleted ) {
-                deletedIds.add( id );
+            if( 1 == corona.deleted ) {
+                deletedIds.add( corona.id );
             }
 
             if (!this.isActivityAlive()) {
@@ -506,16 +500,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 break;
             }
 
-            Marker markerPrev = coronaMarkers.get( id );
+            Marker markerPrev = coronaMarkers.get( corona.id );
             if( null != markerPrev ) {
                 markerPrev.remove();
-                coronaMarkers.remove(id);
+                coronaMarkers.remove(corona.id);
             }
 
             Marker marker = googleMap.addMarker(markerOptions);
-            String tag = String.format("%d:%d", id, notification);
-            marker.setTag( tag );
-            coronaMarkers.put(id, marker);
+            marker.setTag( corona );
+            coronaMarkers.put( corona.id, marker);
 
             coronaMarkerZIndex ++ ;
         }
@@ -531,39 +524,21 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     private void whenMarkerClicked( Marker marker ) {
         Object obj = marker.getTag();
-        String id = null ;
-        String notification = null ;
-        if( obj instanceof String ) {
-            String tag = (String) obj;
-            if( 0 < tag.length() ) {
-                String [] infos = tag.split( ":" );
-                if( null != infos && 1 < infos.length ) {
-                    id = infos[0];
-                    notification = infos[1];
-                }
+
+        Corona corona = null ;
+
+        if( obj instanceof Corona ) {
+            corona = (Corona) obj;
+
+            if ( 1 == corona.notification ) {
+                DbHelper dbHelper = this.dbHelper;
+
+                dbHelper.updateCoronaNotification(corona, 2);
+
+                this.showCoronaMarkerFromDb( corona.id );
             }
         }
 
-        if( null == id || null == notification  || "2".equals( notification )) {
-            return;
-        }
-
-        DbHelper dbHelper = this.dbHelper;
-
-        SQLiteDatabase db = dbHelper.wdb;
-        String table = "corona";
-
-        ContentValues values = new ContentValues();
-        values.put( "notification", 2 );
-
-        String whereClause = " id = ? ";
-        String [] args = { id };
-
-        int updCnt = db.update( table, values, whereClause, args );
-
-        Log.d( TAG, String.format("Corona marker [%s] notification update cnt = %d", id, updCnt ) );
-
-        this.showCoronaMarkerFromDb( Long.valueOf( id ).longValue() );
     }
     // whenMarkerClicked
 
@@ -874,7 +849,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         }
 
-        long coronaInfectedCnt = this.dbHelper.getCoronaListInfectedCount();
+        long coronaInfectedCnt = this.dbHelper.getCoronaListInfectedCount( 1 );
 
         if( 1 > coronaInfectedCnt ) {
             this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_01_no_data);
