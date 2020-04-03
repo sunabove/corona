@@ -836,45 +836,49 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( ! valid ) {
             requestLocationPermissions();
-        } else {
-
-            if (this.isLocationEnabled()) {
-                this.gpsLogo.setImageResource(R.drawable.gps_recording_02);
-            } else {
-                this.gpsLogo.setImageResource(R.drawable.gps_recording_00);
-            }
-
-            TextView mapInfo = this.mapInfo;
-            float zoom = this.getZoom();
-
-            String info = "Zoom: %02.1f,  GPS: %d ";
-            info = String.format(info, zoom, gpsUpdCnt);
-
-            mapInfo.setText(info);
-
-            whenMapLongIdle();
-
-            if (zoom != this.lastZoom) {
-                whenCameraZoomChanged();
-            } else {
-                this.showCoronaMarkerFromDb();
-            }
-
-            final Corona coronaMoved = this.coronaMoved ;
-            if( null != coronaMoved) {
-                long id = coronaMoved.id ;
-                Marker marker = this.coronaMarkers.get( id ) ;
-                if( null != marker ) {
-                    marker.showInfoWindow();
-                }
-
-                if( coronaMoved == this.coronaMoved ) {
-                    this.coronaMoved = null ;
-                }
-            }
-
-            this.lastZoom = zoom;
+            return ;
         }
+
+        if (this.isLocationEnabled()) {
+            this.gpsLogo.setImageResource(R.drawable.gps_recording_02);
+        } else {
+            this.gpsLogo.setImageResource(R.drawable.gps_recording_00);
+        }
+
+        TextView mapInfo = this.mapInfo;
+        float zoom = this.getZoom();
+
+        String info = "Zoom: %02.1f,  GPS: %d ";
+        info = String.format(info, zoom, gpsUpdCnt);
+
+        mapInfo.setText(info);
+
+        whenMapLongIdle();
+
+        if (zoom != this.lastZoom) {
+            whenCameraZoomChanged();
+        } else {
+            this.showCoronaMarkerFromDb();
+        }
+
+        final Corona coronaMoved = this.coronaMoved ;
+        if( null != coronaMoved) {
+            long id = coronaMoved.id ;
+            Marker marker = this.coronaMarkers.get( id ) ;
+            if( null != marker ) {
+                marker.showInfoWindow();
+            }
+
+            if( coronaMoved == this.coronaMoved ) {
+                this.coronaMoved = null ;
+            }
+        }
+
+        long coronaInfectedCnt = this.dbHelper.getCoronaListInfectedCount();
+
+        this.showCoronaDataListBtn.setImageResource( coronaInfectedCnt > 0 ? R.drawable.corona_data_list_02_data : R.drawable.corona_data_list_01_no_data );
+
+        this.lastZoom = zoom;
     }
 
     private float getZoom() {

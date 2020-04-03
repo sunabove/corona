@@ -275,6 +275,28 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     }
     // whenCoronaDbReceived
 
+    public long getCoronaListInfectedCount() {
+        long cnt = 0 ;
+        SQLiteDatabase db = this.rdb;
+
+        String sql = "";
+        sql += " SELECT IFNULL( COUNT( DISTINCT id), 0 ) AS cnt ";
+        sql += " FROM corona ";
+        sql += " WHERE  1 = 1 ";
+        ;
+
+        String[] args = {};
+        Cursor cursor = db.rawQuery(sql, args);
+
+        while (cursor.moveToNext()) {
+            cnt = cursor.getLong( 0 );
+        }
+
+        cursor.close();
+
+        return cnt;
+    }
+
     public ArrayList<Corona> getCoronaListInfected() {
         SQLiteDatabase db = this.rdb;
 
