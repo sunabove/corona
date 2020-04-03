@@ -414,12 +414,13 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
     }
 
+    int coronaDetectionAlarmNotificationId = 888;
+
     private void showColonaDetectionAlarmNotificationImpl( Corona corona ) {
-        int NOTIFICATION_ID = 888;
         String CHANNEL_ID = "999";
 
         // Create an Intent for the activity you want to start
-        Intent resultIntent = new Intent(this, Activity_02_Map.class );
+        Intent resultIntent = new Intent(this, Activity_03_CoronaList.class);
 
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
@@ -435,7 +436,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         builder.setContentInfo( corona.content );
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        notificationManager.notify(NOTIFICATION_ID, builder.build());
+        notificationManager.notify(coronaDetectionAlarmNotificationId, builder.build());
+
+        coronaDetectionAlarmNotificationId ++;
     }
 
 }
