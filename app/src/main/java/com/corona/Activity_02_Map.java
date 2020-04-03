@@ -619,8 +619,20 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Corona corona = (Corona) bundle.getSerializable("corona");
                 if ( null != corona ) {
                     Log.d(TAG, "corona id = " + corona.id);
+                    this.whenCoronaSelectedFromDataList( corona );
                 }
             }
+        }
+    }
+
+    private void whenCoronaSelectedFromDataList( Corona corona ) {
+        float zoom = this.getZoom() ;
+        LatLng latLng = corona.getLatLng();
+
+        if( zoom > 16.5 ) {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        } else {
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
         }
     }
 

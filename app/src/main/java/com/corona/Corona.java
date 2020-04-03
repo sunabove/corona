@@ -1,5 +1,7 @@
 package com.corona;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.io.Serializable;
 
 public class Corona implements Serializable {
@@ -27,5 +29,9 @@ public class Corona implements Serializable {
         this.patient = patient;
         this.visit_fr = visit_fr;
         this.visit_to = visit_to;
+    }
+
+    public LatLng getLatLng() {
+        return new LatLng( latitude, longitude ) ;
     }
 }
