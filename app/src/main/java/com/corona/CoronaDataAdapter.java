@@ -57,10 +57,10 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         if (view.getId() == R.id.item_info ) {
             Corona c = corona;
             SimpleDateFormat df = ComInterface.MMdd_HHmm ;
-            String info = String.format("동선 겹침: %s ~ %s 위도 %.4f, 경도 %.4f", df.format(c.visit_fr), df.format(c.visit_to), c.latitude, c.longitude ) ;
-            info += "\n 잠시후 지도로 이동합니다.";
+            String info = String.format("동선 겹침: %s, 위도 %.4f, 경도 %.4f", df.format(c.visit_fr), c.latitude, c.longitude ) ;
+            info += "\n잠시후 지도로 이동합니다.";
 
-            Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_LONG);
+            Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_SHORT );
             snackbar.setAction("No action", null);
 
             snackbar.addCallback(new Snackbar.Callback() {

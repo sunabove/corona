@@ -608,8 +608,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // check if the request code is same as what is passed  here it is 2
-        if(requestCode==2) {
+
+        if(INTENT_RESULT_CORONA_SELECTED == resultCode ) {
+            Corona corona = data.getParcelableExtra( "corona" );
+            if( null != corona ) {
+                Log.d( TAG, "corona id = " + corona.id );
+            }
         }
     }
 
