@@ -880,17 +880,17 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         long coronaInfectedCnt = this.dbHelper.getCoronaListInfectedCount();
 
         if( 1 > coronaInfectedCnt ) {
-            this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_02_data );
+            this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_01_no_data);
 
             this.status.setText( "지도가 로드 되었습니다.");
         } else {
-            this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_01_no_data);
+            this.showCoronaDataListBtn.setImageResource( R.drawable.corona_data_list_02_data );
 
             String info = String.format("%d건의 확진자 중첩 정보가 있습니다.", coronaInfectedCnt ) ;
 
             this.status.setText( info );
 
-            Snackbar snackbar = Snackbar.make( this.status, info, Snackbar.LENGTH_SHORT );
+            Snackbar snackbar = Snackbar.make( this.status, info, Snackbar.LENGTH_LONG );
             snackbar.setAction("No action", null);
             snackbar.show();
         }
