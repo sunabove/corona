@@ -65,7 +65,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -625,9 +624,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
     }
 
+    private Corona coronaMoved;
+
     private void whenCoronaSelectedFromDataList( Corona corona ) {
         float zoom = this.getZoom() ;
         LatLng latLng = corona.getLatLng();
+
+        this.coronaMoved = corona ;
 
         if( zoom > 16.5 ) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -855,6 +858,19 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 whenCameraZoomChanged();
             } else {
                 this.showCoronaMarkerFromDb();
+            }
+
+            final Corona coronaMoved = this.coronaMoved ;
+            if( null != coronaMoved) {
+                long id = coronaMoved.id ;
+                Marker marker = this.coronaMarkers.get( id ) ;
+                if( null != marker ) {
+                    marker.showInfoWindow();
+                }
+
+                if( coronaMoved == this.coronaMoved ) {
+                    this.coronaMoved = null ;
+                }
             }
 
             this.lastZoom = zoom;
