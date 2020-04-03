@@ -865,15 +865,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         final Corona coronaMoved = this.coronaMoved ;
+
         if( null != coronaMoved) {
             long id = coronaMoved.id ;
             Marker marker = this.coronaMarkers.get( id ) ;
             if( null != marker ) {
                 marker.showInfoWindow();
-            }
-
-            if( coronaMoved == this.coronaMoved ) {
-                this.coronaMoved = null ;
             }
         }
 
@@ -890,9 +887,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             this.status.setText( info );
 
-            Snackbar snackbar = Snackbar.make( this.status, info, Snackbar.LENGTH_LONG );
-            snackbar.setAction("No action", null);
-            snackbar.show();
+            if( null == coronaMoved ) {
+                Snackbar snackbar = Snackbar.make(this.status, info, Snackbar.LENGTH_LONG);
+                snackbar.setAction("No action", null);
+                snackbar.show();
+            }
+        }
+
+        if( coronaMoved == this.coronaMoved ) {
+            this.coronaMoved = null ;
         }
 
         this.lastZoom = zoom;
