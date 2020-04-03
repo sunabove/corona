@@ -6,11 +6,9 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.Build;
@@ -46,9 +44,7 @@ import org.json.JSONArray;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 
 public class LocationService extends Service implements ComInterface, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
@@ -204,7 +200,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private void showNotificationAndStartForegroundService() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        final NotificationCompat.Builder builder = this.createBuilder();
+        final NotificationCompat.Builder builder = this.createNotificationBuilder();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             int importance = NotificationManager.IMPORTANCE_NONE;
@@ -220,11 +216,11 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     }
     // -- showNotificationAndStartForegroundService
 
-    private NotificationCompat.Builder createBuilder() {
+    private NotificationCompat.Builder createNotificationBuilder() {
 
         String serviceName = getString(R.string.location_service_name);
         if( this.gpsInsCnt > 0 ) {
-            serviceName = String.format("%s [%d][%d]", serviceName, this.gpsInsCnt, this.coronaDbRecSuccCnt);
+            serviceName = String.format("%s [ %d ] [ %d ]", serviceName, this.gpsInsCnt, this.coronaDbRecSuccCnt);
         }
 
         String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
@@ -239,7 +235,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private void updateServiceNotificationTitleAndText() {
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        final NotificationCompat.Builder builder = this.createBuilder();
+        final NotificationCompat.Builder builder = this.createNotificationBuilder();
 
         notificationManager.notify( NOTIFICATION_ID, builder.build());
     }
