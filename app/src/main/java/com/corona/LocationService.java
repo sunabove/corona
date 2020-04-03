@@ -414,9 +414,12 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
     }
 
-    int coronaDetectionAlarmNotificationId = 888;
+    int coronaDetectionAlarmNotificationId = 10_000 ;
 
     private void showColonaDetectionAlarmNotificationImpl( Corona corona ) {
+        if( coronaDetectionAlarmNotificationId < 10_000 ) {
+            coronaDetectionAlarmNotificationId = 10_000;
+        }
         String CHANNEL_ID = "999";
 
         // Create an Intent for the activity you want to start
