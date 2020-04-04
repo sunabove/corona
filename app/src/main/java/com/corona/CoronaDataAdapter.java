@@ -50,15 +50,13 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         return null;
     }
 
-    private long lastCoronaId = -1 ;
+    public long selCoronaId = -1 ;
 
     @Override
     public void onClick(View view) {
         int position=(Integer) view.getTag();
 
         final Corona corona =(Corona) this.getItem(position) ;
-
-        this.lastCoronaId = corona.id ;
 
         if (view.getId() == R.id.item_info ) {
             Corona c = corona;
@@ -131,7 +129,7 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        if( lastCoronaId == corona.id ) {
+        if( selCoronaId == corona.id ) {
             viewHolder.coronaTopPane.setBackgroundColor( Color.parseColor( "#FF5722" ) );
         } else {
             viewHolder.coronaTopPane.setBackgroundColor( Color.TRANSPARENT );

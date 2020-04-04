@@ -1,6 +1,8 @@
 package com.corona;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.TextView;
@@ -68,5 +70,24 @@ public class Activity_03_CoronaList extends ComActivity {
         }
 
         this.status.setText( info );
+
+        Intent intent = getIntent();
+
+        if( null != intent ) {
+            this.whenNewIntentReceived( intent );
+        }
+    }
+
+    private void whenNewIntentReceived(Intent intent) {
+
+        Bundle bundle = intent.getExtras();
+        if( null != bundle ) {
+            Corona corona = (Corona) bundle.getSerializable(corona_from_notification_click );
+            if ( null != corona ) {
+                Log.d(TAG, "corona_from_notification_click corona id = " + corona.id);
+
+                this.coronaListView.adapter.selCoronaId = corona.id ;
+            }
+        }
     }
 }
