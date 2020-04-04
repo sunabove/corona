@@ -222,12 +222,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        Intent intent = getIntent();
-
-        if( null != intent ) {
-            this.whenNewIntentReceived( intent );
-        }
     }
 
     @Override
@@ -711,6 +705,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             this.getPhoneLastLocation();
 
             this.mapReadyTime = System.currentTimeMillis();
+        }
+
+        Intent intent = getIntent();
+
+        if( null != intent ) {
+            this.whenNewIntentReceived( intent );
         }
     }
 
@@ -1349,8 +1349,15 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
 
     private void whenNewIntentReceived(Intent intent) {
-        String msg = intent.getStringExtra("NotificationMessage");
-        Log.d( TAG, "NotificationMessage = " + msg ) ;
+
+        Bundle bundle = intent.getExtras();
+        if( null != bundle ) {
+            Corona corona = (Corona) bundle.getSerializable(corona_from_notification_click );
+            if ( null != corona ) {
+                Log.d(TAG, "corona_from_notification_click corona id = " + corona.id);
+                this.whenCoronaSelectedFromDataList( corona );
+            }
+        }
     }
 
 }

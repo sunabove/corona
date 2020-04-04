@@ -47,4 +47,6 @@ public interface ComInterface {
 
     int INTENT_RESULT_CORONA_SELECTED = 200 ;
 
+    String corona_from_notification_click = "corona_from_notification_click" ;
+
 }

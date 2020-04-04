@@ -427,15 +427,17 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         // Create an Intent for the activity you want to start
         Intent intent = new Intent(this, Activity_02_Map.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //Add Any key-value to pass extras to intent
-        intent.putExtra("NotificationMessage", "yes" );
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable( corona_from_notification_click , corona ) ;
+        intent.putExtras(bundle);
 
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addNextIntentWithParentStack(intent);
         // Get the PendingIntent containing the entire back stack
-        //PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent resultPendingIntent = PendingIntent.getActivity( this.getApplicationContext(), coronaDetectionAlarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent resultPendingIntent = PendingIntent.getActivity( this.getApplicationContext(), coronaDetectionAlarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
