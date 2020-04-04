@@ -3,6 +3,7 @@ package com.corona;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -11,6 +12,7 @@ import java.text.SimpleDateFormat;
 public class Activity_03_CoronaList extends ComActivity {
 
     private CoronaListView coronaListView;
+    private TextView status;
 
     @Override
     public int getLayoutId() {
@@ -21,9 +23,10 @@ public class Activity_03_CoronaList extends ComActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        coronaListView = this.findViewById(R.id.coronaListView);
+        this.status = this.findViewById(R.id.status );
+        this.coronaListView = this.findViewById(R.id.coronaListView);
 
-        coronaListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        this.coronaListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Corona corona = coronaListView.dataSet.get(position);
@@ -52,5 +55,16 @@ public class Activity_03_CoronaList extends ComActivity {
         super.onResume();
 
         this.coronaListView.initData();
+
+        int count = this.coronaListView.dataSet.size() ;
+
+        String info = "";
+        if( 1 > count ) {
+            info = "조회할 데이터가 없습니다." ;
+        } else {
+            info = String.format("%d건의 데이터가 조회되었습니다.",  count);
+        }
+
+        this.status.setText( info );
     }
 }
