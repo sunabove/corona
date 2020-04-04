@@ -1356,6 +1356,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             if ( null != corona ) {
                 Log.d(TAG, "corona_from_notification_click corona id = " + corona.id);
                 this.whenCoronaSelectedFromDataList( corona );
+
+                intent = new Intent(this, Activity_03_CoronaList.class );
+                bundle = new Bundle();
+                bundle.putSerializable( corona_from_notification_click , corona ) ;
+                intent.putExtras(bundle);
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivityForResult(intent, ComInterface.INTENT_RESULT_CORONA_SELECTED );
             }
         }
     }
