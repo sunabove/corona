@@ -3,8 +3,11 @@ package com.corona;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.text.SimpleDateFormat;
@@ -12,7 +15,7 @@ import java.util.ArrayList;
 
 public class CoronaListView extends ListView implements ComInterface {
     public CoronaDataAdapter adapter;
-    public ArrayList<Corona> dataSet = new ArrayList<>();
+    public ArrayList<Corona> dataSet ;
 
     public CoronaListView(Context context) {
         super(context);
@@ -40,8 +43,13 @@ public class CoronaListView extends ListView implements ComInterface {
 
     public void initData() {
         boolean test = false ;
+
         if( null == this.dataSet ) {
             this.dataSet = new ArrayList<>();
+
+            this.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+            this.setOnItemClickListener(new ItemHighlighterListener ());
         }
 
         ArrayList<Corona> dataSet = this.dataSet;
@@ -73,6 +81,24 @@ public class CoronaListView extends ListView implements ComInterface {
         if( null == this.adapter ) {
             this.adapter = new CoronaDataAdapter(this.getContext(), dataSet);
             this.setAdapter(adapter);
+        }
+    }
+
+    private class ItemHighlighterListener implements OnItemClickListener{
+
+        private View lastSelectedView = null;
+
+        public void clearSelection() {
+            if(lastSelectedView != null) {
+                lastSelectedView.setBackgroundColor( Color.TRANSPARENT );
+            }
+        }
+
+        @Override
+        public void onItemClick(AdapterView<?> arg0, View view, int arg2, long arg3) {
+            clearSelection();
+            lastSelectedView = view;
+            view.setBackgroundColor(Color.RED);
         }
     }
 }

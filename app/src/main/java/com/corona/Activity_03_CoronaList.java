@@ -31,6 +31,8 @@ public class Activity_03_CoronaList extends ComActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Corona corona = coronaListView.dataSet.get(position);
 
+                coronaListView.setSelection( position );
+
                 String info = coronaListView.adapter.getSnackbarInfo( corona );
 
                 Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_LONG);

@@ -23,7 +23,6 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
 
     public ArrayList<Corona> dataSet ;
     private Context context;
-    private int lastPosition = -1;
 
     public CoronaDataAdapter(Context context, ArrayList<Corona> dataSet) {
         super(context, R.layout.corona_row_item, dataSet);
@@ -49,11 +48,15 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         return null;
     }
 
+    private long lastCoronaId = -1 ;
+
     @Override
     public void onClick(View view) {
         int position=(Integer) view.getTag();
 
         final Corona corona =(Corona) this.getItem(position) ;
+
+        this.lastCoronaId = corona.id ;
 
         if (view.getId() == R.id.item_info ) {
             Corona c = corona;
@@ -86,6 +89,8 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
             snackbar.show();
         }
     }
+
+    private int lastPosition = -1 ;
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
