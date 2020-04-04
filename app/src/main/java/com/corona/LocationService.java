@@ -445,6 +445,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         builder.setContentTitle( corona.title );
         builder.setContentText( corona.text );
         builder.setContentInfo( corona.content );
+        builder.setAutoCancel( true );
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(coronaDetectionAlarmNotificationId, builder.build());
