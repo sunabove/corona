@@ -48,8 +48,6 @@ public class CoronaListView extends ListView implements ComInterface {
             this.dataSet = new ArrayList<>();
 
             this.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-
-            this.setOnItemClickListener(new ItemHighlighterListener ());
         }
 
         ArrayList<Corona> dataSet = this.dataSet;
@@ -81,24 +79,6 @@ public class CoronaListView extends ListView implements ComInterface {
         if( null == this.adapter ) {
             this.adapter = new CoronaDataAdapter(this.getContext(), dataSet);
             this.setAdapter(adapter);
-        }
-    }
-
-    private class ItemHighlighterListener implements OnItemClickListener{
-
-        private View lastSelectedView = null;
-
-        public void clearSelection() {
-            if(lastSelectedView != null) {
-                lastSelectedView.setBackgroundColor( Color.TRANSPARENT );
-            }
-        }
-
-        @Override
-        public void onItemClick(AdapterView<?> arg0, View view, int arg2, long arg3) {
-            clearSelection();
-            lastSelectedView = view;
-            view.setBackgroundColor(Color.RED);
         }
     }
 }
