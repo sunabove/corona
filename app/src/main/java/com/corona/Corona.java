@@ -18,7 +18,9 @@ public class Corona implements Serializable {
     float longitude = 0 ;
 
     String infection ;
-    String title, text, content ;
+    String title;
+    String text;
+    String content ;
     String up_dt_str ;
 
     public Corona() {

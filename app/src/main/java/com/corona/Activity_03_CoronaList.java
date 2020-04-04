@@ -79,7 +79,6 @@ public class Activity_03_CoronaList extends ComActivity {
     }
 
     private void whenNewIntentReceived(Intent intent) {
-
         Bundle bundle = intent.getExtras();
         if( null != bundle ) {
             Corona corona = (Corona) bundle.getSerializable(corona_from_notification_click );

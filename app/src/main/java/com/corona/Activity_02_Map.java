@@ -439,7 +439,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             String infection = 1 == corona.checked ? "동선 겹침" : "" ;
 
-            corona.title = String.format("[%d] %s / %s / %s", corona.id, corona.place, corona.patient , infection );
+            corona.title = String.format("%s / %s / %s [%d] ", corona.place, corona.patient , infection, corona.id );
             snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
 
             corona.up_dt_str = df.format( corona.up_dt ) ;
