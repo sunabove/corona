@@ -555,7 +555,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             TextView status = findViewById(R.id.status);
 
             if( null != status ) {
-                status.setText( "이전 화면으로 돌아갑니다." );
+                status.setText( "앱을 종료합니다." );
             }
 
             new Handler().postDelayed(new Runnable() {

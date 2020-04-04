@@ -280,7 +280,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         long cnt = 0 ;
         SQLiteDatabase db = this.rdb;
 
-        int notiLen = null == notifications ? 9 : notifications.length ;
+        final int notiLen = null == notifications ? 0 : notifications.length ;
 
         String sql = "";
         sql += " SELECT IFNULL( COUNT( DISTINCT id), 0 ) AS cnt ";
@@ -289,7 +289,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         sql += " AND notification IN (  ";
 
         for( int i = 0 ; i < notiLen ; i ++ ) {
-            sql += 0 > i ? ", ?" : "?" ;
+            sql += 0 < i ? ", ?" : "?" ;
         }
 
         sql += " ) " ;
@@ -314,7 +314,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     public ArrayList<Corona> getCoronaListInfected( int ... notifications ) {
         SQLiteDatabase db = this.rdb;
 
-        int notiLen = null == notifications ? 9 : notifications.length ;
+        int notiLen = null == notifications ? 0 : notifications.length ;
 
         String sql = "" ;
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
@@ -324,7 +324,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         sql += " AND notification IN (  ";
 
         for( int i = 0 ; i < notiLen ; i ++ ) {
-            sql += 0 > i ? ", ?" : "?" ;
+            sql += 0 < i ? ", ?" : "?" ;
         }
 
         sql += " ) " ;
