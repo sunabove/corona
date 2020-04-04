@@ -362,9 +362,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
             corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
             corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-            corona.infection = 1 == corona.checked ? "동선 겹침" : "" ;
-
-            corona.title = String.format("[%d] %s / %s / %s", corona.id, corona.place, corona.patient , corona.infection );
+            String title = corona.getTitle();
             String snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
             corona.content = "동선 겹침 / 자가 격리 요망";
 
@@ -373,7 +371,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
             corona.up_dt_str = df.format( corona.up_dt ) ;
 
             String info = String.format("corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
-                    corona.deleted, corona.checked, corona.notification, corona.title, snippet, corona.latitude, corona.longitude, corona.up_dt_str ) ;
+                    corona.deleted, corona.checked, corona.notification, title, snippet, corona.latitude, corona.longitude, corona.up_dt_str ) ;
             Log.d( TAG, info );
 
             dataSet.add( corona );

@@ -437,15 +437,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
             corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
 
-            String infection = 1 == corona.checked ? "동선 겹침" : "" ;
+            String title = corona.getTitle();
 
-            corona.title = String.format("%s / %s / %s [%d] ", corona.place, corona.patient , infection, corona.id );
             snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
 
             corona.up_dt_str = df.format( corona.up_dt ) ;
 
             info = "corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s" ;
-            info = String.format( info, corona.deleted, corona.checked, corona.notification, corona.title, snippet,
+            info = String.format( info, corona.deleted, corona.checked, corona.notification, title, snippet,
                     corona.latitude, corona.longitude, corona.up_dt_str ) ;
             Log.d( TAG, info );
 
@@ -485,7 +484,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             LatLng latLng = new LatLng( corona.latitude, corona.longitude );
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position( latLng );
-            markerOptions.title( corona.title );
+            markerOptions.title( title );
             markerOptions.snippet( snippet );
             markerOptions.flat(true);
             markerOptions.icon( markerIcon );

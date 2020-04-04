@@ -17,8 +17,6 @@ public class Corona implements Serializable {
     float latitude = 0;
     float longitude = 0 ;
 
-    String infection ;
-    String title;
     String text;
     String content ;
     String up_dt_str ;
@@ -35,5 +33,13 @@ public class Corona implements Serializable {
 
     public LatLng getLatLng() {
         return new LatLng( latitude, longitude ) ;
+    }
+
+    public String getTitle() {
+        String infection = 1 == this.checked ? "동선 겹침" : "" ;
+
+        String title = String.format("%s / %s / %s  [%d] ", this.place, this.patient , infection, this.id );
+
+        return title;
     }
 }

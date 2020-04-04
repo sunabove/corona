@@ -443,7 +443,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
         builder.setSmallIcon( R.drawable.corona_alarm );
-        builder.setContentTitle( corona.title );
+        builder.setContentTitle( corona.getTitle() );
         builder.setContentText( corona.text );
         builder.setContentInfo( corona.content );
         builder.setPriority(Notification.PRIORITY_DEFAULT);
