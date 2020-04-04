@@ -222,6 +222,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         mapFragment.getMapAsync(this);
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        Intent intent = getIntent();
+
+        if( null != intent ) {
+            this.whenNewIntentReceived( intent );
+        }
     }
 
     @Override
@@ -1333,6 +1339,18 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 }
             }
         );
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        this.whenNewIntentReceived( intent );
+    }
+
+    private void whenNewIntentReceived(Intent intent) {
+        String msg = intent.getStringExtra("NotificationMessage");
+        Log.d( TAG, "NotificationMessage = " + msg ) ;
     }
 
 }

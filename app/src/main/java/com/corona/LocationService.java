@@ -256,6 +256,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         this.checkCurrDataAndRemoveOldGpsData();
 
         this.updateServiceNotificationTitleAndText();
+
     }
     // -- whenLocationUpdated
 
@@ -331,13 +332,13 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         } finally {
             gettingCoronaDataFromServer = false ;
         }
-
     }
+    // getCoronaDataFromServer
 
     private int coronaDbHandlerCnt = 0;
     protected RequestQueue requestQueue ;
 
-    private void getCoronaDataFromServerImpl( ) {
+    private void getCoronaDataFromServerImpl() {
         Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt));
 
         String url = "http://sunabove.iptime.org:8080/corona_map-1/corona/data.json";
@@ -389,6 +390,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         this.requestQueue.add( jsonObjectRequest );
     }
+    // -- getCoronaDataFromServerImpl
 
     private void showCoronaInfectionAlarmNotifications() {
         ArrayList<Corona> coronaList = this.dbHelper.getCoronaListInfected( 0 ) ;
@@ -423,13 +425,17 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         String CHANNEL_ID = "999";
 
         // Create an Intent for the activity you want to start
-        Intent resultIntent = new Intent(this, Activity_03_CoronaList.class);
+        Intent intent = new Intent(this, Activity_02_Map.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //Add Any key-value to pass extras to intent
+        intent.putExtra("NotificationMessage", "yes" );
 
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addNextIntentWithParentStack(resultIntent);
+        stackBuilder.addNextIntentWithParentStack(intent);
         // Get the PendingIntent containing the entire back stack
-        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        //PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity( this.getApplicationContext(), coronaDetectionAlarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
