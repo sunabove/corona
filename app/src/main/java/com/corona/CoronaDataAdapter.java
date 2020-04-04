@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -98,6 +100,7 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         Corona corona = getItem(position);
 
         class ViewHolder {
+            LinearLayout coronaTopPane ;
             TextView patient;
             TextView place;
             TextView visitFr;
@@ -119,12 +122,19 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
             viewHolder.visitFr = (TextView) convertView.findViewById(R.id.coronaVisitFr);
             viewHolder.visitTo = (TextView) convertView.findViewById(R.id.coronaVisitTo);
             viewHolder.info = (ImageView) convertView.findViewById(R.id.item_info);
+            viewHolder.coronaTopPane = (LinearLayout) convertView.findViewById( R.id.coronaTopPane );
 
             viewHolder.info.setOnClickListener(this);
 
             convertView.setTag(viewHolder);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
+        }
+
+        if( lastCoronaId == corona.id ) {
+            viewHolder.coronaTopPane.setBackgroundColor( Color.parseColor( "#FF5722" ) );
+        } else {
+            viewHolder.coronaTopPane.setBackgroundColor( Color.TRANSPARENT );
         }
 
         Animation animation = AnimationUtils.loadAnimation(context, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
