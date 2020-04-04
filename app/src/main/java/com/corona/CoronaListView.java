@@ -42,7 +42,7 @@ public class CoronaListView extends ListView implements ComInterface {
     }
 
     public void initData() {
-        boolean test = true ;
+        boolean test = false ;
 
         if( null == this.dataSet ) {
             this.dataSet = new ArrayList<>();
