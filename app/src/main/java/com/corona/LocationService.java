@@ -1,6 +1,7 @@
 package com.corona;
 
 import android.Manifest;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -445,6 +446,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         builder.setContentTitle( corona.title );
         builder.setContentText( corona.text );
         builder.setContentInfo( corona.content );
+        builder.setPriority(Notification.PRIORITY_DEFAULT);
         builder.setAutoCancel( true );
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
