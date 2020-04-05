@@ -1,14 +1,20 @@
 package com.corona;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -41,13 +47,66 @@ public class CoronaListView extends ListView implements ComInterface {
         this.initData();
     }
 
+    private Activity getActivity(View view) {
+        Context context = view.getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                return (Activity)context;
+            }
+            context = ((ContextWrapper)context).getBaseContext();
+        }
+        return null;
+    }
+
+    private void initView() {
+        final View view = this ;
+
+        this.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+
+        this.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Corona corona = dataSet.get(position);
+
+                Corona c = corona;
+                SimpleDateFormat df = ComInterface.MMdd_HHmm ;
+                String info = String.format("동선 겹침: %s, 위도 %.4f, 경도 %.4f", df.format(c.visit_fr), c.latitude, c.longitude ) ;
+                info += "\n잠시후 지도로 이동합니다.";
+
+                Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_SHORT );
+                snackbar.setAction("No action", null);
+
+                snackbar.addCallback(new Snackbar.Callback() {
+                    @Override
+                    public void onDismissed(Snackbar snackbar, int event) {
+                        Activity activity = getActivity( view ) ;
+
+                        Intent intent=new Intent();
+                        Bundle bundle = new Bundle();
+                        bundle.putSerializable( "corona", corona ) ;
+                        intent.putExtras(bundle);
+                        activity.setResult( INTENT_RESULT_CORONA_SELECTED, intent );
+
+                        activity.finish();//finishing activity
+                    }
+
+                    @Override
+                    public void onShown(Snackbar snackbar) {
+                    }
+                });
+
+                snackbar.show();
+            }
+        });
+    }
+
     public void initData() {
         boolean test = false ;
 
         if( null == this.dataSet ) {
             this.dataSet = new ArrayList<>();
 
-            this.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+            this.initView();
         }
 
         ArrayList<Corona> dataSet = this.dataSet;

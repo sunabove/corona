@@ -21,7 +21,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
-public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterface, View.OnClickListener{
+public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterface {
 
     public ArrayList<Corona> dataSet ;
     private Context context;
@@ -51,44 +51,6 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
     }
 
     public long selCoronaId = -1 ;
-
-    @Override
-    public void onClick(View view) {
-        int position=(Integer) view.getTag();
-
-        final Corona corona =(Corona) this.getItem(position) ;
-
-        if (view.getId() == R.id.item_info ) {
-            Corona c = corona;
-            SimpleDateFormat df = ComInterface.MMdd_HHmm ;
-            String info = String.format("동선 겹침: %s, 위도 %.4f, 경도 %.4f", df.format(c.visit_fr), c.latitude, c.longitude ) ;
-            info += "\n잠시후 지도로 이동합니다.";
-
-            Snackbar snackbar = Snackbar.make(view, info, Snackbar.LENGTH_SHORT );
-            snackbar.setAction("No action", null);
-
-            snackbar.addCallback(new Snackbar.Callback() {
-                @Override
-                public void onDismissed(Snackbar snackbar, int event) {
-                    Activity activity = getActivity(view) ;
-
-                    Intent intent=new Intent();
-                    Bundle bundle = new Bundle();
-                    bundle.putSerializable( "corona", corona ) ;
-                    intent.putExtras(bundle);
-                    activity.setResult( INTENT_RESULT_CORONA_SELECTED, intent );
-
-                    activity.finish();//finishing activity
-                }
-
-                @Override
-                public void onShown(Snackbar snackbar) {
-                }
-            });
-
-            snackbar.show();
-        }
-    }
 
     private int lastPosition = -1 ;
 
@@ -121,8 +83,6 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
             viewHolder.visitTo = (TextView) convertView.findViewById(R.id.coronaVisitTo);
             viewHolder.info = (ImageView) convertView.findViewById(R.id.item_info);
             viewHolder.coronaTopPane = (LinearLayout) convertView.findViewById( R.id.coronaTopPane );
-
-            viewHolder.info.setOnClickListener(this);
 
             convertView.setTag(viewHolder);
         } else {

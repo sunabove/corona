@@ -28,6 +28,7 @@ public class Activity_03_CoronaList extends ComActivity {
         this.status = this.findViewById(R.id.status );
         this.coronaListView = this.findViewById(R.id.coronaListView);
 
+        /*
         this.coronaListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -51,6 +52,7 @@ public class Activity_03_CoronaList extends ComActivity {
                 snackbar.show();
             }
         });
+        */
 
     }
 
