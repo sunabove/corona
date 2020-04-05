@@ -411,7 +411,6 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
                 this.dbHelper.whenCoronaDbReceived( response );
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

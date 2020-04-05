@@ -370,13 +370,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private void showCoronaMarkerFromDbImpl(final long spec_id) {
         // remove at first
         HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
-        Iterator<Map.Entry<Long, Marker>> it = coronaMarkers.entrySet().iterator();
-
-        while ( this.isActivityAlive() && it.hasNext() ) {
-            Marker marker = it.next().getValue();
-            marker.remove();
-            it.remove();
-        }
 
         if( ! this.isActivityAlive() ) {
             return ;
@@ -481,15 +474,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             Bitmap markerIconResized = Bitmap.createScaledBitmap(b, width, height, false);
             BitmapDescriptor markerIcon = BitmapDescriptorFactory.fromBitmap( markerIconResized );
 
-            LatLng latLng = new LatLng( corona.latitude, corona.longitude );
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position( latLng );
-            markerOptions.title( title );
-            markerOptions.snippet( snippet );
-            markerOptions.flat(true);
-            markerOptions.icon( markerIcon );
-            markerOptions.zIndex( coronaMarkerZIndex );
-
             if( 1 == corona.deleted ) {
                 deletedIds.add( corona.id );
             }
@@ -499,17 +483,28 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 break;
             }
 
-            Marker markerPrev = coronaMarkers.get( corona.id );
-            if( null != markerPrev ) {
-                markerPrev.remove();
-                coronaMarkers.remove(corona.id);
+            LatLng latLng = new LatLng( corona.latitude, corona.longitude );
+
+            Marker marker = coronaMarkers.get( corona.id );
+            if( null != marker ) {
+                marker.setPosition(latLng);
+            } else {
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position( latLng );
+                markerOptions.zIndex( coronaMarkerZIndex );
+
+                marker = googleMap.addMarker(markerOptions);
+
+                coronaMarkers.put( corona.id, marker);
+
+                coronaMarkerZIndex ++ ;
             }
 
-            Marker marker = googleMap.addMarker(markerOptions);
-            marker.setTag( corona );
-            coronaMarkers.put( corona.id, marker);
-
-            coronaMarkerZIndex ++ ;
+            marker.setTitle( title );
+            marker.setSnippet( snippet );
+            marker.setFlat( true );
+            marker.setIcon(markerIcon) ;
+            marker.setTag(corona);
         }
 
         cursor.close();
@@ -874,6 +869,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             }
         }
 
+        this.removeAllMarkerOutOfBounds();
+
         if( coronaMoved == this.coronaMoved ) {
             this.coronaMoved = null ;
         }
@@ -890,9 +887,26 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private void whenCameraZoomChanged() {
         this.showGpsLogFromDb( this.gpsLogSeekBarMovedCnt < 1 ? 100 : this.gpsLogSeekBar.getProgress() , this.calendarTime );
 
-        this.showCurrentGpsData( this.lastLocationResult );
-
         this.showCoronaMarkerFromDb();
+
+        this.showCurrentGpsData( this.lastLocationResult );
+    }
+
+    private void removeAllMarkerOutOfBounds() {
+        HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
+
+        Iterator<Map.Entry<Long, Marker>> it = coronaMarkers.entrySet().iterator();
+
+        final GoogleMap googleMap = this.googleMap ;
+        final LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds ;
+
+        while ( this.isActivityAlive() && it.hasNext() ) {
+            Marker marker = it.next().getValue();
+            if( ! bounds.contains(marker.getPosition() ) ) {
+                marker.remove();
+                it.remove();
+            }
+        }
     }
 
     private void whenMapClick(LatLng latLng) {
