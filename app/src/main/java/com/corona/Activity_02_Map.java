@@ -985,15 +985,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 option.visitTimeTo = this.mapReadyTime ;
             }
         } else {
-            long now = System.currentTimeMillis();
             long todayStartTime = this.getTodayStartTime() ;
-            if( now > todayStartTime + 2*ONE_HOUR_TIME ) {
-                Log.d( TAG, "now is larger than today + 2 hr." );
-                option.visitTimeFr = todayStartTime;
-            } else {
-                Log.d( TAG, "now is less than today + 2 hr." );
-                option.visitTimeFr = now - 2*ONE_HOUR_TIME ;
-            }
             option.visitTimeTo = this.mapReadyTime ;
         }
 
