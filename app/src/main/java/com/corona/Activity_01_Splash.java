@@ -50,7 +50,15 @@ public class Activity_01_Splash extends ComActivity {
     private void moveToNextActivity() {
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                startActivity(new android.content.Intent(Activity_01_Splash.this, Activity_02_Map.class));
+                Intent intent = new Intent( getApplicationContext(), Activity_02_Map.class) ;
+
+                Intent prevIntent = getIntent() ;
+                Bundle prevBundle = prevIntent.getExtras() ;
+                if( null != prevBundle ) {
+                    intent.putExtras( prevBundle );
+                }
+
+                startActivity( intent );
             }
         }, 1_000);
     }

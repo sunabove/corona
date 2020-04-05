@@ -227,7 +227,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
 
         // Create an Intent for the activity you want to start
-        Intent intent = new Intent(this, Activity_02_Map.class);
+        Intent intent = new Intent(this, Activity_01_Splash.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
@@ -435,7 +435,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         String CHANNEL_ID = "999";
 
         // Create an Intent for the activity you want to start
-        Intent intent = new Intent(this, Activity_02_Map.class);
+        Intent intent = new Intent(this, Activity_01_Splash.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         Bundle bundle = new Bundle();
