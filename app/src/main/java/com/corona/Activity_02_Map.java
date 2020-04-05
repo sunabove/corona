@@ -1,7 +1,6 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -607,6 +606,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         } else {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
         }
+
+        this.mapForceMoveTime = System.currentTimeMillis() ;
     }
 
     private void whenPermissionGranted() {
@@ -766,12 +767,12 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         togglePane.setVisibility( togglePane.getVisibility() == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE );
     }
 
-    private long calendarViewClickTime = 0 ;
+    private long mapForceMoveTime = 0 ;
 
     private void whenCalendarViewClicked( int year, int month, int dayOfMonth ) {
         Log.d( TAG, String.format("calendarView year = %d, month = %d, day = %d",  year, month, dayOfMonth ) );
 
-        calendarViewClickTime = System.currentTimeMillis();
+        this.mapForceMoveTime = System.currentTimeMillis();
 
         Calendar calendar = Calendar.getInstance();
         calendar.set( Calendar.YEAR, year );
@@ -798,8 +799,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
 
         if( this.calendarView.getVisibility() == View.INVISIBLE ) {
-            if( calendarViewClickTime > 0 && now > calendarViewClickTime + 30_1000 ) {
-                this.calendarViewClickTime = 0 ;
+            if( mapForceMoveTime > 0 && now > mapForceMoveTime + 30_1000 ) {
+                this.mapForceMoveTime = 0 ;
                 this.calendarTime = 0 ;
             }
         }
@@ -976,7 +977,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         option.color = Color.GRAY;
         option.lineWidth = isMapDetail ? 30: 15 ;
 
-        if( 0 < calendarTime ) {
+        if( 0 < calendarTime ) { // when calendar time was selected
             SimpleDateFormat df = ComInterface.yyyyMMdd_HHmmSS;
             Log.d( TAG, "showGpsLogFromDb calendarTime = " + df.format( calendarTime ) );
             option.visitTimeFr = calendarTime;
@@ -984,42 +985,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             if( option.visitTimeTo > this.mapReadyTime ) {
                 option.visitTimeTo = this.mapReadyTime ;
             }
-        } else {
-            long todayStartTime = this.getTodayStartTime() ;
+        } else if( 1 > calendarTime ){ // when calendar time was not selected
+            option.visitTimeFr = this.getTodayStartTime() ;
             option.visitTimeTo = this.mapReadyTime ;
         }
 
         option.visitTimeToUi = option.visitTimeTo ;
 
         option.progress = progress;
-
-        if( true ) {
-            DbHelper dbHelper = this.dbHelper;
-
-            SQLiteDatabase db = dbHelper.rdb;
-
-            String sql = "SELECT MIN( visit_tm ) , MAX( visit_tm ) FROM gps ";
-            sql += " WHERE visit_tm BETWEEN ? AND ? " ;
-            sql += " LIMIT 1 ";
-
-            String[] args = { "" + option.visitTimeFr, "" + option.visitTimeTo };
-            Cursor cursor = db.rawQuery(sql, args);
-
-            while( cursor.moveToNext() ) {
-                long minTm = cursor.getLong( 0 );
-                long maxTm = cursor.getLong( 1 );
-
-                Log.d( TAG, "min visit_tm = " + minTm );
-                Log.d( TAG, "max visit_tm = " + maxTm );
-
-                if( minTm > 0 && maxTm > 0) {
-                    option.visitTimeFr = minTm ;
-                    option.visitTimeTo = maxTm ;
-                }
-            }
-
-            cursor.close();
-        }
 
         if( progress < 100 ) {
             option.visitTimeTo = (long) ( option.visitTimeFr + Math.abs( option.visitTimeTo - option.visitTimeFr )*( progress + 0.0)/100.0 );
