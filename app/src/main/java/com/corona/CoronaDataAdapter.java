@@ -92,7 +92,7 @@ public class CoronaDataAdapter extends ArrayAdapter<Corona> implements ComInterf
         if( selCoronaId == corona.id ) {
             viewHolder.coronaTopPane.setBackgroundColor( Color.parseColor( "#FF5722" ) );
         } else {
-            viewHolder.coronaTopPane.setBackgroundColor( Color.TRANSPARENT );
+            viewHolder.coronaTopPane.setBackgroundColor( corona.getItemRowBackgroundColor() );
         }
 
         Animation animation = AnimationUtils.loadAnimation(context, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);

@@ -1,5 +1,7 @@
 package com.corona;
 
+import android.graphics.Color;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
@@ -41,5 +43,22 @@ public class Corona implements Serializable {
         String title = String.format("%s / %s / %s  [%d] ", this.place, this.patient , infection, this.id );
 
         return title;
+    }
+
+    public int getItemRowBackgroundColor() {
+        int color = Color.YELLOW ;
+        if( 0 == checked ) {
+            color =  Color.YELLOW ;
+        } else {
+            if( 0 == notification ) {
+                color = Color.YELLOW ;
+            } else if( 1 == notification ) {
+                color = Color.parseColor( "#FF5722" ) ;
+            } else if( 2 == notification ) {
+                color = Color.parseColor( "#DF58B0" ) ;
+            }
+        }
+
+        return color ;
     }
 }
