@@ -3,7 +3,7 @@
 
     <string name="location_service_name">코로나 동선 스캔중입니다.</string>
 
-    <string name="app_version">V1.0.02</string>
+    <string name="app_version">V1.0.3</string>
 
     <string name="title_activity_maps">Corona Map</string>
 </resources>
