@@ -879,6 +879,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             this.coronaMoved = null ;
         }
 
+        this.animateCoronaDataDownloading();
+
         this.lastZoom = zoom;
     }
 
@@ -1302,6 +1304,43 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsAnimation = animation ;
 
         this.gpsLogo.startAnimation( animation );
+    }
+
+    private void animateCoronaDataDownloading() {
+        ImageView coronaDownloadIcon = this.coronaDownloadIcon ;
+
+        coronaDownloadIcon.clearAnimation();
+
+        coronaDownloadIcon.setImageResource(R.drawable.corona_data_downloading );
+
+        int relative = Animation.RELATIVE_TO_SELF ;
+
+        Animation animation = new RotateAnimation(
+                30, -30,
+                relative, 0.5f,
+                relative,  0.5f);
+
+        animation.setDuration( 2_500 );
+        animation.setRepeatCount( 2 );
+
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                gpsLogo.clearAnimation();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        this.coronaDownloadIcon.startAnimation( animation );
     }
 
     private boolean firstMove = true ;
