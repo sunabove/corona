@@ -1250,7 +1250,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 relative,  0.5f);
 
         animation.setDuration( 2_500 );
-        animation.setRepeatCount( 2 );
+        animation.setRepeatCount( 1 );
 
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
