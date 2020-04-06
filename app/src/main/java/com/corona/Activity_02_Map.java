@@ -79,6 +79,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private EditText status ;
     private TextView mapInfo ;
     private ImageView gpsLogo;
+    private ImageView coronaDownloadIcon ;
 
     private LocationResult lastLocationResult ;
 
@@ -140,6 +141,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.gpsLogTimeTo = this.findViewById(R.id.gpsLogTimeTo);
         this.gpsLogSeekBarProgress = this.findViewById(R.id.gpsLogSeekBarProgress);
         this.gpsLogSeekBar = this.findViewById(R.id.gpsLogSeekBar);
+
+        this.coronaDownloadIcon = this.findViewById(R.id.coronaDownloadIcon);
 
         this.gpsLogSeekBar.setMax( 100 );
         this.gpsLogSeekBar.setProgress( 100 );
