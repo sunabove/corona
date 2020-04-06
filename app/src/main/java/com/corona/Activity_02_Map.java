@@ -299,83 +299,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
     }
 
-    private HashMap<Integer, Double> mapScales = null ;
-
-    private double getRefScale( double zoom ) {
-        if( null == mapScales ) {
-            mapScales = new HashMap<>();
-            mapScales.put( 20, 1128.497220 );
-            mapScales.put( 19, 2256.994440 );
-            mapScales.put( 18, 4513.988880 );
-            mapScales.put( 17, 9027.977761 );
-            mapScales.put( 16, 18055.955520 );
-            mapScales.put( 15, 36111.911040 );
-            mapScales.put( 14, 72223.822090 );
-            mapScales.put( 13, 144447.644200 );
-            mapScales.put( 12, 288895.288400 );
-            mapScales.put( 11, 577790.576700 );
-            mapScales.put( 10, 1155581.153000 );
-            mapScales.put(  9, 2311162.307000 );
-            mapScales.put(  8, 4622324.614000 );
-            mapScales.put(  7, 9244649.227000 );
-            mapScales.put(  6, 18489298.450000 );
-            mapScales.put(  5, 36978596.910000 );
-            mapScales.put(  4, 73957193.820000 );
-            mapScales.put(  3, 147914387.600000 );
-            mapScales.put(  2, 295828775.300000 );
-            mapScales.put(  1, 591657550.500000 );
-
-            /*
-            20 : 1128.497220
-            19 : 2256.994440
-            18 : 4513.988880
-            17 : 9027.977761
-            16 : 18055.955520
-            15 : 36111.911040
-            14 : 72223.822090
-            13 : 144447.644200
-            12 : 288895.288400
-            11 : 577790.576700
-            10 : 1155581.153000
-            9  : 2311162.307000
-            8  : 4622324.614000
-            7  : 9244649.227000
-            6  : 18489298.450000
-            5  : 36978596.910000
-            4  : 73957193.820000
-            3  : 147914387.600000
-            2  : 295828775.300000
-            1  : 591657550.500000
-            */
-        }
-        double scale = mapScales.get( (int) zoom ) ;
-
-        return scale;
-    }
-
-    private double getMapScaleRatio(double zoom) {
-        if( zoom == (int) zoom ) {
-            return this.getRefScale( zoom );
-        }
-
-        int zoomPrev = (int) zoom ;
-        int zoomNext = (int) ( zoom - 1 );
-
-        double scalePrev = this.getRefScale( zoomPrev ) ;
-        double scaleNext = this.getRefScale( zoomNext );
-
-        double scale = scalePrev + (scaleNext - scalePrev)*(zoom - zoomPrev);
-
-        return scale;
-    }
-
     private void showCoronaMarkerFromDbImpl(final long spec_id) {
-        // remove at first
-        HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
+        this.animateCoronaDataDownloading();
 
         if( ! this.isActivityAlive() ) {
             return ;
         }
+
+        HashMap<Long, Marker> coronaMarkers = this.coronaMarkers;
 
         GoogleMap googleMap = this.googleMap;
         LatLngBounds bounds = googleMap.getProjection().getVisibleRegion().latLngBounds;
@@ -878,8 +809,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         if( coronaMoved == this.coronaMoved ) {
             this.coronaMoved = null ;
         }
-
-        this.animateCoronaDataDownloading();
 
         this.lastZoom = zoom;
     }
