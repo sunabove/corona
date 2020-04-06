@@ -1071,15 +1071,16 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
         cursor.close();
 
+        SimpleDateFormat dfUiCurr = ComInterface.HHmmSS ;
+
         if( 99 < option.progress ) {
             this.gpsLogSeekBarProgress.setText( "100%" );
         } else {
-            SimpleDateFormat dfUiCurr = ComInterface.HHmmSS ;
             String visitTmToText = dfUiCurr.format( option.visitTimeTo );
             this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "% " + visitTmToText));
         }
 
-        this.gpsLogTimeTo.setText( dfUi.format( option.visitTimeToUi ) );
+        this.gpsLogTimeTo.setText( dfUiCurr.format( option.visitTimeToUi ) );
 
         if (null != gpsLogPathPoly) {
             gpsLogPathPoly.remove();
