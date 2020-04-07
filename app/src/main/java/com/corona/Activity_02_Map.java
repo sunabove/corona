@@ -1,6 +1,8 @@
 package com.corona;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -569,9 +571,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             valid = valid && isLocationEnabled();
 
             if( ! valid ) {
-                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG  ).show();
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
+                buildAlertMessageNoGps();
             }
         }
 
@@ -641,6 +641,24 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         if( null != intent ) {
             this.whenNewIntentReceived( intent );
         }
+    }
+
+    private void buildAlertMessageNoGps() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, final int id) {
+                        dialog.cancel();
+                    }
+                });
+        final AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private void whenLocationUpdate( LocationResult locationResult ) {
