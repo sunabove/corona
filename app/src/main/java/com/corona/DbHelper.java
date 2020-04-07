@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 42 ;
+    public static final int DATABASE_VERSION = 44 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
@@ -214,20 +214,25 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     }
 
     public long getCoronaMaxUpDt() {
-        String sql = " SELECT MAX( up_dt ) AS max_up_dt FROM corona " ;
+        long maxUpdt = 0 ;
 
-        String[] args = { };
-        SQLiteDatabase db = this.rdb;
-        Cursor cursor = db.rawQuery(sql, args);
+        try {
+            String sql = " SELECT IFNULL( MAX( up_dt ) , 0 ) AS max_up_dt FROM corona ";
 
-        while (cursor.moveToNext()) {
-            long max_up_dt = cursor.getLong( 0 );
-            return max_up_dt ;
+            String[] args = {};
+            SQLiteDatabase db = this.rdb;
+            Cursor cursor = db.rawQuery(sql, args);
+
+            while (cursor.moveToNext()) {
+                maxUpdt = cursor.getLong(0);
+            }
+
+            cursor.close();
+        } catch( Exception e ) {
+            e.printStackTrace();
         }
 
-        cursor.close();
-
-        return 0;
+        return maxUpdt ;
     }
 
     public void whenCoronaDbReceived(JSONArray response) throws Exception {
@@ -403,6 +408,5 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         Log.d( TAG, "notification updCnt = " + updCnt );
     }
     // -- updateCoronaNotification
-
 
 }

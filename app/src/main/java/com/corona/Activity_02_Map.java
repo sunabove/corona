@@ -235,6 +235,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Log.v( TAG, "onResume");
 
         this.hideActionBar();
+
+        startCoronaMarkerUpdaterHandler();
     }
 
     // whenShowCoronaDataListBtnClicked
@@ -245,8 +247,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     }
     // -- whenShowCoronaDataListBtnClicked
 
-    /*
-    private void startCoronaMarkerDbShowHandler() {
+    private long prevMarkerUpdateTime = 0 ;
+
+    private void startCoronaMarkerUpdaterHandler() {
         if( null == this.googleMap ) {
             return ;
         }
@@ -267,17 +270,22 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 }
 
                 Log.d(TAG, "Running startCoronaDbShowHandler");
+                final long maxCoronaUpDt = dbHelper.getCoronaMaxUpDt() ;
 
-                startCoronaMarkerDbShowImpl();
+                if( maxCoronaUpDt != prevMarkerUpdateTime ) {
+                    prevMarkerUpdateTime = maxCoronaUpDt ;
+                    showCoronaMarkerFromDb();
+                }
 
                 if( isActivityAlive() ) {
-                    final long delay = coronaMarkers.size() < 1 ? 5_000 : ComInterface.CORONA_DB_GET_INTERVAL ;
+                    final long delay = coronaMarkers.size() < 1 ? 3_000 : ComInterface.CORONA_DB_GET_INTERVAL ;
                     coronaDbShowHandler.postDelayed(this, delay );
                 }
             }
         }, 1_000);
 
-    }*/
+    }
+    // -- startCoronaMarkerUpdaterHandler
 
     private boolean showingCoronaMarkerDb = false ;
 
