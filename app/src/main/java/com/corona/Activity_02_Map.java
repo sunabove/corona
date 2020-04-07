@@ -344,7 +344,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Corona corona ;
 
         String snippet, info ;
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        SimpleDateFormat df = ComInterface.yyyyMMdd_HHmmSS ;
 
         ArrayList<Long> deletedIds = new ArrayList<>();
         final long now = System.currentTimeMillis();
@@ -375,14 +375,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
 
-            corona.up_dt_str = df.format( corona.up_dt ) ;
-
-            info = "corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s" ;
+            info = "corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, y = %f, x = %f, up_dt = %s" ;
             info = String.format( info, corona.deleted, corona.checked, corona.notification, title, snippet,
-                    corona.latitude, corona.longitude, corona.up_dt_str ) ;
+                    corona.latitude, corona.longitude, corona.y, corona.x, df.format( corona.up_dt ) ) ;
             Log.d( TAG, info );
-
-            Log.d( TAG, "corona marker x = " + corona.x + ", y = " + corona.y );
 
             int rscId = R.drawable.map_dot_corona_old_64; // old data
             if( 1 == corona.checked ) { // checked data

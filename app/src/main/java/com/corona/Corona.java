@@ -23,7 +23,7 @@ public class Corona implements Serializable {
 
     String text;
     String content ;
-    String up_dt_str ;
+    //String up_dt_str ;
 
     public Corona() {
     }

@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 37 ;
+    public static final int DATABASE_VERSION = 42 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
@@ -119,32 +119,32 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
 
         if( true ) {
             final long min_dist = 31;
-            String checked_tm   = "" + System.currentTimeMillis() ;
-            String visit_gap    = "" + ( 120 * 60 * 1_000 );
-            String dist_gap     = "" + min_dist;
-            String distum_gap   = "" + (min_dist*min_dist);
 
             String table = "corona";
 
             String whereClause = "";
             whereClause += " 1 = 1 ";
-            //whereClause += " AND checked = 0 ";
+            whereClause += " AND checked = 0 ";
             whereClause += " AND deleted = 0 ";
             whereClause += " AND id IN ( ";
             whereClause += "    SELECT DISTINCT c.id FROM corona c , gps g ";
             whereClause += "    WHERE c.deleted = 0 ";
-            //whereClause += "    AND c.checked = 0 ";
-            whereClause += "    AND g.visit_tm BETWEEN c.visit_fr - ? AND c.visit_to + ? ";
-            whereClause += "    AND ABS( g.y - c.y ) < ? AND ABS( g.x - c.x ) < ? ";
-            whereClause += "    AND ( (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) ) < ? ";
+            whereClause += "    AND c.checked = 0 ";
+            whereClause += "    AND g.visit_tm BETWEEN c.visit_fr AND c.visit_to";
+            whereClause += "    AND ABS( g.y - c.y ) < 31 AND ABS( g.x - c.x ) < 31 ";
+            whereClause += "    AND ( (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) ) < 901 ";
             whereClause += " ) ";
 
             ContentValues values = new ContentValues();
+
+            String checked_tm   = "" + System.currentTimeMillis() ;
+
             values.put( "checked" , 1 );
+            values.put( "notification" , 1 );
             values.put( "checked_tm" , checked_tm );
 
             SQLiteDatabase db = this.wdb;
-            String[] args = { visit_gap, visit_gap, dist_gap, dist_gap, distum_gap };
+            String[] args = { };
 
             int updCnt = db.update(table, values, whereClause, args);
 
@@ -182,7 +182,8 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         values.put( "y", projCoord.y );
         values.put( "x", projCoord.x );
 
-        Log.d(TAG, "gps x = " + projCoord.x + ", y = " + projCoord.y );
+        String info = "gps latitude = %f, longitude = %f, y = %f, x = %f" ;
+        info = String.format(info,  latitude, longitude, projCoord.y, projCoord.x );
 
         Calendar now = Calendar.getInstance();
 
@@ -232,6 +233,8 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     public void whenCoronaDbReceived(JSONArray response) throws Exception {
         SQLiteDatabase db = this.wdb;
 
+        SimpleDateFormat df = ComInterface.yyyyMMdd_HHmmSS ;
+
         JSONObject obj ;
         for( int i = 0 ; i < response.length() ; i ++ ) {
             try {
@@ -250,8 +253,8 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
 
                 ProjCoordinate projCoord = this.projection.convertToUtmK( latitude, longitude );
 
-                String info = "[%d] upDt: %s, id=%s, place = %s, patient, %s, deleted = %s, latitude = %s, longitude = %s, visitFr = %s, visitTo = %s" ;
-                info = String.format( info, i, "" + id, "" + upDt, place, patient, "" + deleted, latitude, longitude, "" + visitFr, "" + visitTo );
+                String info = "[%d] id=%s, upDt: %s, place = %s, patient, %s, deleted = %s, latitude = %s, longitude = %s, y = %f, x = %f, visitFr = %s, visitTo = %s" ;
+                info = String.format( info, i, "" + id, df.format(upDt), place, patient, "" + deleted, latitude, longitude, projCoord.y, projCoord.x, df.format( visitFr ), df.format( visitTo ) );
 
                 // Create a new map of values, where column names are the keys
                 ContentValues values = new ContentValues();
@@ -273,7 +276,6 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
                 long newRowId = db.replace("corona", null, values);
 
                 Log.d(TAG, info );
-                Log.d(TAG, "corona x = " + projCoord.x + ", y = " + projCoord.y );
 
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -372,12 +374,8 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
             String snippet = String.format( "%s ~ %s", df.format( corona.visit_fr ) , df.format( corona.visit_to ) );
             corona.content = "동선 겹침 / 자가 격리 요망";
 
-            corona.up_dt_str = df.format( corona.up_dt );
-
-            corona.up_dt_str = df.format( corona.up_dt ) ;
-
             String info = String.format("corona marker deleted = %d, checked = %d, notification = %d, title = %s, snippet = %s, latitude = %f, longitude = %f, up_dt = %s",
-                    corona.deleted, corona.checked, corona.notification, title, snippet, corona.latitude, corona.longitude, corona.up_dt_str ) ;
+                    corona.deleted, corona.checked, corona.notification, title, snippet, corona.latitude, corona.longitude, df.format( corona.up_dt ) ) ;
             Log.d( TAG, info );
 
             dataSet.add( corona );
