@@ -7,16 +7,21 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -437,8 +442,6 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         Log.d( TAG, "corona alarm id = " + corona.id );
 
-        String CHANNEL_ID = "999";
-
         // Create an Intent for the activity you want to start
         Intent intent = new Intent(this, Activity_01_Splash.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -452,7 +455,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         stackBuilder.addNextIntentWithParentStack(intent);
         // Get the PendingIntent containing the entire back stack
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-        //PendingIntent resultPendingIntent = PendingIntent.getActivity( this.getApplicationContext(), coronaDetectionAlarmNotificationId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        String CHANNEL_ID = "999";
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
@@ -462,11 +466,29 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         builder.setContentInfo( corona.content );
         builder.setPriority(Notification.PRIORITY_DEFAULT);
         builder.setAutoCancel( true );
+        //Uri Emergency_sound_uri=Uri.parse("android.resource://"+getPackageName()+"/raw/emergency_sound");
+        //builder.setSound( Emergency_sound_uri );
+        builder.setSound(Settings.System.DEFAULT_NOTIFICATION_URI);
+        builder.setVibrate(new long[] { 1000, 1000, 1000, 1000, 1000 });
+        builder.setDefaults(Notification.DEFAULT_ALL);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.notify(coronaDetectionAlarmNotificationId, builder.build());
 
+        // this.playNotificationSound();
+
         coronaDetectionAlarmNotificationId ++;
+    }
+
+    public void playNotificationSound() {
+        try {
+            Uri alarmSound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE
+                    + "://" + this.getApplicationContext().getPackageName() + "/raw/notification");
+            Ringtone r = RingtoneManager.getRingtone(this.getApplicationContext(), alarmSound);
+            r.play();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
