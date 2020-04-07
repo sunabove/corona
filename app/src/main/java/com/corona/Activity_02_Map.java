@@ -235,8 +235,6 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Log.v( TAG, "onResume");
 
         this.hideActionBar();
-
-        startCoronaMarkerUpdaterHandler();
     }
 
     // whenShowCoronaDataListBtnClicked
@@ -272,13 +270,13 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Log.d(TAG, "Running startCoronaDbShowHandler");
                 final long maxCoronaUpDt = dbHelper.getCoronaMaxUpDt() ;
 
-                if( maxCoronaUpDt != prevMarkerUpdateTime ) {
+                if( maxCoronaUpDt < 1 || maxCoronaUpDt != prevMarkerUpdateTime ) {
                     prevMarkerUpdateTime = maxCoronaUpDt ;
                     showCoronaMarkerFromDb();
                 }
 
                 if( isActivityAlive() ) {
-                    final long delay = coronaMarkers.size() < 1 ? 3_000 : ComInterface.CORONA_DB_GET_INTERVAL ;
+                    final long delay = coronaMarkers.size() < 1 ? 3_000 : CORONA_DB_GET_INTERVAL ;
                     coronaDbShowHandler.postDelayed(this, delay );
                 }
             }
@@ -644,6 +642,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         if( valid ) {
             this.getPhoneLastLocation();
+
+            this.startCoronaMarkerUpdaterHandler();
 
             this.mapReadyTime = System.currentTimeMillis();
         }
