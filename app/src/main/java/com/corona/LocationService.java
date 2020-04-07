@@ -406,6 +406,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private void showCoronaInfectionAlarmNotifications() {
         ArrayList<Corona> coronaList = this.dbHelper.getCoronaListInfected( 0 ) ;
 
+        Log.d( TAG, "corona alarm count = " + coronaList.size() );
+
         for( Corona corona : coronaList ) {
             this.showColonaDetectionAlarmNotificationImpl(corona);
 
@@ -432,6 +434,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         if( coronaDetectionAlarmNotificationId < 10_000 ) {
             coronaDetectionAlarmNotificationId = 10_000;
         }
+
+        Log.d( TAG, "corona alarm id = " + corona.id );
+
         String CHANNEL_ID = "999";
 
         // Create an Intent for the activity you want to start
