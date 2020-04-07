@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 47 ;
+    public static final int DATABASE_VERSION = 48 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
