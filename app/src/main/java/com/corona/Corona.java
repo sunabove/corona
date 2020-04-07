@@ -18,6 +18,8 @@ public class Corona implements Serializable {
     long visit_to;
     float latitude = 0;
     float longitude = 0 ;
+    float x ;
+    float y ;
 
     String text;
     String content ;

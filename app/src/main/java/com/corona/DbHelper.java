@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 31 ;
+    public static final int DATABASE_VERSION = 37 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
@@ -127,13 +127,16 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
             String table = "corona";
 
             String whereClause = "";
-            whereClause += " checked = 0 AND deleted = 0 ";
+            whereClause += " 1 = 1 ";
+            //whereClause += " AND checked = 0 ";
+            whereClause += " AND deleted = 0 ";
             whereClause += " AND id IN ( ";
             whereClause += "    SELECT DISTINCT c.id FROM corona c , gps g ";
-            whereClause += "    WHERE c.deleted = 0 AND c.checked = 0 ";
+            whereClause += "    WHERE c.deleted = 0 ";
+            //whereClause += "    AND c.checked = 0 ";
             whereClause += "    AND g.visit_tm BETWEEN c.visit_fr - ? AND c.visit_to + ? ";
             whereClause += "    AND ABS( g.y - c.y ) < ? AND ABS( g.x - c.x ) < ? ";
-            whereClause += "    AND (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) < ? ";
+            whereClause += "    AND ( (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) ) < ? ";
             whereClause += " ) ";
 
             ContentValues values = new ContentValues();
@@ -171,13 +174,15 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         ContentValues values = new ContentValues();
         double latitude = location.getLatitude();;
         double longitude = location.getLongitude();;
-        ProjCoordinate coord = this.projection.convertToUtmK( latitude, longitude );
+        ProjCoordinate projCoord = this.projection.convertToUtmK( latitude, longitude );
 
         values.put( "latitude", latitude );
         values.put( "longitude", longitude );
 
-        values.put( "y", coord.y );
-        values.put( "x", coord.x );
+        values.put( "y", projCoord.y );
+        values.put( "x", projCoord.x );
+
+        Log.d(TAG, "gps x = " + projCoord.x + ", y = " + projCoord.y );
 
         Calendar now = Calendar.getInstance();
 
@@ -233,7 +238,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
                 obj = response.getJSONObject( i );
 
                 long id = obj.getLong( "id" );
-                Object deleted = obj.get( "deleted" );
+                long deleted = obj.getLong( "deleted" );
                 long upDt = obj.getLong( "upDt" );
                 String place = obj.getString( "place" );
                 String patient = obj.getString( "patient" );
@@ -251,7 +256,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
                 // Create a new map of values, where column names are the keys
                 ContentValues values = new ContentValues();
                 values.put("id", id );
-                values.put("deleted", "1".equals("" + deleted) ? 1 : 0 );
+                values.put("deleted", deleted );
                 values.put("up_dt", upDt );
                 values.put("checked", 0 );
                 values.put("checked_tm", 0 );
@@ -268,6 +273,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
                 long newRowId = db.replace("corona", null, values);
 
                 Log.d(TAG, info );
+                Log.d(TAG, "corona x = " + projCoord.x + ", y = " + projCoord.y );
 
             } catch (JSONException e) {
                 e.printStackTrace();

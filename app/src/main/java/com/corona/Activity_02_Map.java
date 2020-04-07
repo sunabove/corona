@@ -329,14 +329,16 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         String sql = "" ;
         sql += " SELECT id, deleted, checked, notification, up_dt, place, patient, visit_fr, visit_to " ;
-        sql += " , latitude, longitude " ;
+        sql += " , latitude, longitude, y, x " ;
         sql += " FROM corona " ;
+
         sql += " WHERE  id = ? " ;
         sql += " OR ( x >= ? AND x <= ? AND y >= ? AND y <= ? )" ;
         sql += " ORDER BY up_dt ASC " ;
         ;
 
         String[] args = { "" + spec_id, "" + minX , "" + maxX , "" + minY , "" + maxY };
+        //String[] args = { };
         Cursor cursor = db.rawQuery(sql, args);
 
         Corona corona ;
@@ -346,6 +348,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
         ArrayList<Long> deletedIds = new ArrayList<>();
         final long now = System.currentTimeMillis();
+
+        Log.d( TAG, "corona marker count = " + cursor.getCount() );
 
         while ( this.isActivityAlive() && cursor.moveToNext()) {
             corona = new Corona() ;
@@ -364,6 +368,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             corona.latitude = cursor.getFloat(cursor.getColumnIndex("latitude"));
             corona.longitude = cursor.getFloat(cursor.getColumnIndex("longitude"));
+            corona.x = cursor.getFloat(cursor.getColumnIndex("x"));
+            corona.y = cursor.getFloat(cursor.getColumnIndex("y"));
 
             String title = corona.getTitle();
 
@@ -375,6 +381,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
             info = String.format( info, corona.deleted, corona.checked, corona.notification, title, snippet,
                     corona.latitude, corona.longitude, corona.up_dt_str ) ;
             Log.d( TAG, info );
+
+            Log.d( TAG, "corona marker x = " + corona.x + ", y = " + corona.y );
 
             int rscId = R.drawable.map_dot_corona_old_64; // old data
             if( 1 == corona.checked ) { // checked data
