@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 48 ;
+    public static final int DATABASE_VERSION = 49 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
@@ -55,12 +55,14 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         sql += " , up_dt INTEGER ";
         sql += " , place VARCHAR(500), patient VARCHAR(500) ";
         sql += " , visit_fr INTEGER, visit_to INTEGER ";
-        sql += " , latitude REAL, longitude REAL, y REAL, x REAL" ;
+        sql += " , latitude REAL, longitude REAL" ;
+        sql += " , y REAL, x REAL" ;
+        sql += " , py REAL, px REAL" ;
         sql += ")";
 
         db.execSQL( sql );
         db.execSQL( "CREATE INDEX corona_idx_01 ON corona( deleted, checked, notification, up_dt ) ");
-        db.execSQL( "CREATE INDEX corona_idx_02 ON corona( deleted, checked, visit_fr, visit_to, y, x ) ");
+        db.execSQL( "CREATE INDEX corona_idx_02 ON corona( deleted, checked, visit_fr, visit_to, y, x, py, px ) ");
 
         sql = "CREATE TABLE gps( ";
         sql += " id INTEGER PRIMARY KEY AUTOINCREMENT ";
