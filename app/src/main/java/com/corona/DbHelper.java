@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 51 ;
+    public static final int DATABASE_VERSION = 52 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
@@ -188,7 +188,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         double px = null == prevCoord ? coord.x : prevCoord.y ;
         double py = null == prevCoord ? coord.y : prevCoord.y ;
 
-        double pdistum = (py - coord.y)*(py - coord.y) + (px - coord.x)*(px - coord.x);
+        double pdistum = 30*Math.sqrt( (py - coord.y)*(py - coord.y) + (px - coord.x)*(px - coord.x) ) + 1 ;
 
         values.put( "py", py );
         values.put( "px", px );
