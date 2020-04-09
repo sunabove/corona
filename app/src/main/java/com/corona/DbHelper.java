@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 50 ;
+    public static final int DATABASE_VERSION = 51 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
@@ -57,25 +57,25 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         sql += " , visit_fr INTEGER, visit_to INTEGER ";
         sql += " , latitude REAL, longitude REAL" ;
         sql += " , y REAL, x REAL" ;
-        sql += " , py REAL, px REAL, pdistum REAL" ;
         sql += ")";
 
         db.execSQL( sql );
         db.execSQL( "CREATE INDEX corona_idx_01 ON corona( deleted, checked, notification, up_dt ) ");
-        db.execSQL( "CREATE INDEX corona_idx_02 ON corona( deleted, checked, visit_fr, visit_to, y, x, py, px ) ");
+        db.execSQL( "CREATE INDEX corona_idx_02 ON corona( deleted, checked, visit_fr, visit_to, y, x ) ");
 
         sql = "CREATE TABLE gps( ";
         sql += " id INTEGER PRIMARY KEY AUTOINCREMENT ";
         sql += " , yyyy INTEGER, mm INTEGER, dd INTEGER, hh INTEGER, mi INTEGER, ss INTEGER, zz INTEGER ";
         sql += " , visit_tm INTEGR ";
         sql += " , latitude REAL, longitude REAL, y REAL, x REAL" ;
+        sql += " , py REAL, px REAL, pdistum REAL" ;
         sql += " , corona_id INTEGER ";
         sql += " , FOREIGN KEY( corona_id ) REFERENCES corona( id ) ";
         sql += " )" ;
 
         db.execSQL(sql);
         db.execSQL("CREATE INDEX gps_idx_01 ON gps( yyyy DESC, mm DESC, dd DESC, hh DESC, mi DESC, ss DESC, zz DESC ) ");
-        db.execSQL("CREATE INDEX gps_idx_02 ON gps( visit_tm, y, x ) ");
+        db.execSQL("CREATE INDEX gps_idx_02 ON gps( visit_tm, y, x, py, px ) ");
 
     }
 
