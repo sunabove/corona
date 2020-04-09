@@ -17,7 +17,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -93,7 +92,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
     private LinearLayout togglePane;
     private ImageButton hideCalendarPaneBtn;
 
-    private TextView gpsLogTimeFr ;
+    private TextView gpsLogTimeFrDay ;
+    private TextView gpsLogTimeFrMinute ;
     private TextView gpsLogTimeTo ;
     private TextView gpsLogSeekBarProgress ;
     private SeekBar gpsLogSeekBar ;
@@ -139,7 +139,8 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         this.calendarView = this.findViewById(R.id.calendarView);
         this.togglePane = this.findViewById(R.id.togglePane) ;
         this.hideCalendarPaneBtn = this.findViewById(R.id.hideCalenearPaneBtn);
-        this.gpsLogTimeFr = this.findViewById(R.id.gpsLogTimeFr);
+        this.gpsLogTimeFrDay = this.findViewById(R.id.gpsLogTimeFrDay);
+        this.gpsLogTimeFrMinute = this.findViewById(R.id.gpsLogTimeFrMinute);
         this.gpsLogTimeTo = this.findViewById(R.id.gpsLogTimeTo);
         this.gpsLogSeekBarProgress = this.findViewById(R.id.gpsLogSeekBarProgress);
         this.gpsLogSeekBar = this.findViewById(R.id.gpsLogSeekBar);
@@ -1002,10 +1003,10 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         double latitude, longitude;
 
         String dateTimeTextLog;
-        SimpleDateFormat dfUi = ComInterface.MMdd_HHmm;
 
         if( true ) {
-            this.gpsLogTimeFr.setText( dfUi.format( option.visitTimeFr ));
+            this.gpsLogTimeFrDay.setText( MMdd.format( option.visitTimeFr ));
+            this.gpsLogTimeFrMinute.setText( HHmm.format( option.visitTimeFr ));
             this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "%" ));
         }
 
@@ -1035,16 +1036,14 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         }
         cursor.close();
 
-        SimpleDateFormat dfUiCurr = ComInterface.HHmmSS ;
-
         if( 99 < option.progress ) {
             this.gpsLogSeekBarProgress.setText( "100%" );
         } else {
-            String visitTmToText = dfUiCurr.format( option.visitTimeTo );
+            String visitTmToText = HHmm.format( option.visitTimeTo );
             this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "% " + visitTmToText));
         }
 
-        this.gpsLogTimeTo.setText( dfUiCurr.format( option.visitTimeToUi ) );
+        this.gpsLogTimeTo.setText( HHmm.format( option.visitTimeToUi ) );
 
         if (null != gpsLogPathPoly) {
             gpsLogPathPoly.remove();

@@ -195,11 +195,21 @@
                 android:paddingRight="10dp">
 
                 <TextView
-                    android:id="@+id/gpsLogTimeFr"
+                    android:id="@+id/gpsLogTimeFrDay"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="01:00:00"
+                    android:text="12:31"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/gpsLogTimeFrMinute"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center"
+                    android:text="24:60"
                     android:textSize="18sp" />
 
                 <Space
@@ -211,10 +221,9 @@
                     android:id="@+id/gpsLogSeekBarProgress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
                     android:gravity="center"
-                    android:text="06:00:00"
-                    android:textSize="18sp"/>
+                    android:text="24:60"
+                    android:textSize="18sp" />
 
                 <Space
                     android:layout_width="wrap_content"
@@ -227,7 +236,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="12:00:00"
+                    android:text="24:60"
                     android:textSize="18sp" />
 
             </LinearLayout>
