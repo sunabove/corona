@@ -19,7 +19,7 @@ import java.util.Calendar;
 
 public class DbHelper extends SQLiteOpenHelper implements ComInterface {
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 49 ;
+    public static final int DATABASE_VERSION = 50 ;
     public static final String DATABASE_NAME = "Corona.db";
 
     private static DbHelper dbHelper = null;
@@ -57,7 +57,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         sql += " , visit_fr INTEGER, visit_to INTEGER ";
         sql += " , latitude REAL, longitude REAL" ;
         sql += " , y REAL, x REAL" ;
-        sql += " , py REAL, px REAL" ;
+        sql += " , py REAL, px REAL, pdistum REAL" ;
         sql += ")";
 
         db.execSQL( sql );
@@ -172,20 +172,30 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         }
     }
 
+    private ProjCoordinate prevCoord ;
     public void insertGpsLog( Location location) {
         ContentValues values = new ContentValues();
         double latitude = location.getLatitude();;
         double longitude = location.getLongitude();;
-        ProjCoordinate projCoord = this.projection.convertToUtmK( latitude, longitude );
+        ProjCoordinate coord = this.projection.convertToUtmK( latitude, longitude );
 
         values.put( "latitude", latitude );
         values.put( "longitude", longitude );
 
-        values.put( "y", projCoord.y );
-        values.put( "x", projCoord.x );
+        values.put( "y", coord.y );
+        values.put( "x", coord.x );
+
+        double px = null == prevCoord ? coord.x : prevCoord.y ;
+        double py = null == prevCoord ? coord.y : prevCoord.y ;
+
+        double pdistum = (py - coord.y)*(py - coord.y) + (px - coord.x)*(px - coord.x);
+
+        values.put( "py", py );
+        values.put( "px", px );
+        values.put( "pdistum", pdistum );
 
         String info = "gps latitude = %f, longitude = %f, y = %f, x = %f" ;
-        info = String.format(info,  latitude, longitude, projCoord.y, projCoord.x );
+        info = String.format(info,  latitude, longitude, coord.y, coord.x );
 
         Calendar now = Calendar.getInstance();
 
@@ -213,6 +223,8 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         SQLiteDatabase db = this.wdb;
 
         long newRowId = db.insert("gps", null, values);
+
+        this.prevCoord = coord ;
     }
 
     public long getCoronaMaxUpDt() {

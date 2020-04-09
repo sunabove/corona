@@ -1039,8 +1039,9 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         if( 99 < option.progress ) {
             this.gpsLogSeekBarProgress.setText( "100%" );
         } else {
-            String visitTmToText = HHmm.format( option.visitTimeTo );
-            this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "% " + visitTmToText));
+            //String visitTmToText = HHmm.format( option.visitTimeTo );
+            //this.gpsLogSeekBarProgress.setText(String.format("%d%s", option.progress, "% " + visitTmToText));
+            this.gpsLogSeekBarProgress.setText( String.format("%d%s", option.progress, "%" ) );
         }
 
         this.gpsLogTimeTo.setText( HHmm.format( option.visitTimeToUi ) );
