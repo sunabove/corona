@@ -98,78 +98,62 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         onUpgrade(db, oldVersion, newVersion);
     }
 
+    private long getCoronaCheckedCnt() {
+        long checkedCnt = 0 ;
+
+        SQLiteDatabase db = this.rdb;
+
+        String sql = " SELECT COUNT( id ) FROM corona ";
+        sql += " WHERE checked = 1 ";
+        String [] args = {};
+
+        Cursor cursor = db.rawQuery( sql, args );
+        while( cursor.moveToNext() ) {
+            checkedCnt = cursor.getLong( 0 );
+        }
+        cursor.close();
+
+        return checkedCnt ;
+    }
+
     public void checkCoronaInfection() {
         // Insert the new row, returning the primary key value of the new row
 
-        if( true ) {
-            long prevCheckedCnt = 0 ;
+        long prevCheckedCnt = this.getCoronaCheckedCnt() ;
+        Log.d( TAG, "prevCheckedCnt = " + prevCheckedCnt );
 
-            String sql = " SELECT COUNT( id ) FROM corona ";
-            sql += " WHERE checked = 1 ";
-            String [] args = {};
+        String table = "corona";
 
-            SQLiteDatabase db = this.wdb;
+        String whereClause = "";
+        whereClause += " 1 = 1 ";
+        whereClause += " AND checked = 0 ";
+        whereClause += " AND deleted = 0 ";
+        whereClause += " AND id IN ( ";
+        whereClause += "    SELECT DISTINCT c.id FROM corona c , gps g ";
+        whereClause += "    WHERE c.deleted = 0 ";
+        whereClause += "    AND c.checked = 0 ";
+        whereClause += "    AND g.visit_tm BETWEEN c.visit_fr AND c.visit_to";
+        whereClause += "    AND ABS( g.y - c.y ) < 31 AND ABS( g.x - c.x ) < 31 ";
+        whereClause += "    AND ( (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) ) < 901 ";
+        whereClause += " ) ";
 
-            Cursor cursor = db.rawQuery( sql, args );
-            while( cursor.moveToNext() ) {
-                prevCheckedCnt = cursor.getLong( 0 );
-            }
-            cursor.close();
+        ContentValues values = new ContentValues();
 
-            Log.d( TAG, "prevCheckedCnt = " + prevCheckedCnt );
-        }
+        String checked_tm   = "" + System.currentTimeMillis() ;
 
-        if( true ) {
-            final long min_dist = 31;
+        values.put( "checked" , 1 );
+        values.put( "notification" , 0 );
+        values.put( "checked_tm" , checked_tm );
 
-            String table = "corona";
+        SQLiteDatabase db = this.wdb;
+        String[] args = { };
 
-            String whereClause = "";
-            whereClause += " 1 = 1 ";
-            whereClause += " AND checked = 0 ";
-            whereClause += " AND deleted = 0 ";
-            whereClause += " AND id IN ( ";
-            whereClause += "    SELECT DISTINCT c.id FROM corona c , gps g ";
-            whereClause += "    WHERE c.deleted = 0 ";
-            whereClause += "    AND c.checked = 0 ";
-            whereClause += "    AND g.visit_tm BETWEEN c.visit_fr AND c.visit_to";
-            whereClause += "    AND ABS( g.y - c.y ) < 31 AND ABS( g.x - c.x ) < 31 ";
-            whereClause += "    AND ( (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) ) < 901 ";
-            whereClause += " ) ";
+        int updCnt = db.update(table, values, whereClause, args);
 
-            ContentValues values = new ContentValues();
+        Log.d( TAG, "checked corona infection. updCnt = " + updCnt );
 
-            String checked_tm   = "" + System.currentTimeMillis() ;
-
-            values.put( "checked" , 1 );
-            values.put( "notification" , 0 );
-            values.put( "checked_tm" , checked_tm );
-
-            SQLiteDatabase db = this.wdb;
-            String[] args = { };
-
-            int updCnt = db.update(table, values, whereClause, args);
-
-            Log.d( TAG, "checked corona infection. updCnt = " + updCnt );
-        }
-
-        if( true ) {
-            long currCheckedCnt = 0 ;
-
-            String sql = " SELECT COUNT( id ) FROM corona ";
-            sql += " WHERE checked = 1 ";
-            String [] args = {};
-
-            SQLiteDatabase db = this.wdb;
-
-            Cursor cursor = db.rawQuery( sql, args );
-            while( cursor.moveToNext() ) {
-                currCheckedCnt = cursor.getLong( 0 );
-            }
-            cursor.close();
-
-            Log.d( TAG, "currCheckCnt = " + currCheckedCnt );
-        }
+        long currCheckedCnt = this.getCoronaCheckedCnt() ;
+        Log.d( TAG, "currCheckCnt = " + currCheckedCnt );
     }
 
     private ProjCoordinate prevCoord ;
