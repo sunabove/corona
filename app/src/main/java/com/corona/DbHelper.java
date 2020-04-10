@@ -124,6 +124,14 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
 
         String table = "corona";
 
+        ContentValues values = new ContentValues();
+
+        String checked_tm = "" + System.currentTimeMillis() ;
+
+        values.put( "checked" , 1 );
+        values.put( "notification" , 0 );
+        values.put( "checked_tm" , checked_tm );
+
         String whereClause = "";
         whereClause += " 1 = 1 ";
         whereClause += " AND checked = 0 ";
@@ -133,17 +141,16 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         whereClause += "    WHERE c.deleted = 0 ";
         whereClause += "    AND c.checked = 0 ";
         whereClause += "    AND g.visit_tm BETWEEN c.visit_fr AND c.visit_to";
-        whereClause += "    AND ABS( g.y - c.y ) < 31 AND ABS( g.x - c.x ) < 31 ";
-        whereClause += "    AND ( (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) ) < 901 ";
+        whereClause += "    AND ( ";
+        whereClause += "          ( ";
+        whereClause += "            ABS( g.y - c.y ) < 31 AND ABS( g.x - c.x ) < 31 ";
+        whereClause += "            AND ( (g.y - c.y)*(g.y -c.y) + (g.x - c.x)*(g.x - c.x) ) < 901 ";
+        whereClause += "          ) OR ( ";
+        whereClause += "            g.pdistum > 0 ";
+        whereClause += "            AND ABS( (g.py - c.y)*(g.x - c.x) - (g.px - c.x)*(g.y - c.y) ) < g.pdistum ";
+        whereClause += "          ) ";
+        whereClause += "    AND ) ";
         whereClause += " ) ";
-
-        ContentValues values = new ContentValues();
-
-        String checked_tm   = "" + System.currentTimeMillis() ;
-
-        values.put( "checked" , 1 );
-        values.put( "notification" , 0 );
-        values.put( "checked_tm" , checked_tm );
 
         SQLiteDatabase db = this.wdb;
         String[] args = { };
