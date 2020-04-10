@@ -116,7 +116,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         return checkedCnt ;
     }
 
-    public void checkCoronaInfection() {
+    public int checkCoronaInfection() {
         // Insert the new row, returning the primary key value of the new row
 
         long prevCheckedCnt = this.getCoronaCheckedCnt() ;
@@ -163,6 +163,8 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
 
         long currCheckedCnt = this.getCoronaCheckedCnt() ;
         Log.d( TAG, "currCheckCnt = " + currCheckedCnt );
+
+        return updCnt ;
     }
 
     private ProjCoordinate prevCoord ;

@@ -228,15 +228,33 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private NotificationCompat.Builder createServiceNotificationBuilder() {
 
-        final String serviceName = getString(R.string.location_service_name);
+        ArrayList<Corona> coronaList = dbHelper.getCoronaListInfected( 0, 1 );
+        int infectedCountCnt = coronaList.size() ;
+        Corona corona = 0 < infectedCountCnt ? coronaList.get( 0 ) : null ;
+
+        String serviceName = getString(R.string.location_service_name);
+
+        if( 0 < infectedCountCnt ) {
+            serviceName = String.format( "코로나 확진자 동선 겹침 [%d] 건", infectedCountCnt );
+        }
 
         String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
-        if( this.gpsInsCnt > 0 ) {
+        if( 1 == infectedCountCnt ) {
+            contentText = String.format( "%s에서 코로나 확진자[%s]와 동선이 겹쳤습니다.", corona.place, corona.patient );
+        }else if( 1 < infectedCountCnt ) {
+            contentText = String.format( "%s에서 코로나 확진자[%s]와 동선이 겹쳤습니다. 총 %d 건.", corona.place, corona.patient, infectedCountCnt );
+        } else if( this.gpsInsCnt > 0 ) {
             contentText = String.format("%s [ %d ] [ %d ]", contentText, this.gpsInsCnt, this.coronaDbRecSuccCnt);
         }
 
         // Create an Intent for the activity you want to start
         Intent intent = new Intent(this, Activity_01_Splash.class);
+        Bundle bundle = new Bundle();
+        if( null != corona ) {
+            bundle.putSerializable( corona_from_notification_click , corona );
+        }
+        intent.putExtras( bundle ) ;
+
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
@@ -246,7 +264,11 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID);
         builder.setContentIntent(resultPendingIntent);
-        builder.setSmallIcon(R.mipmap.ic_launcher);
+        if( 0 == infectedCountCnt ) {
+            builder.setSmallIcon(R.mipmap.ic_launcher);
+        } else {
+            builder.setSmallIcon( R.drawable.corona_alarm );
+        }
         builder.setContentTitle(serviceName);
         builder.setContentText(contentText);
 
@@ -388,8 +410,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                         whenCoronaDbReceived( response );
 
                         dbHelper.checkCoronaInfection();
-
                         showCoronaInfectionAlarmNotifications( );
+                        updateServiceNotificationTitleAndText();
                     }
                 },
 
@@ -401,6 +423,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
                         dbHelper.checkCoronaInfection();
                         showCoronaInfectionAlarmNotifications( );
+                        updateServiceNotificationTitleAndText();
                     }
                 }
         );
@@ -423,7 +446,8 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             this.dbHelper.updateCoronaNotification( corona, 1 );
         }
 
-        if( 0 < coronaList.size() ) {
+        boolean showAlertDialog = false ;
+        if( showAlertDialog && 0 < coronaList.size() ) {
             this.showCoronaInfectionAlarmDialog( coronaList );
         }
     }
@@ -441,12 +465,12 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
             message = String.format( message, corona.place, cnt ) ;
         }
 
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
+        AlertDialog alertDialog = new AlertDialog.Builder( this )
                 .setTitle( title )
                 .setMessage( message )
                 .create();
 
-        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_PANEL );
         alertDialog.setButton(Dialog.BUTTON_POSITIVE,"OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 whenColonaAlarmDialogClicked( corona );
