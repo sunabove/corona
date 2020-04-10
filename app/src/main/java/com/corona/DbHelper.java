@@ -155,9 +155,11 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         SQLiteDatabase db = this.wdb;
         String[] args = { };
 
+        long then = System.currentTimeMillis() ;
         int updCnt = db.update(table, values, whereClause, args);
+        long now = System.currentTimeMillis() ;
 
-        Log.d( TAG, "checked corona infection. updCnt = " + updCnt );
+        Log.d( TAG, String.format("checked corona infection. updCnt = %d, queryTime = %d", updCnt, (now -then) ) );
 
         long currCheckedCnt = this.getCoronaCheckedCnt() ;
         Log.d( TAG, "currCheckCnt = " + currCheckedCnt );
