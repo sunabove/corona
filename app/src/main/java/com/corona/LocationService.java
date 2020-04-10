@@ -240,9 +240,9 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
         String contentText = "핸드폰 위치와 확진자의 동선을 스캔중입니다.";
         if( 1 == infectedCountCnt ) {
-            contentText = String.format( "%s에서 코로나 확진자[%s]와 동선이 겹쳤습니다.", corona.place, corona.patient );
+            contentText = String.format( "%s에서 확진자[%s]와 동선이 겹쳤습니다.", corona.place, corona.patient );
         }else if( 1 < infectedCountCnt ) {
-            contentText = String.format( "%s에서 코로나 확진자[%s]와 동선이 겹쳤습니다. 총 %d 건.", corona.place, corona.patient, infectedCountCnt );
+            contentText = String.format( "%s에서 확진자[%s]와 동선이 겹쳤습니다. 총 %d 건.", corona.place, corona.patient, infectedCountCnt );
         } else if( this.gpsInsCnt > 0 ) {
             contentText = String.format("%s [ %d ] [ %d ]", contentText, this.gpsInsCnt, this.coronaDbRecSuccCnt);
         }
@@ -271,6 +271,10 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
         builder.setContentTitle(serviceName);
         builder.setContentText(contentText);
+
+        if( 0 < infectedCountCnt ) {
+            this.playNotificationSound();
+        }
 
         return builder;
     }
