@@ -185,10 +185,15 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         values.put( "y", coord.y );
         values.put( "x", coord.x );
 
-        double px = null == prevCoord ? coord.x : prevCoord.y ;
-        double py = null == prevCoord ? coord.y : prevCoord.y ;
+        double py = coord.y ;
+        double px = coord.x ;
+        double pdistum = 0 ;
 
-        double pdistum = 30*Math.sqrt( (py - coord.y)*(py - coord.y) + (px - coord.x)*(px - coord.x) ) + 1 ;
+        if( null != this.prevCoord ) {
+            py = prevCoord.y ;
+            px = prevCoord.x ;
+            pdistum = 30*Math.sqrt( (py - coord.y)*(py - coord.y) + (px - coord.x)*(px - coord.x) ) + 1 ;
+        }
 
         values.put( "py", py );
         values.put( "px", px );
