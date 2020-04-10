@@ -1061,8 +1061,37 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
             gpsLogPathPoly = googleMap.addPolyline(polyOptions);
         }
+
+        if( 100 > option.progress && null != latLng ) {
+            this.modeMapPosAfterCheckBounds( latLng );
+        }
     }
     // showGpsLogFromDb
+
+    private void modeMapPosAfterCheckBounds( LatLng latLng ) {
+        Projection projection = googleMap.getProjection();
+        Point scrPos = projection.toScreenLocation( latLng );
+
+        // animate camera when current marker is out of screen
+        double x = scrPos.x;
+        double y = scrPos.y;
+
+        int sw = getScreenWidth();
+        int sh = getScreenHeight();
+
+        double xr = Math.abs( sw/2.0 - x )/sw ;
+        double yr = Math.abs( sh/2.0 - y )/sh ;
+
+        if( false ) {
+            Log.d("screen range", "xr = " + xr);
+            Log.d("screen range", "yr = " + yr);
+        }
+
+        if( 0.35 < xr || 0.4 < yr ) {
+            // animate camera when current marker is out of screen
+            googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        }
+    }
 
     private void setHighlightedDays() {
         List<Calendar> dates = new ArrayList<>();
@@ -1185,37 +1214,17 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
         Projection projection = googleMap.getProjection();
         Point scrPos = projection.toScreenLocation(phoneMarker.getPosition());
 
-        // animate camera when current marker is out of screen
-        double x = scrPos.x;
-        double y = scrPos.y;
-
-        int sw = getScreenWidth();
-        int sh = getScreenHeight();
-
-        double xr = Math.abs( sw/2.0 - x )/sw ;
-        double yr = Math.abs( sh/2.0 - y )/sh ;
-
-        if( false ) {
-            Log.d("screen range", "xr = " + xr);
-            Log.d("screen range", "yr = " + yr);
-        }
 
         if( firstMove ) {
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, googleMap.getMaxZoomLevel() - 2));
-            if( 0.35 < xr || 0.4 < yr ) {
-                // animate camera when current marker is out of screen
-                googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-            }
+            modeMapPosAfterCheckBounds( latLng );
         } else {
             long now = System.currentTimeMillis();
             if( now - lastMapMoveTime < 6*1000 ) {
                 Log.d( TAG, "Last click time is less than 6 seconds. Skipped moving map." );
             } else {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                if( 0.35 < xr || 0.4 < yr ) {
-                    // animate camera when current marker is out of screen
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-                }
+                modeMapPosAfterCheckBounds( latLng );
             }
         }
 
