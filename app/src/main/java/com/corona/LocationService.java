@@ -1,6 +1,7 @@
 package com.corona;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,6 +24,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -418,6 +420,32 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
             this.dbHelper.updateCoronaNotification( corona, 1 );
         }
+
+        if( 0 < coronaList.size() ) {
+            this.showCoronaInfectionAlarmDialog( coronaList );
+        }
+    }
+
+    private void showCoronaInfectionAlarmDialog( ArrayList<Corona> coronaList ) {
+        Corona corona = coronaList.get( 0 );
+        String title = "코로나 알림";
+        String message = "%s에서 코로나 확진다 동선 겹침이 발행하였습니다." ;
+        int cnt = coronaList.size();
+        if( 1 == cnt ) {
+            message = "%s에서 코로나 확진다 동선 겹침이 발행하였습니다." ;
+            message = String.format( message, corona.place ) ;
+        } else {
+            message = "%s외 %d건의 코로나 확진다 동선 겹침이 발행하였습니다." ;
+            message = String.format( message, corona.place, cnt ) ;
+        }
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setTitle( title )
+                .setMessage( message )
+                .create();
+
+        alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alertDialog.show();
     }
 
     private int coronaDbRecSuccCnt = 0 ;
