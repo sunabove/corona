@@ -2,6 +2,7 @@ package com.corona;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -10,6 +11,7 @@ import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
@@ -427,7 +429,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     }
 
     private void showCoronaInfectionAlarmDialog( ArrayList<Corona> coronaList ) {
-        Corona corona = coronaList.get( 0 );
+        final Corona corona = coronaList.get( 0 );
         String title = "코로나 알림";
         String message = "%s에서 코로나 확진다 동선 겹침이 발행하였습니다." ;
         int cnt = coronaList.size();
@@ -445,8 +447,33 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
                 .create();
 
         alertDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+        alertDialog.setButton(Dialog.BUTTON_POSITIVE,"OK", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                whenColonaAlarmDialogClicked( corona );
+            }
+        });
+        alertDialog.setButton(Dialog.BUTTON_NEGATIVE,"Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                alertDialog.hide();
+            }
+        });
+
         alertDialog.show();
     }
+    // -- showCoronaInfectionAlarmDialog
+
+    private void whenColonaAlarmDialogClicked(Corona corona ) {
+        // Create an Intent for the activity you want to start
+        Intent intent = new Intent(this, Activity_01_Splash.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        Bundle bundle = new Bundle();
+        bundle.putSerializable( corona_from_notification_click , corona ) ;
+        intent.putExtras(bundle);
+
+        startActivity( intent );
+    }
+    // -- whenColonaAlarmDialogClicked
 
     private int coronaDbRecSuccCnt = 0 ;
     private void whenCoronaDbReceived(JSONArray response) {
