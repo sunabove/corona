@@ -81,7 +81,7 @@ public class CoronaListView extends ListView implements ComInterface {
                     public void onDismissed(Snackbar snackbar, int event) {
                         Activity activity = getActivity( view ) ;
 
-                        Intent intent=new Intent();
+                        Intent intent = new Intent();
                         Bundle bundle = new Bundle();
                         bundle.putSerializable( "corona", corona ) ;
                         intent.putExtras(bundle);
@@ -92,6 +92,8 @@ public class CoronaListView extends ListView implements ComInterface {
 
                     @Override
                     public void onShown(Snackbar snackbar) {
+                        DbHelper dbHelper = DbHelper.getLocationDbHelper(CoronaListView.this.getContext());
+                        dbHelper.updateCoronaNotification( corona, 2 );
                     }
                 });
 
