@@ -149,7 +149,7 @@ public class DbHelper extends SQLiteOpenHelper implements ComInterface {
         whereClause += "            g.pdistum > 0 ";
         whereClause += "            AND ABS( (g.py - c.y)*(g.x - c.x) - (g.px - c.x)*(g.y - c.y) ) < g.pdistum ";
         whereClause += "          ) ";
-        whereClause += "    AND ) ";
+        whereClause += "        ) ";
         whereClause += " ) ";
 
         SQLiteDatabase db = this.wdb;
