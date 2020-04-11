@@ -756,14 +756,14 @@ public class Activity_020_Map extends ComActivity implements OnMapReadyCallback 
     }
 
     private void whenMapLongIdle() {
-        long now = System.currentTimeMillis() ;
-
-        if( now > this.gpsLogSeekBarMoveTime + 30*1_000 ) {
-            this.gpsLogSeekBar.setProgress( 100 );
-            this.gpsLogSeekBarMovedCnt = 0 ;
-        }
-
         if( this.calendarView.getVisibility() == View.INVISIBLE ) {
+            long now = System.currentTimeMillis() ;
+
+            if( now > this.gpsLogSeekBarMoveTime + 30_000 ) {
+                this.gpsLogSeekBar.setProgress( 100 );
+                this.gpsLogSeekBarMovedCnt = 0 ;
+            }
+
             if( mapForceMoveTime > 0 && now > mapForceMoveTime + 30_1000 ) {
                 this.mapForceMoveTime = 0 ;
                 this.calendarTime = 0 ;
