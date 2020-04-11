@@ -18,7 +18,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true" >
+        android:usesCleartextTraffic="true">
+        <activity android:name=".Activity_015_AlertDialog"></activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCwA-Qu8QQ_utZilJPDk8rL23wMaotxm6A" />
@@ -40,10 +42,7 @@
             android:name=".Activity_020_Map"
             android:label="@string/title_activity_maps"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
-        <activity android:name=".Activity_030_CoronaList">
-        </activity>
-
+        <activity android:name=".Activity_030_CoronaList"></activity>
     </application>
 
 </manifest>
