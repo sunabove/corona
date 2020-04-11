@@ -248,7 +248,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         }
 
         // Create an Intent for the activity you want to start
-        Intent intent = new Intent(this, Activity_01_Splash.class);
+        Intent intent = new Intent(this, Activity_010_Splash.class);
         Bundle bundle = new Bundle();
         if( null != corona ) {
             bundle.putSerializable( corona_from_notification_click , corona );
@@ -492,7 +492,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
 
     private void whenColonaAlarmDialogClicked(Corona corona ) {
         // Create an Intent for the activity you want to start
-        Intent intent = new Intent(this, Activity_01_Splash.class);
+        Intent intent = new Intent(this, Activity_010_Splash.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         Bundle bundle = new Bundle();
@@ -526,7 +526,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
         Log.d( TAG, "corona alarm id = " + corona.id );
 
         // Create an Intent for the activity you want to start
-        Intent intent = new Intent(this, Activity_01_Splash.class);
+        Intent intent = new Intent(this, Activity_010_Splash.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         Bundle bundle = new Bundle();

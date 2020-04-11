@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".Activity_03_CoronaList">
+    tools:context=".Activity_030_CoronaList">
 
     <LinearLayout
         android:layout_width="match_parent"

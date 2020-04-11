@@ -28,7 +28,7 @@
             android:exported="false" />
 
         <activity
-            android:name=".Activity_01_Splash"
+            android:name=".Activity_010_Splash"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,11 +37,11 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Activity_02_Map"
+            android:name=".Activity_020_Map"
             android:label="@string/title_activity_maps"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
 
-        <activity android:name=".Activity_03_CoronaList">
+        <activity android:name=".Activity_030_CoronaList">
         </activity>
 
     </application>

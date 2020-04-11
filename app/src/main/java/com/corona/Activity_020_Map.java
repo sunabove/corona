@@ -71,7 +71,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
+public class Activity_020_Map extends ComActivity implements OnMapReadyCallback {
 
     private static String TAG = "sun_above map" ;
 
@@ -118,7 +118,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     @Override
     public final int getLayoutId() {
-        return R.layout.activity_02_map;
+        return R.layout.activity_020_map;
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -240,7 +240,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
 
     // whenShowCoronaDataListBtnClicked
     private void whenShowCoronaDataListBtnClicked () {
-        Intent intent = new Intent(this, Activity_03_CoronaList.class );
+        Intent intent = new Intent(this, Activity_030_CoronaList.class );
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivityForResult(intent, ComInterface.INTENT_RESULT_CORONA_SELECTED );
     }
@@ -1346,7 +1346,7 @@ public class Activity_02_Map extends ComActivity implements OnMapReadyCallback {
                 Log.d(TAG, "corona_from_notification_click corona id = " + corona.id);
                 this.whenCoronaSelectedFromDataList( corona );
 
-                intent = new Intent(this, Activity_03_CoronaList.class );
+                intent = new Intent(this, Activity_030_CoronaList.class );
                 bundle = new Bundle();
                 bundle.putSerializable( corona_from_notification_click , corona ) ;
                 intent.putExtras(bundle);

@@ -3,22 +3,16 @@ package com.corona;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
-
-import java.text.SimpleDateFormat;
-
-public class Activity_03_CoronaList extends ComActivity {
+public class Activity_030_CoronaList extends ComActivity {
 
     private CoronaListView coronaListView;
     private TextView status;
 
     @Override
     public int getLayoutId() {
-        return R.layout.activity_03_corona_list;
+        return R.layout.activity_030_corona_list;
     }
 
     @Override

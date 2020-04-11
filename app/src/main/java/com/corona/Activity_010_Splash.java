@@ -1,24 +1,20 @@
 package com.corona;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Window;
 
-public class Activity_01_Splash extends ComActivity {
+public class Activity_010_Splash extends ComActivity {
 
 
     private int resumeCnt = 0;
 
     @Override
     public final int getLayoutId() {
-        return R.layout.activity_01_splash;
+        return R.layout.activity_010_splash;
     }
 
     @SuppressLint("SourceLockedOrientationActivity")
@@ -50,7 +46,7 @@ public class Activity_01_Splash extends ComActivity {
     private void moveToNextActivity() {
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                Intent intent = new Intent( getApplicationContext(), Activity_02_Map.class) ;
+                Intent intent = new Intent( getApplicationContext(), Activity_020_Map.class) ;
 
                 Intent prevIntent = getIntent() ;
                 Bundle prevBundle = prevIntent.getExtras() ;
