@@ -674,6 +674,8 @@ public class Activity_020_Map extends ComActivity implements OnMapReadyCallback 
         alert.show();
     }
 
+    int gpsUpdCnt = 0;
+
     private void whenLocationUpdate( LocationResult locationResult ) {
         Log.d(TAG, String.format("locationResult update[%d]: %s", gpsUpdCnt, locationResult));
 
@@ -770,8 +772,6 @@ public class Activity_020_Map extends ComActivity implements OnMapReadyCallback 
             }
         }
     }
-
-    int gpsUpdCnt = 0;
 
     private void whenCameraIdle() {
         boolean valid = checkLocationPermissions();
@@ -1131,45 +1131,49 @@ public class Activity_020_Map extends ComActivity implements OnMapReadyCallback 
 
         GpsLog gpsLog = this.gpsLog ;
 
-        if( 100_000 < gpsLog.size() ) {
-            while( 100_000 < gpsLog.size() ) {
-                gpsLog.remove( 0 );
-            }
+        while( 100_000 < gpsLog.size() ) {
+            gpsLog.remove( 0 );
         }
 
         gpsLog.add( latLng );
 
         lastGpsLatLng = latLng;
 
-        int color = Color.BLUE ;
-        int width = isMapDetail ? 30: 15 ;
+        if( mapForceMoveTime > 0 || this.calendarTime > 0 ) {
+            // when gps log
+            // do nothing
+        } else {
+            int color = Color.BLUE ;
+            int width = isMapDetail ? 30: 15 ;
 
-        PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
-        polyOptions.jointType(JointType.ROUND);
+            PolylineOptions polyOptions = new PolylineOptions().width( width ).color( color ).geodesic(true);
+            polyOptions.jointType(JointType.ROUND);
 
-        //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
-        List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(10));
-        polyOptions.pattern( pattern );
+            //List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dash(20), new Gap(10));
+            List<PatternItem> pattern = Arrays.<PatternItem>asList(new Dot(), new Gap(10));
+            polyOptions.pattern( pattern );
 
-        int insCnt = 0 ;
-        for( LatLng log : gpsLog ) {
-            polyOptions.add( log );
-            insCnt += 1;
+            int insCnt = 0 ;
+            for( LatLng log : gpsLog ) {
+                polyOptions.add( log );
+                insCnt += 1;
+            }
+
+            while( 3 > insCnt ) {
+                polyOptions.add( latLng );
+                insCnt += 1;
+            }
+
+            if( null != gpsPathPoly ) {
+                gpsPathPoly.remove();
+                gpsPathPoly = null ;
+            }
+
+            gpsPathPoly = googleMap.addPolyline(polyOptions);
+            gpsPathPoly.setZIndex(4);
+
+            this.showCurrentPosMarker(location);
         }
-
-        while( 3 > insCnt ) {
-            polyOptions.add( latLng );
-            insCnt += 1;
-        }
-
-        if( null != gpsPathPoly ) {
-            gpsPathPoly.remove();
-        }
-
-        gpsPathPoly = googleMap.addPolyline( polyOptions );
-        gpsPathPoly.setZIndex( 4 );
-
-        this.showCurrentPosMarker( location );
     }
 
     private void showCurrentPosMarker(Location location ) {
