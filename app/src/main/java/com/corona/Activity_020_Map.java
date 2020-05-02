@@ -1053,7 +1053,6 @@ public class Activity_020_Map extends ComActivity implements OnMapReadyCallback 
         }
 
         if( latLng != null ) {
-
             while( cnt < 2 ) {
                 polyOptions.add( latLng );
                 cnt ++ ;
