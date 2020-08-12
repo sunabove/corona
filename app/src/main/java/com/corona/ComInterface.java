@@ -51,4 +51,6 @@ public interface ComInterface {
 
     String corona_from_notification_click = "corona_from_notification_click" ;
 
+    String SERVER_URL_HEADER = "http://sunabove.iptime.org:8080/corona_map-1" ;
+
 }

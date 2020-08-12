@@ -387,7 +387,7 @@ public class LocationService extends Service implements ComInterface, GoogleApiC
     private void getCoronaDataFromServerImpl() {
         Log.d(TAG, String.format("Corona DbHandler[%d]:", coronaDbHandlerCnt));
 
-        String url = "http://sunabove.iptime.org:8080/corona_map-1/corona/data.json";
+        String url = SERVER_URL_HEADER + "/corona/data.json";
 
         String up_dt = "";
         long coronaMaxUpDt = DbHelper.getLocationDbHelper( this ).getCoronaMaxUpDt();
