@@ -8,6 +8,8 @@ public interface ComInterface {
 
     String TAG = "sun_above";
 
+    String SERVER_URL_HEADER = "http://sunabove.iptime.org:8080/corona_map-1" ;
+
     int PERMISSION_REQUEST_ID = 44;
 
     long ONE_DAY_TIME = 24*60*60*1000;
@@ -50,7 +52,4 @@ public interface ComInterface {
     int INTENT_RESULT_CORONA_SELECTED = 200 ;
 
     String corona_from_notification_click = "corona_from_notification_click" ;
-
-    String SERVER_URL_HEADER = "http://sunabove.iptime.org:8080/corona_map-1" ;
-
 }
